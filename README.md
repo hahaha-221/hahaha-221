@@ -1,5 +1,6 @@
 # 💰 Financial Fraud Detection Project
-
+![Python](https://img.shields.io/badge/Python-3.11-blue)
+![Machine Learning](https://img.shields.io/badge/Machine-Learning-green)
 ## 📌 Giới thiệu
 
 Dự án sử dụng Machine Learning để phát hiện các giao dịch tài chính bất thường (Fraud Detection / Anomaly Detection) trong hệ thống kế toán và báo cáo tài chính.
