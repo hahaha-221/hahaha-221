@@ -248,9 +248,9 @@ Trong tương lai có thể:
 
 # 👨‍💻 Thành viên thực hiện
 
-- Tên sinh viên
-- MSSV
-- Lớp
+- Tên sinh viên : Nguyễn Phương Trúc
+- MSSV: B25DCKT168
+- Nhóm: 15
 
 ---
 
