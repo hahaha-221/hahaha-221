@@ -8,13 +8,23 @@
 
 Dự án sử dụng Machine Learning để phát hiện các giao dịch tài chính bất thường (Fraud Detection / Anomaly Detection) trong hệ thống kế toán và báo cáo tài chính.
 
-Mục tiêu:
-- Phát hiện giao dịch đáng ngờ
-- Hỗ trợ kiểm toán nội bộ
-- Hỗ trợ phát hiện gian lận tài chính
-- Ứng dụng AI vào lĩnh vực kế toán – kiểm toán
+# 🎯 Objectives
+
+- Detect abnormal financial transactions
+- Apply Machine Learning in accounting
+- Support fraud analysis and auditing
+- Visualize anomaly detection results
 
 ---
+
+# ✨ Features
+
+- Financial anomaly detection
+- Fraud transaction analysis
+- Machine Learning prediction
+- Data visualization
+- Isolation Forest model
+- Fraud analytics reporting
 
 # 🧠 Công nghệ sử dụng
 
@@ -226,15 +236,15 @@ File `.env` đã được thêm vào `.gitignore`.
 
 ---
 
-# 📚 Kiến thức áp dụng
+# 📚 Applied Knowledge
 
-- Python cơ bản
-- Data Analysis
+- Python Programming -> Python cơ bản
+- Data Analysis -> Phân tích dữ 
 - Machine Learning
-- Fraud Detection
-- GitHub
-- Virtual Environment
+- Fraud Detection -> Phát hiện gian lận tài chính
 - Financial Analytics
+- Git & GitHub
+- Virtual Environment (Anaconda) -> Môi trường ảo Anaconda
 
 ---
 
