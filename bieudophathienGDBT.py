@@ -64,4 +64,5 @@ plt.legend(loc='upper left', fontsize=11)
 plt.grid(True, linestyle='--', alpha=0.5)
 
 # Lệnh bắt buộc kích hoạt cửa sổ biểu đồ hiển thị lên màn hình Windows
+plt.savefig("images/anomaly_chart.png")
 plt.show()
