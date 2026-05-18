@@ -1,68 +1,166 @@
 # ==============================================================================
-# BƯỚC 1: KHỞI TẠO MÔI TRƯỜNG DỮ LIỆU GIẢ LẬP (DATA GENERATION)
+# FINANCIAL FRAUD DETECTION - ANOMALY VISUALIZATION
+# Isolation Forest with Realistic Financial Transaction Simulation
 # ==============================================================================
+
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import IsolationForest
 import matplotlib.pyplot as plt
 
-# Thiết lập seed để kết quả chạy luôn đồng nhất
+# ==============================================================================
+# 1. GENERATE REALISTIC FINANCIAL TRANSACTION DATA
+# ==============================================================================
+
+# Seed for reproducibility
 np.random.seed(42)
 
-# Giả lập 95 giao dịch kế toán bình thường (Amount quanh mức 100)
-normal_data = np.random.normal(size=(95, 2), loc=100, scale=15)
+# Simulate normal financial transactions
+n_normal = 500
 
-# Giả lập 5 giao dịch bất thường/đáng nghi (Amount vọt lên từ 180 đến 250)
-outliers = np.random.uniform(low=180, high=250, size=(5, 2))
+amount_normal = np.random.normal(
+    loc=1200,
+    scale=350,
+    size=n_normal
+)
 
-# Gộp dữ liệu lại thành một tập hợp 100 giao dịch
-data = np.vstack([normal_data, outliers])
-df = pd.DataFrame(data, columns=['Amount', 'Time_Gap'])
+time_gap_normal = np.random.normal(
+    loc=45,
+    scale=12,
+    size=n_normal
+)
 
+# Simulate suspicious transactions
+n_fraud = 20
+
+amount_fraud = np.random.uniform(
+    low=5000,
+    high=12000,
+    size=n_fraud
+)
+
+time_gap_fraud = np.random.uniform(
+    low=1,
+    high=8,
+    size=n_fraud
+)
+
+# Combine datasets
+amount = np.concatenate([amount_normal, amount_fraud])
+time_gap = np.concatenate([time_gap_normal, time_gap_fraud])
+
+# Create dataframe
+df = pd.DataFrame({
+    'Amount': amount,
+    'Time_Gap': time_gap
+})
+
+# Remove negative values
+df['Amount'] = df['Amount'].clip(lower=10)
+df['Time_Gap'] = df['Time_Gap'].clip(lower=1)
 
 # ==============================================================================
-# BƯỚC 2: HUẤN LUYỆN MÔ HÌNH AI PHÁT HIỆN GIAN LẬN (ISOLATION FOREST)
+# 2. TRAIN ISOLATION FOREST MODEL
 # ==============================================================================
-# Thiết lập tỷ lệ nhiễm bẩn (contamination) = 0.05 để quét ra 5% dữ liệu dị biệt nhất
-model = IsolationForest(n_estimators=100, contamination=0.05, random_state=42)
-df['anomaly_score'] = model.fit_predict(df[['Amount', 'Time_Gap']])
 
-# Gán nhãn kết quả phân tích dựa trên điểm anomaly score
-df['result'] = df['anomaly_score'].map({1: 'Bình thường', -1: 'Đáng nghi'})
+model = IsolationForest(
+    n_estimators=150,
+    contamination=0.04,
+    random_state=42
+)
 
+df['anomaly'] = model.fit_predict(df[['Amount', 'Time_Gap']])
 
-# ==============================================================================
-# BƯỚC 3: XUẤT BÁO CÁO KẾT QUẢ RA MÀN HÌNH TERMINAL (LOGGING KẾT QUẢ)
-# ==============================================================================
-print("=" * 50)
-print(" SYSTEM REPORT: DANH SÁCH CÁC GIAO DỊCH BỊ AI PHẠT THẺ ĐỎ ")
-print("=" * 50)
-fraud_list = df[df['anomaly_score'] == -1]
-print(fraud_list[['Amount', 'Time_Gap', 'result']])
-print("-" * 50)
-print(f"Tổng số giao dịch cần đưa vào diện kiểm toán chuyên sâu: {len(fraud_list)}\n")
-
+# Map labels
+df['Label'] = df['anomaly'].map({
+    1: 'Normal Transaction',
+    -1: 'Suspicious Transaction'
+})
 
 # ==============================================================================
-# BƯỚC 4: VẼ BẢN ĐỒ ĐỒ THỊ TRỰC QUAN HÓA DỮ LIỆU (DATA VISUALIZATION)
+# 3. DISPLAY DETECTED ANOMALIES
 # ==============================================================================
-plt.figure(figsize=(10, 6))
 
-# Lọc và vẽ các điểm giao dịch an toàn (Màu xanh dương)
-normal = df[df['anomaly_score'] == 1]
-plt.scatter(normal['Amount'], normal['Time_Gap'], c='#1f77b4', label='Giao dịch Bình thường', alpha=0.6)
+print("=" * 60)
+print(" FINANCIAL FRAUD DETECTION REPORT ")
+print("=" * 60)
 
-# Lọc và vẽ các điểm giao dịch gian lận (Màu đỏ rực, kích thước to để dễ soi)
-fraud = df[df['anomaly_score'] == -1]
-plt.scatter(fraud['Amount'], fraud['Time_Gap'], c='red', label='Giao dịch Đáng nghi (Outliers)', s=120, edgecolors='black', zorder=5)
+fraud_cases = df[df['anomaly'] == -1]
 
-# Cấu hình các tiêu đề hiển thị trên biểu đồ
-plt.title('BẢN ĐỒ PHÁT HIỆN GIAO DỊCH BẤT THƯỜNG (ISOLATION FOREST)', fontsize=14, fontweight='bold', pad=15)
-plt.xlabel('Giá trị giao dịch (Amount)', fontsize=12)
-plt.ylabel('Khoảng cách thời gian nhập liệu (Time Gap)', fontsize=12)
-plt.legend(loc='upper left', fontsize=11)
-plt.grid(True, linestyle='--', alpha=0.5)
+print(fraud_cases[['Amount', 'Time_Gap', 'Label']].head(10))
 
-# Lệnh bắt buộc kích hoạt cửa sổ biểu đồ hiển thị lên màn hình Windows
-plt.savefig("images/anomaly_chart.png")
+print("-" * 60)
+print(f"Total suspicious transactions detected: {len(fraud_cases)}")
+print("=" * 60)
+
+# ==============================================================================
+# 4. VISUALIZATION
+# ==============================================================================
+
+plt.figure(figsize=(12, 7))
+
+# Normal transactions
+normal = df[df['anomaly'] == 1]
+
+plt.scatter(
+    normal['Amount'],
+    normal['Time_Gap'],
+    s=35,
+    alpha=0.55,
+    label='Normal Transactions'
+)
+
+# Fraud transactions
+fraud = df[df['anomaly'] == -1]
+
+plt.scatter(
+    fraud['Amount'],
+    fraud['Time_Gap'],
+    s=90,
+    edgecolors='black',
+    linewidths=1,
+    label='Suspicious Transactions',
+    zorder=5
+)
+
+# Titles and labels
+plt.title(
+    'Financial Transaction Anomaly Detection',
+    fontsize=16,
+    fontweight='bold',
+    pad=18
+)
+
+plt.xlabel(
+    'Transaction Amount ($)',
+    fontsize=12
+)
+
+plt.ylabel(
+    'Transaction Time Gap',
+    fontsize=12
+)
+
+# Grid styling
+plt.grid(
+    linestyle='--',
+    alpha=0.25
+)
+
+# Legend
+plt.legend(
+    fontsize=11,
+    frameon=True
+)
+
+# Clean layout
+plt.tight_layout()
+
+# Save chart
+plt.savefig(
+    "images/anomaly_chart.png",
+    dpi=300,
+    bbox_inches='tight'
+)
+
 plt.show()

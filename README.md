@@ -4,9 +4,13 @@
 ![Machine Learning](https://img.shields.io/badge/Machine-Learning-green)
 ![Fraud Detection](https://img.shields.io/badge/Fraud-Detection-red)
 ![Status](https://img.shields.io/badge/Status-Completed-brightgreen)
-## 📌 Giới thiệu
+## Overview
 
-Dự án sử dụng Machine Learning để phát hiện các giao dịch tài chính bất thường (Fraud Detection / Anomaly Detection) trong hệ thống kế toán và báo cáo tài chính.
+This project applies Machine Learning techniques to detect anomalous financial transactions and suspicious accounting activities.
+
+The system uses anomaly detection algorithms to identify irregular financial patterns that may indicate fraud, accounting manipulation, or abnormal transaction behavior.
+
+This project was developed for educational and research purposes in financial analytics and fraud detection.
 
 # 🎯 Objectives
 
@@ -20,11 +24,11 @@ Dự án sử dụng Machine Learning để phát hiện các giao dịch tài c
 # ✨ Features
 
 - Financial anomaly detection
-- Fraud transaction analysis
-- Machine Learning prediction
-- Data visualization
-- Isolation Forest model
-- Fraud analytics reporting
+- Fraud transaction monitoring
+- Machine Learning-based prediction
+- Transaction pattern analysis
+- Data visualization and reporting
+- Isolation Forest anomaly scoring
 
 # 🧠 Công nghệ sử dụng
 
@@ -64,29 +68,27 @@ fraud_detection_project/
 
 ---
 
-# 📊 Dataset sử dụng
+# 📊 Dataset
 
-## Financial Anomaly Dataset
+## Financial Statement Anomaly Dataset
 
-Dataset chứa:
+[View Dataset on Kaggle](https://www.kaggle.com/datasets/zara2099/financial-statement-anomaly-dataset)
+
+The dataset includes:
 - transaction amount
-- account id
-- transaction type
-- timestamp
-- category
-- anomaly label
+- account data
+- financial categories
+- anomaly labels
+- timestamps
 
-Ứng dụng:
-- phát hiện giao dịch bất thường
-- fraud detection
-- anomaly detection
-
-Dataset:
-https://www.kaggle.com/datasets/devondev/financial-anomaly-data
+Used for:
+- financial fraud detection
+- anomaly analysis
+- suspicious transaction monitoring
 
 ---
 
-# ⚙️ Cài đặt môi trường
+# ⚙️ Installation
 
 ## 1️⃣ Clone project
 
@@ -96,7 +98,7 @@ git clone https://github.com/truzpuong/fraud_detection_project.git
 
 ---
 
-## 2️⃣ Di chuyển vào thư mục project
+## 2️⃣ Move into project directory
 
 ```bash
 cd fraud_detection_project
@@ -104,7 +106,7 @@ cd fraud_detection_project
 
 ---
 
-## 3️⃣ Tạo môi trường ảo bằng Anaconda
+## 3️⃣ Create virtual environment
 
 ```bash
 conda create -n fraud_env python=3.11
@@ -112,13 +114,13 @@ conda create -n fraud_env python=3.11
 
 ---
 
-## 4️⃣ Kích hoạt môi trường
+## 4️⃣ Activate environment
 
 ```bash
 conda activate fraud_env
 ```
 
-Sau khi kích hoạt thành công sẽ xuất hiện:
+After activation:
 
 ```bash
 (fraud_env)
@@ -126,13 +128,13 @@ Sau khi kích hoạt thành công sẽ xuất hiện:
 
 ---
 
-## 5️⃣ Cài thư viện
+## 5️⃣ Install dependencies
 
 ```bash
 pip install pandas numpy matplotlib seaborn scikit-learn pyod jupyter
 ```
 
-Hoặc dùng:
+Or:
 
 ```bash
 pip install -r requirements.txt
@@ -220,7 +222,7 @@ Ví dụ:
 
 ---
 
-# 🔐 Bảo mật
+# 🔐 Environment Variables (bảo mật)
 
 Project sử dụng file `.env` để lưu:
 - API key
@@ -242,21 +244,21 @@ File `.env` đã được thêm vào `.gitignore`.
 - Pandas
 - NumPy
 - Matplotlib
-- Scikit-learn (Machine )
+- Scikit-learn (Machine Learning)
 - Anaconda
 - VSCode
 - GitHub
 
 ---
 
-# 🚀 Hướng phát triển
+# 🚀 Future Improvements
 
-Trong tương lai có thể:
-- xây dựng dashboard bằng Streamlit
-- dùng Deep Learning
-- tích hợp dữ liệu ERP SAP
-- realtime fraud detection
-- triển khai trên cloud
+- Real-time fraud detection
+- Streamlit dashboard integration
+- Deep Learning anomaly models
+- ERP/SAP financial integration
+- Cloud deployment
+- Explainable AI (XAI)
 
 ---
 
