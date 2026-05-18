@@ -236,15 +236,16 @@ File `.env` đã được thêm vào `.gitignore`.
 
 ---
 
-# 📚 Applied Knowledge
+# 🛠️ Tech Stack
 
-- Python Programming -> Python cơ bản
-- Data Analysis -> Phân tích dữ 
-- Machine Learning
-- Fraud Detection -> Phát hiện gian lận tài chính
-- Financial Analytics
-- Git & GitHub
-- Virtual Environment (Anaconda) -> Môi trường ảo Anaconda
+- Python
+- Pandas
+- NumPy
+- Matplotlib
+- Scikit-learn (Machine )
+- Anaconda
+- VSCode
+- GitHub
 
 ---
 
