@@ -1,3 +1,4 @@
+![Banner](images/banner.png)
 # 💰 Financial Fraud Detection Project
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![Machine Learning](https://img.shields.io/badge/Machine-Learning-green)
@@ -248,17 +249,6 @@ Trong tương lai có thể:
 
 ---
 
-# 👨‍💻 Thành viên thực hiện
-
-- Tên sinh viên : Nguyễn Phương Trúc
-- MSSV: B25DCKT168
-- Nhóm: 15
-
----
-
-# 📜 License
-
-This project is for educational purposes.
 # 🖥️ Output Example
 
 ```bash
@@ -276,3 +266,16 @@ Accuracy: 96%
 # 🔄 Workflow
 
 ![Workflow](images/workflow.png)
+
+
+# 👨‍💻 Thành viên thực hiện
+
+- Tên sinh viên : Nguyễn Phương Trúc
+- MSSV: B25DCKT168
+- Nhóm: 15
+
+---
+
+# 📜 License
+
+This project is for educational purposes.
