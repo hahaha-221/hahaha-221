@@ -259,3 +259,20 @@ Trong tương lai có thể:
 # 📜 License
 
 This project is for educational purposes.
+# 🖥️ Output Example
+
+```bash
+Loading dataset...
+
+Training model...
+
+Anomaly transactions detected: 42
+
+Accuracy: 96%
+```
+# 📈 Anomaly Detection Result
+
+![Anomaly Chart](images/anomaly_chart.png)
+# 🔄 Workflow
+
+![Workflow](images/workflow.png)
