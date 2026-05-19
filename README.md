@@ -45,24 +45,24 @@ This project was developed for educational and research purposes in financial an
 
 ---
 
-# 📂 Cấu trúc thư mục
+# 📁 Cấu trúc thư mục
 
 ```bash
 fraud_detection_project/
 │
-├── data/                  # Dataset
-├── outputs/               # Kết quả mô hình
-├── notebooks/             # Jupyter Notebook
-├── src/                   # Source code
-│   ├── preprocessing.py
-│   ├── model.py
-│   └── visualization.py
+├── data/                         # Dataset
+├── images/                       # Hình ảnh README
+│   ├── anomaly_chart.png
+│   ├── banner.png
+│   └── workflow.png
 │
-├── detect_fraud.py        # File chạy chính
-├── basic_math.py          # Các bài Python cơ bản
-├── requirements.txt
-├── .env
+├── notebooks/                    # Notebook
+│
+├── .env                          # Virtual environment
 ├── .gitignore
+├── basic_math.py                 # Python cơ bản
+├── bieudophathienGDBT.py         # Fraud detection visualization
+├── moi_truong_ao.py              # Virtual environment setup
 └── README.md
 ```
 
