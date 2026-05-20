@@ -280,13 +280,6 @@ Accuracy: 96%
 
 ![Workflow](images/workflow.png)
 
-
-# 👨‍💻 Thành viên thực hiện
-
-- Tên sinh viên : Nguyễn Phương Trúc
-- MSSV: B25DCKT168
-- Nhóm: 15
-
 ---
 
 # 📜 License
