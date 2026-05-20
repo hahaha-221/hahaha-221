@@ -281,7 +281,3 @@ Accuracy: 96%
 ![Workflow](images/workflow.png)
 
 ---
-
-# 📜 License
-
-This project is for educational purposes.
