@@ -87,7 +87,36 @@ Used for:
 - suspicious transaction monitoring
 
 ---
+## 🚨 Detailed List of Abnormal Financial Statements
 
+| Index | Revenue | Operating Expenses | Net Income | Cash Flow | Debt Ratio | Prediction |
+|------|----------|-------------------|------------|-----------|------------|-------------|
+| 144 | 1.2315 | -0.7738 | -0.8871 | 0.5215 | 0.8454 | Abnormal |
+| 163 | 0.7485 | -0.5446 | 1.0134 | 0.5986 | -0.7311 | Abnormal |
+| 194 | 1.8520 | 0.3672 | 0.8491 | -0.4780 | 3.7190 | Abnormal |
+| 202 | -0.0800 | 0.7201 | 0.8504 | -0.5599 | -0.3905 | Abnormal |
+| 214 | 4.1854 | 0.0200 | 0.1447 | 0.5800 | 4.4591 | Abnormal |
+| 224 | 0.4115 | -0.4444 | -0.6523 | 0.4472 | -0.3234 | Abnormal |
+| 294 | 1.7246 | 0.9899 | 0.2000 | 0.1500 | 0.3712 | Abnormal |
+| 337 | 0.2192 | 1.0010 | 0.3250 | 0.6000 | 3.7790 | Abnormal |
+| 341 | -0.6176 | 0.6885 | 0.8480 | -0.4000 | -0.6441 | Abnormal |
+
+### 🔍 Interpretation
+
+Các bản ghi bất thường này được mô hình Machine Learning phát hiện dựa trên những mẫu hành vi tài chính bất thường như:
+
+- Tỷ lệ nợ quá cao
+- Dòng tiền âm hoặc không ổn định
+- Doanh thu thay đổi đột ngột
+- Chi phí hoạt động biến động bất thường
+- Lợi nhuận dao động không hợp lý
+
+Hệ thống phát hiện bất thường giúp xác định các báo cáo tài chính đáng ngờ có thể cho thấy:
+
+- Gian lận trong báo cáo tài chính
+- Thao túng lợi nhuận
+- Che giấu các khoản nợ
+- Tình trạng tài chính không ổn định
 # ⚙️ Installation
 
 ## 1️⃣ Clone project
