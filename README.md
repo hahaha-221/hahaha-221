@@ -1,4 +1,3 @@
-![Banner](images/banner.png)
 
 # 💰 Fraud Detection Project | Dự Án Phát Hiện Gian Lận Tài Chính
 
@@ -197,6 +196,24 @@ The chart visualizes:
 - Model accuracy on test set
 - Performance metric on unseen data
 - Baseline for model comparison
+
+### Confusion Matrix
+
+The confusion matrix heatmap shows true vs predicted labels:
+
+![Confusion Matrix](images/confusion_matrix.png)
+
+### Metrics Comparison
+
+Bar chart summarizing Accuracy, Precision, Recall, and F1-Score:
+
+![Metrics Comparison](images/metrics_comparison.png)
+
+### Feature Importance
+
+Top features used by the Random Forest model:
+
+![Feature Importance](images/feature_importance.png)
 
 ### Launch Streamlit Dashboard
 
