@@ -114,19 +114,89 @@ pip install -r requirements.txt
 pip install -r requirements.txt
 ```
 
-## ▶️ Running the Project
+## 📋 Project Workflow | Luồng Công Việc Dự Án
 
-### Train Model and Save Results
+### System Architecture
+
+![Project Workflow](images/workflow.png)
+
+**Workflow Steps:**
+
+1. **Data Ingestion** → Load CSV from `data/` folder
+2. **Data Processing** → Clean, normalize, and split data
+3. **Model Training** → Train ML models (RF, XGB, LGB, etc.)
+4. **Model Evaluation** → Calculate metrics and comparisons
+5. **Visualization** → Generate charts and reports
+6. **Results Export** → Save models and predictions
+
+---
+
+## ▶️ Running the Project | Chạy Dự Án
+
+### Main Script - Train Model and Save Results
 
 ```bash
 python main.py
 ```
 
-Output:
-- Model accuracy metrics
-- Confusion matrix
-- Classification report
-- Saved model: `fraud_model.pkl`
+**`main.py` Workflow:**
+
+```
+1. Load Dataset
+   └─ Read "data/Financial Statement Anomaly Dataset.csv"
+
+2. Data Preparation
+   └─ Split features (X) and target (y)
+
+3. Train-Test Split
+   └─ 80% training, 20% testing data
+
+4. Train RandomForestClassifier
+   └─ Fit model on training data
+
+5. Model Evaluation
+   ├─ Calculate accuracy score
+   ├─ Generate confusion matrix
+   ├─ Print classification report
+   └─ Create accuracy bar chart
+
+6. Save Model
+   └─ Export to "fraud_model.pkl"
+```
+
+**Output:**
+- ✅ Model accuracy metrics
+- ✅ Confusion matrix
+- ✅ Classification report (Precision, Recall, F1-Score)
+- ✅ Accuracy visualization chart
+- ✅ Saved model: `fraud_model.pkl`
+
+**Sample Output:**
+```
+Dataset loaded successfully!
+Model Accuracy: 0.8547
+
+Confusion Matrix:
+[[45 12]
+ [8  51]]
+
+Classification Report:
+              precision    recall  f1-score   support
+           0       0.85      0.79      0.82        57
+           1       0.81      0.86      0.84        59
+    accuracy                           0.83       116
+```
+
+### Anomaly Detection Chart
+
+When `main.py` completes successfully, it generates a bar chart showing model accuracy:
+
+![Anomaly Detection Chart](images/anomaly_chart.png)
+
+The chart visualizes:
+- Model accuracy on test set
+- Performance metric on unseen data
+- Baseline for model comparison
 
 ### Launch Streamlit Dashboard
 
@@ -136,12 +206,46 @@ streamlit run streamlit_app.py
 
 Access at: `http://localhost:8501`
 
+**Streamlit Features:**
+- 📊 Dataset preview and statistics
+- 📈 Distribution analysis
+- 🔗 Correlation heatmap
+- 🤖 Multi-model training and comparison
+- 📉 Detailed model evaluation metrics
+
 ## 📝 Notes
 
 - `main.py`: Trains RandomForestClassifier on the dataset and saves results
 - `streamlit_app.py`: Interactive web dashboard for data analysis and model comparison
 - If you encounter missing library errors, reinstall dependencies: `pip install -r requirements.txt`
 - Trained models are cached for fast loading
+
+### Adding Images to README
+
+To display images in README, save them in the `images/` folder:
+
+- `banner.png` - Project banner (displayed at top)
+- `anomaly_chart.png` - Model accuracy visualization from `main.py`
+- `workflow.png` - Project workflow/architecture diagram
+
+**How to add:**
+1. Take a screenshot or generate an image
+2. Save it as `.png` in `images/` folder
+3. Reference in README: `![Description](images/filename.png)`
+
+**Quick image generation with Python:**
+```python
+import matplotlib.pyplot as plt
+
+# Accuracy chart
+plt.figure(figsize=(8, 5))
+plt.bar(['Accuracy'], [0.85], color='green')
+plt.title('Model Accuracy', fontsize=14)
+plt.ylabel('Score')
+plt.ylim(0, 1)
+plt.savefig('images/anomaly_chart.png', dpi=100, bbox_inches='tight')
+plt.close()
+```
 
 ## 🔄 Workflow
 
@@ -259,17 +363,70 @@ pip install -r requirements.txt
 
 ## ▶️ Chạy Dự Án
 
-### Huấn Luyện Mô Hình Và Lưu Kết Quả
+### Script Chính - Huấn Luyện Mô Hình Và Lưu Kết Quả
 
 ```bash
 python main.py
 ```
 
-Kết Quả:
-- Độ chính xác của mô hình
-- Ma trận nhầm lẫn
-- Báo cáo phân loại
-- Lưu mô hình: `fraud_model.pkl`
+**Luồng Công Việc Của `main.py`:**
+
+```
+1. Tải Dataset
+   └─ Đọc "data/Financial Statement Anomaly Dataset.csv"
+
+2. Chuẩn Bị Dữ Liệu
+   └─ Tách features (X) và target (y)
+
+3. Chia Train-Test
+   └─ 80% dữ liệu huấn luyện, 20% dữ liệu kiểm tra
+
+4. Huấn Luyện RandomForestClassifier
+   └─ Fit mô hình trên dữ liệu training
+
+5. Đánh Giá Mô Hình
+   ├─ Tính độ chính xác (accuracy)
+   ├─ Tạo ma trận nhầm lẫn (confusion matrix)
+   ├─ In báo cáo phân loại (classification report)
+   └─ Vẽ biểu đồ độ chính xác
+
+6. Lưu Mô Hình
+   └─ Export sang "fraud_model.pkl"
+```
+
+**Kết Quả Đầu Ra:**
+- ✅ Chỉ số độ chính xác mô hình
+- ✅ Ma trận nhầm lẫn
+- ✅ Báo cáo phân loại (Precision, Recall, F1-Score)
+- ✅ Biểu đồ trực quan độ chính xác
+- ✅ Mô hình lưu: `fraud_model.pkl`
+
+**Ví Dụ Kết Quả:**
+```
+Dataset loaded successfully!
+Model Accuracy: 0.8547
+
+Confusion Matrix:
+[[45 12]
+ [8  51]]
+
+Classification Report:
+              precision    recall  f1-score   support
+           0       0.85      0.79      0.82        57
+           1       0.81      0.86      0.84        59
+    accuracy                           0.83       116
+```
+
+### Biểu Đồ Phát Hiện Bất Thường
+
+Khi `main.py` hoàn thành, nó tạo một biểu đồ cột hiển thị độ chính xác mô hình:
+
+![Anomaly Detection Chart](images/anomaly_chart.png)
+
+Biểu đồ trực quan hoá:
+- Độ chính xác mô hình trên tập kiểm tra
+- Chỉ số hiệu suất trên dữ liệu chưa nhìn thấy
+- Cơ sở để so sánh các mô hình
 
 ### Khởi Động Dashboard Streamlit
 
@@ -279,12 +436,46 @@ streamlit run streamlit_app.py
 
 Truy Cập Tại: `http://localhost:8501`
 
+**Tính Năng Streamlit:**
+- 📊 Xem trước và thống kê dataset
+- 📈 Phân tích phân phối dữ liệu
+- 🔗 Ma trận tương quan
+- 🤖 Huấn luyện và so sánh nhiều mô hình
+- 📉 Chỉ số đánh giá mô hình chi tiết
+
 ## 📝 Ghi Chú
 
 - `main.py`: Huấn luyện RandomForestClassifier trên dataset và lưu kết quả
 - `streamlit_app.py`: Dashboard web tương tác để phân tích dữ liệu và so sánh mô hình
 - Nếu gặp lỗi thư viện bị thiếu, cài lại dependencies: `pip install -r requirements.txt`
 - Mô hình được cache để tải nhanh hơn
+
+### Thêm Ảnh Vào README
+
+Để hiển thị ảnh trong README, lưu chúng trong thư mục `images/`:
+
+- `banner.png` - Banner dự án (hiển thị ở đầu)
+- `anomaly_chart.png` - Trực quan hoá độ chính xác từ `main.py`
+- `workflow.png` - Sơ đồ luồng công việc/kiến trúc dự án
+
+**Cách thêm:**
+1. Chụp ảnh hoặc tạo ảnh
+2. Lưu dưới dạng `.png` trong thư mục `images/`
+3. Tham chiếu trong README: `![Description](images/filename.png)`
+
+**Tạo ảnh nhanh bằng Python:**
+```python
+import matplotlib.pyplot as plt
+
+# Biểu đồ độ chính xác
+plt.figure(figsize=(8, 5))
+plt.bar(['Accuracy'], [0.85], color='green')
+plt.title('Model Accuracy', fontsize=14)
+plt.ylabel('Score')
+plt.ylim(0, 1)
+plt.savefig('images/anomaly_chart.png', dpi=100, bbox_inches='tight')
+plt.close()
+```
 
 ## 🔄 Luồng Công Việc
 
@@ -305,134 +496,3 @@ Truy Cập Tại: `http://localhost:8501`
 ## 📜 License | Giấy Phép
 
 This project is open source. Feel free to use and modify. | Dự án này mã nguồn mở. Tự do sử dụng và chỉnh sửa.
-
-
-## Chạy Jupyter Notebook
-
-```bash
-jupyter notebook
-```
-
----
-
-# 🤖 Thuật toán sử dụng
-
-## Isolation Forest
-
-Isolation Forest là thuật toán Machine Learning dùng để phát hiện:
-- outlier
-- anomaly
-- fraud transaction
-
-Ý tưởng:
-- dữ liệu bất thường sẽ dễ bị “cô lập”
-- anomaly có path ngắn hơn dữ liệu bình thường
-
-Ưu điểm:
-- chạy nhanh
-- hiệu quả với dữ liệu lớn
-- không cần label quá nhiều
-
----
-
-# 📈 Quy trình xử lý dữ liệu
-
-1. Load dataset
-2. Làm sạch dữ liệu
-3. Encode dữ liệu categorical
-4. Huấn luyện mô hình
-5. Dự đoán anomaly
-6. Visualization kết quả
-
----
-
-# 🧪 Ví dụ code
-
-## Huấn luyện mô hình
-
-```python
-from sklearn.ensemble import IsolationForest
-
-model = IsolationForest(
-    contamination=0.02,
-    random_state=42
-)
-
-model.fit(X)
-```
-
----
-
-# 📊 Kết quả đạt được
-
-Mô hình có thể:
-- phát hiện giao dịch bất thường
-- phân loại transaction đáng ngờ
-- hỗ trợ kiểm toán tài chính
-
-Ví dụ:
-- giao dịch giá trị quá lớn
-- giao dịch khác pattern thông thường
-- transaction bất thường theo thời gian
-
----
-
-# 🔐 Environment Variables (bảo mật)
-
-Project sử dụng file `.env` để lưu:
-- API key
-- thông tin nhạy cảm
-
-Ví dụ:
-
-```env
-API_KEY=your_api_key
-```
-
-File `.env` đã được thêm vào `.gitignore`.
-
----
-
-# 🛠️ Tech Stack
-
-- Python
-- Pandas
-- NumPy
-- Matplotlib
-- Scikit-learn (Machine Learning)
-- Anaconda
-- VSCode
-- GitHub
-
----
-
-# 🚀 Future Improvements
-
-- Real-time fraud detection
-- Streamlit dashboard integration
-- Deep Learning anomaly models
-- ERP/SAP financial integration
-- Cloud deployment
-- Explainable AI (XAI)
-
----
-
-# 🖥️ Output Example
-
-```bash
-Loading dataset...
-
-Training model...
-
-Anomaly transactions detected: 42
-
-Accuracy: 96%
-```
-# 📈 Anomaly Detection Result
-
-![Anomaly Chart](images/anomaly_chart.png)
-# 🔄 Workflow
-
-![Workflow](images/workflow.png)
-
----
