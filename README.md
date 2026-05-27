@@ -72,7 +72,8 @@ fraud_detection_project/
 
 ## Financial Statement Anomaly Dataset
 
-[View Dataset on Kaggle](https://www.kaggle.com/datasets/zara2099/financial-statement-anomaly-dataset)
+[View Dataset on Kaggle](https://www.kaggle.com/datasets/zara2099/financial-statement-anomaly-dataset)python -m venv .venv
+.\.venv\Scripts\Activate.ps1
 
 The dataset includes:
 - transaction amount
@@ -138,7 +139,7 @@ cd fraud_detection_project
 ## 3️⃣ Create virtual environment
 
 ```bash
-conda create -n fraud_env python=3.11
+conda env create -f environment.yml
 ```
 
 ---
@@ -159,14 +160,31 @@ After activation:
 
 ## 5️⃣ Install dependencies
 
-```bash
-pip install pandas numpy matplotlib seaborn scikit-learn pyod jupyter
-```
+Dependencies are installed automatically from `environment.yml`.
 
-Or:
+If you prefer pip, use:
 
 ```bash
 pip install -r requirements.txt
+```
+
+---
+
+## 6️⃣ Download dataset from Kaggle
+
+Make sure the Kaggle API key is configured at `~/.kaggle/kaggle.json`.
+
+```bash
+kaggle datasets download -d zara2099/financial-statement-anomaly-dataset -p data/ --force
+```
+
+---
+
+## 7️⃣ Run dataset analysis
+
+```bash
+python download_and_analyze.py
+```
 ```
 
 ---
