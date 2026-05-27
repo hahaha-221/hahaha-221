@@ -193,15 +193,31 @@ When `main.py` completes successfully, it generates a bar chart showing model ac
 ![Anomaly Detection Chart](images/anomaly_chart.png)
 
 The chart visualizes:
-- Model accuracy on test set
-- Performance metric on unseen data
-- Baseline for model comparison
+- Model accuracy on the test set
+- The overall percentage of correctly classified records
+- The model's ability to separate normal vs anomalous samples
+
+**How to read it:**
+- A higher bar means the model is more accurate.
+- This chart is useful for quick validation after training.
+- If accuracy is low, retrain with data cleaning or more features.
 
 ### Confusion Matrix
 
-The confusion matrix heatmap shows true vs predicted labels:
+The confusion matrix heatmap shows the relationship between true labels and predicted labels:
 
 ![Confusion Matrix](images/confusion_matrix.png)
+
+This image helps you understand:
+- True Positives: correctly detected anomalies
+- False Positives: normal records predicted as anomalies
+- False Negatives: anomalies missed by the model
+- True Negatives: correctly identified normal records
+
+**Why it matters:**
+- It reveals where the model makes mistakes.
+- Use it to decide whether to prioritize recall or precision.
+- A healthy fraud detection model should keep false negatives low.
 
 ### Metrics Comparison
 
@@ -209,11 +225,32 @@ Bar chart summarizing Accuracy, Precision, Recall, and F1-Score:
 
 ![Metrics Comparison](images/metrics_comparison.png)
 
+Interpretation:
+- **Accuracy** shows overall correctness.
+- **Precision** shows how many predicted anomalies are actually anomalies.
+- **Recall** shows how many actual anomalies were detected.
+- **F1-Score** balances precision and recall.
+
+**Why use this chart:**
+- It compares the main model performance metrics in one view.
+- It helps you decide if the model is biased toward false positives or false negatives.
+- Model tuning should improve the metric with the lowest score.
+
 ### Feature Importance
 
-Top features used by the Random Forest model:
+Top features used by the Random Forest model are displayed here:
 
 ![Feature Importance](images/feature_importance.png)
+
+This chart explains:
+- Which input features most influence the model's decisions
+- Which financial indicators are most correlated with anomaly detection
+- Where to focus feature engineering efforts
+
+**How to use it:**
+- High-importance features are strong fraud indicators.
+- If a feature has low importance, consider removing or reprocessing it.
+- Use this plot to interpret which financial patterns the model learns.
 
 ### Launch Streamlit Dashboard
 
@@ -242,8 +279,12 @@ Access at: `http://localhost:8501`
 To display images in README, save them in the `images/` folder:
 
 - `banner.png` - Project banner (displayed at top)
-- `anomaly_chart.png` - Model accuracy visualization from `main.py`
 - `workflow.png` - Project workflow/architecture diagram
+- `anomaly_chart.png` - Model accuracy visualization from `main.py`
+- `confusion_matrix.png` - Confusion matrix heatmap for prediction analysis
+- `metrics_comparison.png` - Comparative chart for accuracy, precision, recall, and F1
+- `feature_importance.png` - Feature importance chart from the Random Forest model
+- `classification_report.txt` - Text report containing detailed classification metrics
 
 **How to add:**
 1. Take a screenshot or generate an image
@@ -509,23 +550,6 @@ plt.close()
 - Luôn cập nhật README với hướng dẫn cài đặt
 
 ---
-
-## 🖼️ Images Gallery | Thư Viện Ảnh
-
-Below are the images generated and stored in the `images/` folder. They are included here so they display on GitHub.
-
-- Banner: ![Banner](images/banner.png)
-- Anomaly Detection Chart: ![Anomaly Chart](images/anomaly_chart.png)
-- Confusion Matrix: ![Confusion Matrix](images/confusion_matrix.png)
-- Metrics Comparison: ![Metrics Comparison](images/metrics_comparison.png)
-- Feature Importance: ![Feature Importance](images/feature_importance.png)
-- Classification Report (text): [images/classification_report.txt](images/classification_report.txt)
-
-If any image is missing, generate it by running:
-
-```bash
-python phathienbatthuong.py
-```
 
 
 ## 📜 License | Giấy Phép
