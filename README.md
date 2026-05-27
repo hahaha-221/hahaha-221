@@ -510,6 +510,24 @@ plt.close()
 
 ---
 
+## 🖼️ Images Gallery | Thư Viện Ảnh
+
+Below are the images generated and stored in the `images/` folder. They are included here so they display on GitHub.
+
+- Banner: ![Banner](images/banner.png)
+- Anomaly Detection Chart: ![Anomaly Chart](images/anomaly_chart.png)
+- Confusion Matrix: ![Confusion Matrix](images/confusion_matrix.png)
+- Metrics Comparison: ![Metrics Comparison](images/metrics_comparison.png)
+- Feature Importance: ![Feature Importance](images/feature_importance.png)
+- Classification Report (text): [images/classification_report.txt](images/classification_report.txt)
+
+If any image is missing, generate it by running:
+
+```bash
+python phathienbatthuong.py
+```
+
+
 ## 📜 License | Giấy Phép
 
 This project is open source. Feel free to use and modify. | Dự án này mã nguồn mở. Tự do sử dụng và chỉnh sửa.
