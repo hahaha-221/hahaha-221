@@ -116,7 +116,7 @@ pip install -r requirements.txt
 
 ### System Architecture
 
-![Project Workflow](images/workflow.png)
+![Project Workflow](images/workflow_en.png)
 
 **Workflow Steps:**
 
@@ -425,7 +425,7 @@ pip install -r requirements.txt
 
 ### Kiến Trúc Hệ Thống
 
-![Project Workflow](images/workflow.png)
+![Project Workflow](images/workflow_vi.png)
 
 **Luồng công việc:**
 
