@@ -31,3 +31,27 @@ predictions = model.predict(X_test)
 accuracy = accuracy_score(y_test, predictions)
 
 print("Model Accuracy:", accuracy)
+
+from sklearn.metrics import confusion_matrix
+
+cm = confusion_matrix(y_test, predictions)
+
+print("Confusion Matrix:")
+print(cm)
+
+from sklearn.metrics import classification_report
+
+print(classification_report(y_test, predictions))
+
+import matplotlib.pyplot as plt
+
+plt.bar(["Accuracy"], [accuracy])
+plt.title("Model Accuracy")
+plt.ylabel("Score")
+plt.show()
+
+import joblib
+
+joblib.dump(model, "fraud_model.pkl")
+
+print("Model saved!")
