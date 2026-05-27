@@ -423,6 +423,19 @@ pip install -r requirements.txt
 pip install -r requirements.txt
 ```
 
+### Kiến Trúc Hệ Thống
+
+![Project Workflow](images/workflow.png)
+
+**Luồng công việc:**
+
+1. **Thu thập dữ liệu** → Đọc file CSV từ thư mục `data/`
+2. **Tiền xử lý dữ liệu** → Làm sạch, chuẩn hóa và tách dữ liệu
+3. **Huấn luyện mô hình** → Train các mô hình ML (RF, XGB, LGB, v.v.)
+4. **Đánh giá mô hình** → Tính toán các chỉ số và so sánh
+5. **Trực quan hóa** → Tạo biểu đồ và báo cáo
+6. **Xuất kết quả** → Lưu mô hình và dự đoán
+
 ## ▶️ Chạy Dự Án
 
 ### Script Chính - Huấn Luyện Mô Hình Và Lưu Kết Quả
@@ -490,6 +503,56 @@ Biểu đồ trực quan hoá:
 - Chỉ số hiệu suất trên dữ liệu chưa nhìn thấy
 - Cơ sở để so sánh các mô hình
 
+### Ma Trận Nhầm Lẫn
+
+Ma trận nhầm lẫn thể hiện mối quan hệ giữa nhãn thật và nhãn dự đoán:
+
+![Confusion Matrix](images/confusion_matrix.png)
+
+Hình ảnh này giúp bạn hiểu:
+- True Positives: phát hiện đúng gian lận
+- False Positives: mẫu bình thường bị dự đoán là gian lận
+- False Negatives: mẫu gian lận bị bỏ sót
+- True Negatives: mẫu bình thường được dự đoán chính xác
+
+**Tại sao quan trọng:**
+- Hiển thị kiểu sai sót của mô hình
+- Giúp xác định ưu tiên giữa recall và precision
+- Mô hình phát hiện gian lận nên giảm false negatives
+
+### So Sánh Các Chỉ Số
+
+Biểu đồ cột tổng hợp Accuracy, Precision, Recall và F1-Score:
+
+![Metrics Comparison](images/metrics_comparison.png)
+
+Diễn giải:
+- **Accuracy** cho biết độ chính xác tổng thể
+- **Precision** cho biết tỷ lệ dự đoán đúng về gian lận
+- **Recall** cho biết tỷ lệ gian lận thực tế được phát hiện
+- **F1-Score** cân bằng precision và recall
+
+**Tại sao dùng biểu đồ này:**
+- So sánh các chỉ số chính trong một ảnh
+- Giúp đánh giá mô hình có thiên về false positives hay false negatives
+- Tối ưu hóa mô hình nên cải thiện chỉ số thấp nhất
+
+### Độ Quan Trọng Của Đặc Trưng
+
+Các đặc trưng quan trọng nhất theo mô hình Random Forest:
+
+![Feature Importance](images/feature_importance.png)
+
+Biểu đồ này giải thích:
+- Đặc trưng nào ảnh hưởng nhiều nhất đến quyết định mô hình
+- Chỉ số tài chính nào liên quan chặt chẽ đến phát hiện bất thường
+- Nên tập trung cải thiện đặc trưng ở đâu
+
+**Cách sử dụng:**
+- Đặc trưng quan trọng cao là tín hiệu gian lận mạnh
+- Nếu đặc trưng ít quan trọng, cân nhắc loại bỏ hoặc xử lý lại
+- Dùng biểu đồ này để giải thích mô hình học được mẫu tài chính nào
+
 ### Khởi Động Dashboard Streamlit
 
 ```bash
@@ -517,8 +580,12 @@ Truy Cập Tại: `http://localhost:8501`
 Để hiển thị ảnh trong README, lưu chúng trong thư mục `images/`:
 
 - `banner.png` - Banner dự án (hiển thị ở đầu)
-- `anomaly_chart.png` - Trực quan hoá độ chính xác từ `main.py`
 - `workflow.png` - Sơ đồ luồng công việc/kiến trúc dự án
+- `anomaly_chart.png` - Trực quan hoá độ chính xác từ `main.py`
+- `confusion_matrix.png` - Ma trận nhầm lẫn để phân tích dự đoán
+- `metrics_comparison.png` - Biểu đồ so sánh Accuracy, Precision, Recall, F1
+- `feature_importance.png` - Biểu đồ độ quan trọng đặc trưng từ Random Forest
+- `classification_report.txt` - Báo cáo text chi tiết các chỉ số phân loại
 
 **Cách thêm:**
 1. Chụp ảnh hoặc tạo ảnh
