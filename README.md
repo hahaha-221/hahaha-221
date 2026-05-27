@@ -8,18 +8,17 @@
 
 ---
 
-## 📖 Table of Contents | Mục Lục
+## 📖 Language Selection | Chọn Ngôn Ngữ
 
-- [English](#english)
-- [Tiếng Việt](#tiếng-việt)
-
----
+<details>
+<summary><strong>English</strong></summary>
 
 # ENGLISH
 
 ## 🎯 Project Overview
 
 This project builds a Financial Fraud Detection system using Machine Learning to classify and detect anomalous financial records and suspicious accounting activities. The system applies multiple classification algorithms to identify irregular financial patterns that may indicate fraud or accounting manipulation.
+
 
 ### Objectives
 
@@ -319,7 +318,12 @@ plt.close()
 - Never commit sensitive data or API keys
 - Keep README updated with setup instructions
 
+</details>
+
 ---
+
+<details>
+<summary><strong>Tiếng Việt</strong></summary>
 
 # TIẾNG VIỆT
 
@@ -548,6 +552,8 @@ plt.close()
 - `.gitignore` loại trừ: `__pycache__/`, `*.pyc`, `venv/`, `.venv/`, `*.pkl`
 - Không commit dữ liệu nhạy cảm hoặc API key
 - Luôn cập nhật README với hướng dẫn cài đặt
+
+</details>
 
 ---
 
