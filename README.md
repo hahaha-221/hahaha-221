@@ -1,168 +1,89 @@
 ![Banner](images/banner.png)
-# 💰 Financial Fraud Detection Project
+# 💰 Fraud Detection Project
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![Machine Learning](https://img.shields.io/badge/Machine-Learning-green)
 ![Fraud Detection](https://img.shields.io/badge/Fraud-Detection-red)
-![Status](https://img.shields.io/badge/Status-Completed-brightgreen)
-## Overview
+![Status](https://img.shields.io/badge/Status-Ready-brightgreen)
 
-This project applies Machine Learning techniques to detect anomalous financial transactions and suspicious accounting activities.
+## Mục tiêu dự án
 
-The system uses anomaly detection algorithms to identify irregular financial patterns that may indicate fraud, accounting manipulation, or abnormal transaction behavior.
+Dự án này xây dựng một hệ thống phát hiện gian lận tài chính bằng Machine Learning, sử dụng dữ liệu báo cáo tài chính để phân loại các bản ghi bất thường.
 
-This project was developed for educational and research purposes in financial analytics and fraud detection.
+- Phân loại tình trạng tài chính của báo cáo
+- Phát hiện các trường hợp gian lận hoặc sai sót
+- Cung cấp giao diện phân tích và trực quan hoá
+- Hỗ trợ đánh giá mô hình và đối chiếu kết quả
 
-# 🎯 Objectives
+## Tính năng chính
 
-- Detect abnormal financial transactions
-- Apply Machine Learning in accounting
-- Support fraud analysis and auditing
-- Visualize anomaly detection results
+- Huấn luyện mô hình phân loại với `RandomForestClassifier`
+- Giao diện Streamlit để quan sát dữ liệu và kết quả
+- So sánh nhiều mô hình ML (Logistic Regression, Random Forest, Gradient Boosting, XGBoost, LightGBM)
+- Trực quan hoá phân phối dữ liệu, ma trận nhầm lẫn, và báo cáo phân loại
+- Hỗ trợ dataset CSV cục bộ trong thư mục `data/`
 
----
+## Công nghệ sử dụng
 
-# ✨ Features
+- Python 3.11
+- Pandas, NumPy
+- Scikit-learn
+- Streamlit
+- XGBoost, LightGBM
+- Matplotlib, Seaborn, Plotly
 
-- Financial anomaly detection
-- Fraud transaction monitoring
-- Machine Learning-based prediction
-- Transaction pattern analysis
-- Data visualization and reporting
-- Isolation Forest anomaly scoring
-
-# 🧠 Công nghệ sử dụng
-
-| Thành phần | Công nghệ |
-|---|---|
-| Ngôn ngữ | Python 3.11 |
-| Machine Learning | Scikit-learn |
-| Thuật toán | Isolation Forest |
-| Xử lý dữ liệu | Pandas, NumPy |
-| Visualization | Matplotlib, Seaborn |
-| Môi trường | Anaconda |
-| IDE | VSCode |
-| Quản lý mã nguồn | Git & GitHub |
-
----
-
-# 📁 Cấu trúc thư mục
+## Cấu trúc thư mục
 
 ```bash
 fraud_detection_project/
-│
-├── data/                         # Dataset
-├── images/                       # Hình ảnh README
-│   ├── anomaly_chart.png
-│   ├── banner.png
-│   └── workflow.png
-│
-├── notebooks/                    # Notebook
-│
-├── .env                          # Virtual environment
-├── .gitignore
-├── basic_math.py                 # Python cơ bản
-├── bieudophathienGDBT.py         # Fraud detection visualization
-├── moi_truong_ao.py              # Virtual environment setup
+├── data/
+│   └── Financial Statement Anomaly Dataset.csv
+├── images/
+├── notebooks/
+├── src/
+├── main.py
+├── streamlit_app.py
+├── environment-fraud.yml
+├── requirements.txt
 └── README.md
 ```
 
----
+## Dataset
 
-# 📊 Dataset
+Dữ liệu chính được lưu trong `data/Financial Statement Anomaly Dataset.csv`.
 
-## Financial Statement Anomaly Dataset
+Nếu bạn cần tải lại dataset, có thể sử dụng nguồn sau:
 
-[View Dataset on Kaggle](https://www.kaggle.com/datasets/zara2099/financial-statement-anomaly-dataset)python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+- Kaggle: https://www.kaggle.com/datasets/zara2099/financial-statement-anomaly-dataset
 
-The dataset includes:
-- transaction amount
-- account data
-- financial categories
-- anomaly labels
-- timestamps
-
-Used for:
-- financial fraud detection
-- anomaly analysis
-- suspicious transaction monitoring
+> Lưu ý: Nếu dataset chưa có trong thư mục `data/`, hãy đặt file CSV vào `data/` trước khi chạy ứng dụng.
 
 ---
-## 🚨 Detailed List of Abnormal Financial Statements
 
-| Index | Revenue | Operating Expenses | Net Income | Cash Flow | Debt Ratio | Prediction |
-|------|----------|-------------------|------------|-----------|------------|-------------|
-| 144 | 1.2315 | -0.7738 | -0.8871 | 0.5215 | 0.8454 | Abnormal |
-| 163 | 0.7485 | -0.5446 | 1.0134 | 0.5986 | -0.7311 | Abnormal |
-| 194 | 1.8520 | 0.3672 | 0.8491 | -0.4780 | 3.7190 | Abnormal |
-| 202 | -0.0800 | 0.7201 | 0.8504 | -0.5599 | -0.3905 | Abnormal |
-| 214 | 4.1854 | 0.0200 | 0.1447 | 0.5800 | 4.4591 | Abnormal |
-| 224 | 0.4115 | -0.4444 | -0.6523 | 0.4472 | -0.3234 | Abnormal |
-| 294 | 1.7246 | 0.9899 | 0.2000 | 0.1500 | 0.3712 | Abnormal |
-| 337 | 0.2192 | 1.0010 | 0.3250 | 0.6000 | 3.7790 | Abnormal |
-| 341 | -0.6176 | 0.6885 | 0.8480 | -0.4000 | -0.6441 | Abnormal |
+## Cài đặt nhanh
 
-### 🔍 Interpretation
-
-Các bản ghi bất thường này được mô hình Machine Learning phát hiện dựa trên những mẫu hành vi tài chính bất thường như:
-
-- Tỷ lệ nợ quá cao
-- Dòng tiền âm hoặc không ổn định
-- Doanh thu thay đổi đột ngột
-- Chi phí hoạt động biến động bất thường
-- Lợi nhuận dao động không hợp lý
-
-Hệ thống phát hiện bất thường giúp xác định các báo cáo tài chính đáng ngờ có thể cho thấy:
-
-- Gian lận trong báo cáo tài chính
-- Thao túng lợi nhuận
-- Che giấu các khoản nợ
-- Tình trạng tài chính không ổn định
-# ⚙️ Installation
-
-## 1️⃣ Clone project
+### 1. Clone repository
 
 ```bash
 git clone https://github.com/truzpuong/fraud_detection_project.git
-```
-
----
-
-## 2️⃣ Move into project directory
-
-```bash
 cd fraud_detection_project
 ```
 
----
-
-## 3️⃣ Create virtual environment
+### 2. Tạo môi trường (Conda)
 
 ```bash
-conda env create -f environment.yml
-```
-
----
-
-## 4️⃣ Activate environment
-
-```bash
+conda env create -f environment-fraud.yml
 conda activate fraud_env
 ```
 
-After activation:
+Nếu bạn muốn dùng pip:
 
 ```bash
-(fraud_env)
+python -m venv .venv
+.\.venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
----
-
-## 5️⃣ Install dependencies
-
-Dependencies are installed automatically from `environment.yml`.
-
-If you prefer pip, use:
+### 3. Cài đặt thư viện
 
 ```bash
 pip install -r requirements.txt
@@ -170,34 +91,47 @@ pip install -r requirements.txt
 
 ---
 
-## 6️⃣ Download dataset from Kaggle
+## Cách chạy
 
-Make sure the Kaggle API key is configured at `~/.kaggle/kaggle.json`.
+### Chạy script huấn luyện và lưu mô hình
 
 ```bash
-kaggle datasets download -d zara2099/financial-statement-anomaly-dataset -p data/ --force
+python main.py
+```
+
+### Chạy giao diện Streamlit
+
+```bash
+streamlit run streamlit_app.py
 ```
 
 ---
 
-## 7️⃣ Run dataset analysis
+## Ghi chú
 
-```bash
-python download_and_analyze.py
-```
-```
+- `main.py` đọc dữ liệu từ `data/Financial Statement Anomaly Dataset.csv`, huấn luyện `RandomForestClassifier`, in báo cáo đánh giá và lưu mô hình thành `fraud_model.pkl`.
+- `streamlit_app.py` là ứng dụng web để trực quan hoá dữ liệu và so sánh hiệu suất các mô hình.
+- Nếu gặp lỗi thiếu thư viện, chạy lại `pip install -r requirements.txt` hoặc kiểm tra môi trường ảo.
+
+---
+
+## Luồng công việc
+
+1. Chuẩn bị dữ liệu trong `data/`
+2. Cài đặt môi trường
+3. Chạy `python main.py` để huấn luyện mô hình
+4. Chạy `streamlit run streamlit_app.py` để mở giao diện phân tích
 
 ---
 
-# ▶️ Cách chạy dự án
+## Thông tin thêm
 
-## Chạy file phát hiện gian lận
+Nếu bạn muốn đưa dự án lên GitHub, đảm bảo:
 
-```bash
-python detect_fraud.py
-```
+- Thêm `.gitignore` để loại trừ `__pycache__/`, `*.pyc`, `venv/`, `.venv/`, và file nhạy cảm
+- Không đẩy dữ liệu nhạy cảm hoặc API key
+- Giữ `README.md` rõ ràng và đầy đủ hướng dẫn cài đặt
 
----
 
 ## Chạy Jupyter Notebook
 
