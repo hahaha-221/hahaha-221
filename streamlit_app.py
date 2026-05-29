@@ -1,3 +1,4 @@
+import os
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -5,6 +6,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import seaborn as sns
 import matplotlib.pyplot as plt
+import joblib
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
@@ -99,6 +101,15 @@ def evaluate_models(models, X_test, y_test):
         predictions[name] = {"y_pred": y_pred, "y_pred_proba": y_pred_proba}
 
     return results, predictions
+
+
+def load_saved_model(model_path="fraud_model.pkl"):
+    if os.path.exists(model_path):
+        try:
+            return joblib.load(model_path)
+        except Exception as e:
+            st.warning(f"Không thể tải mô hình đã lưu: {e}")
+    return None
 
 
 def main():
@@ -291,6 +302,32 @@ def main():
             results_df = pd.DataFrame(results).T
             fig = px.bar(results_df.reset_index(), x="index", y=["Accuracy", "Precision", "Recall", "F1 Score"], title="Model Performance Comparison")
             st.plotly_chart(fig, use_container_width=True)
+
+            st.subheader("🧪 Saved Model Prediction")
+            saved_model = load_saved_model("fraud_model.pkl")
+            if saved_model is not None:
+                st.info("Mô hình đã lưu được phát hiện trong `fraud_model.pkl`. Bạn có thể nhập giá trị để dự đoán.")
+                prediction_inputs = {}
+                with st.form("saved_model_prediction_form"):
+                    for col in st.session_state.feature_cols:
+                        default_value = float(df[col].median()) if np.issubdtype(df[col].dtype, np.number) else 0.0
+                        prediction_inputs[col] = st.number_input(col, value=default_value)
+                    use_saved_model = st.form_submit_button("Predict with saved model")
+
+                if use_saved_model:
+                    input_df = pd.DataFrame([prediction_inputs])
+                    try:
+                        pred = saved_model.predict(input_df)[0]
+                        proba = None
+                        if hasattr(saved_model, "predict_proba"):
+                            proba = saved_model.predict_proba(input_df)[0]
+                        st.success(f"Predicted Financial_Status: {pred}")
+                        if proba is not None:
+                            st.write("Class probabilities:", proba)
+                    except Exception as e:
+                        st.error(f"Không thể dự đoán với mô hình đã lưu: {e}")
+            else:
+                st.info("ℹ️ Không tìm thấy file mô hình đã lưu `fraud_model.pkl`. Vui lòng chạy `main.py` hoặc huấn luyện mô hình trong tab 'Model Training'.")
 
         else:
             st.warning("⚠️ Please train models first in the 'Model Training' tab!")

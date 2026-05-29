@@ -39,4 +39,11 @@ wcwidth==0.7.0
 webcolors==25.10.0
 webencodings==0.5.1
 websocket-client==1.9.0
-widgetsnbextension==4.0.15
+widgetsnbextension==4.0.15streamlit
+scikit-learn
+plotly
+seaborn
+matplotlib
+xgboost
+lightgbm
+joblib
