@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#f6f8fc" />
+    <meta
+      name="description"
+      content="Luyện thi Aptis dễ dàng với bài tập Listening, Reading, Writing và Speaking."
+    />
+    <title>AptisPractice — Luyện thi Aptis mỗi ngày</title>
+    <link rel="stylesheet" href="styles.css?v=20261118-speaking-timers-2" />
+    <script src="assets/listening-part1.js" defer></script>
+    <script src="assets/listening-part2.js" defer></script>
+    <script src="assets/listening-part3.js" defer></script>
+    <script src="assets/listening-part4.js" defer></script>
+    <script src="assets/speaking-exams.js?v=20261118-speaking-sets1-20-1" defer></script>
+    <script src="script.js?v=20261118-speaking-timers-2" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="AptisPractice - Trang chủ" data-home>
+        <span class="brand-mark" aria-hidden="true">A</span>
+        <span>Aptis<span class="brand-accent">Practice</span></span>
+      </a>
+      <nav class="main-nav" aria-label="Điều hướng chính">
+        <a class="nav-link is-active" href="#practice" data-home>Ôn luyện</a>
+        <a class="nav-link" href="#listening" data-start="Listening">Listening</a>
+        <a class="nav-link" href="#practice" data-start="Reading">Reading</a>
+        <a class="nav-link" href="#practice" data-start="Writing">Writing</a>
+        <a class="nav-link" href="#practice" data-start="Speaking">Speaking</a>
+        <a class="nav-link" href="#vocabulary" data-toast="Mở Sổ tay từ vựng trong bài Listening để xem từ mới.">Từ vựng <span class="nav-count">10</span></a>
+        <a class="nav-link" href="#guide" data-guide>Hướng dẫn</a>
+      </nav>
+      <button class="profile-button" type="button" aria-label="Tài khoản Nhân">
+        <span class="avatar">N</span>
+        <span class="profile-name">Nhân</span>
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" /></svg>
+      </button>
+    </header>
+
+    <main class="page-shell" id="practice">
+      <section class="home-view" id="homeView" aria-labelledby="welcomeTitle">
+        <div class="welcome-row">
+          <div>
+            <p class="eyebrow">APTIS GENERAL · LUYỆN TẬP MỖI NGÀY</p>
+            <h1 id="welcomeTitle">Chào bạn <span class="wave" aria-hidden="true">👋</span></h1>
+            <p class="welcome-copy">Hôm nay bạn muốn luyện kỹ năng nào?</p>
+          </div>
+          <div class="skill-stats" aria-label="Số lượng bài luyện tập">
+            <span class="stat-pill listening-pill">Listening: <strong>Part 1: 194 câu · Part 2: 16 bài · Part 3: 16 bài · Part 4: 30 bài</strong></span>
+            <span class="stat-pill reading-pill">Reading: <strong>22 bài</strong></span>
+            <span class="stat-pill writing-pill">Writing: <strong>30 chủ đề</strong></span>
+            <span class="stat-pill speaking-pill">Speaking: <strong>20 đề</strong></span>
+          </div>
+        </div>
+
+        <section class="start-banner" aria-label="Bắt đầu luyện tập">
+          <span class="icon-box icon-blue">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4.5a1 1 0 0 1 1-1h1.5c2.4 0 3.8 1.5 6.2 1.5s3.2-1.5 4.8-1.5H19v12h-.5c-1.7 0-2.5 1.5-4.8 1.5s-3.8-1.5-6.2-1.5H6" /></svg>
+          </span>
+          <div class="start-copy">
+            <h2>Bắt đầu luyện tập</h2>
+            <p>Bắt đầu với Listening Part 1 · mỗi lần vào bài là một lượt làm mới, bài làm không được lưu lại</p>
+          </div>
+          <button class="primary-button" type="button" data-start="Listening">
+            Vào luyện <span aria-hidden="true">→</span>
+          </button>
+        </section>
+
+        <section class="skills-section" aria-labelledby="skillsTitle">
+          <div class="section-heading">
+            <h2 id="skillsTitle">Luyện từng kỹ năng</h2>
+            <span>Theo thứ tự đề thi Aptis</span>
+          </div>
+          <div class="skill-grid">
+            <button class="skill-card listening-card" type="button" data-start="Listening">
+              <span class="icon-box icon-green">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5ZM15.5 8.5a5 5 0 0 1 0 7m3-10a9 9 0 0 1 0 13" /></svg>
+              </span>
+              <span class="card-arrow" aria-hidden="true">→</span>
+              <span class="skill-title">Listening</span>
+              <span class="skill-subtitle">Kỹ năng nghe</span>
+              <span class="skill-meta">Part 1: 194 câu · Part 2: 16 bài · Part 3: 16 bài · Part 4: 30 bài</span>
+            </button>
+            <button class="skill-card reading-card" type="button" data-start="Reading">
+              <span class="icon-box icon-cyan">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10Zm0 0v7h7M8 14h8m-8 4h8" /></svg>
+              </span>
+              <span class="card-arrow" aria-hidden="true">→</span>
+              <span class="skill-title">Reading</span>
+              <span class="skill-subtitle">Kỹ năng đọc hiểu</span>
+              <span class="skill-meta">22 bài · 4 Part</span>
+            </button>
+            <button class="skill-card writing-card" type="button" data-start="Writing">
+              <span class="icon-box icon-pink">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15.5 5.5 3 3M4 20l4.3-.9L20 7.4a2.1 2.1 0 0 0-3-3L5.3 16.1 4 20Zm0 0h16" /></svg>
+              </span>
+              <span class="card-arrow" aria-hidden="true">→</span>
+              <span class="skill-title">Writing</span>
+              <span class="skill-subtitle">Kỹ năng viết</span>
+              <span class="skill-meta">30 chủ đề · 4 Part</span>
+            </button>
+            <button class="skill-card speaking-card" type="button" data-start="Speaking">
+              <span class="icon-box icon-orange">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="12" rx="3" /><path d="M5 11a7 7 0 0 0 14 0m-7 7v3m-4 0h8" /></svg>
+              </span>
+              <span class="card-arrow" aria-hidden="true">→</span>
+              <span class="skill-title">Speaking</span>
+              <span class="skill-subtitle">Kỹ năng nói</span>
+              <span class="skill-meta">20 bộ đề · 4 Part</span>
+            </button>
+          </div>
+        </section>
+
+        <button class="guide-banner" type="button" data-guide>
+          <span class="icon-box icon-blue">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6.5c-2.8-2.4-6.2-2.7-9-1.7v14c3-1 6.4-.7 9 1.7m0-14c2.8-2.4 6.2-2.7 9-1.7v14c-3-1-6.4-.7-9 1.7m0-14v14" /></svg>
+          </span>
+          <span class="guide-copy">
+            <strong>Tài liệu hướng dẫn</strong>
+            <span>Mẹo làm bài Speaking, Writing, thủ tục thi và tính điểm</span>
+          </span>
+          <span class="card-arrow" aria-hidden="true">→</span>
+        </button>
+
+        <section class="overview-panel" id="overview" aria-labelledby="overviewTitle">
+          <div class="panel-heading">
+            <h2 id="overviewTitle">Nội dung luyện tập</h2>
+            <p>Số bài theo từng Part</p>
+          </div>
+          <div class="overview-grid">
+            <div class="overview-column">
+              <h3>Listening</h3>
+              <div><span>Part 1</span><span>194 câu hỏi</span></div>
+              <div><span>Part 2</span><span>16 bài</span></div>
+              <div><span>Part 3</span><span>16 bài</span></div>
+              <div><span>Part 4</span><span>30 bài</span></div>
+            </div>
+            <div class="overview-column">
+              <h3>Reading</h3>
+              <div><span>Part 1</span><span>4 bài</span></div>
+              <div><span>Part 2–3</span><span>10 bài</span></div>
+              <div><span>Part 4</span><span>5 bài</span></div>
+              <div><span>Part 5</span><span>3 bài</span></div>
+            </div>
+            <div class="overview-column">
+              <h3>Writing</h3>
+              <div><span>Part 1</span><span>Form Filling</span></div>
+              <div><span>Part 2</span><span>Short Text</span></div>
+              <div><span>Part 3</span><span>Chat Responses</span></div>
+              <div><span>Part 4</span><span>Email Writing</span></div>
+            </div>
+            <div class="overview-column speaking-overview">
+              <h3>Speaking</h3>
+              <div><span>Part 1</span><span>Personal Information · 3 ý · tổng 30 giây</span></div>
+              <div><span>Part 2</span><span>Describe a Picture · 3 ý · tổng 45 giây</span></div>
+              <div><span>Part 3</span><span>Compare Two Pictures · 3 ý · tổng 45 giây</span></div>
+              <div><span>Part 4</span><span>Extended Discussion · 3 ý · tổng 60 giây</span></div>
+            </div>
+          </div>
+        </section>
+        <footer class="page-footer">AptisPractice <span>·</span> Học đều mỗi ngày, tự tin chinh phục Aptis.</footer>
+      </section>
+
+      <section class="practice-view is-hidden" id="practiceView" aria-labelledby="practiceTitle">
+        <div class="reading-question-heading" id="readingQuestionHeading" hidden>
+          <button class="reading-question-back" type="button" data-reading-list aria-label="Quay lại danh sách câu">←</button>
+          <div class="reading-question-title">
+            <p id="readingQuestionPartLabel">Reading · Part 1</p>
+            <h1 id="readingQuestionTitle"></h1>
+          </div>
+          <span class="reading-question-count" id="readingQuestionCount"></span>
+        </div>
+        <div class="practice-heading" id="practiceHeading">
+          <button class="back-button" id="practiceBackButton" type="button" data-home><span aria-hidden="true">←</span> Trang chủ</button>
+          <div class="session-status"><span class="saved-dot"></span><span id="saveStatus">Sẵn sàng</span></div>
+          <div class="timer-chip"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="11" r="7" /><path d="M10 7v4l2.5 1.5M7 2h6" /></svg><span id="timer">12:00</span></div>
+        </div>
+        <div class="part-tabs" id="partTabs" role="tablist" aria-label="Các phần thi"></div>
+        <div class="practice-content">
+          <div class="task-intro">
+            <p class="task-kicker" id="taskKicker"></p>
+            <h1 id="practiceTitle"></h1>
+          </div>
+          <div class="task-body" id="taskBody" role="tabpanel"></div>
+          <div class="practice-actions">
+            <div class="reading-bottom-left" id="readingBottomLeft" hidden>
+              <button class="secondary-button" type="button" data-reading-list>☷ Danh sách câu</button>
+              <button class="secondary-button" type="button" data-toast="Sổ tay từ vựng Reading đang được cập nhật.">Sổ tay từ vựng</button>
+            </div>
+            <span class="progress-label" id="progressLabel"></span>
+            <div class="action-buttons">
+              <button class="secondary-button" type="button" id="previousPart">Quay lại</button>
+              <button class="primary-button" type="button" id="readingCheckButton" data-reading-check hidden>Kiểm tra</button>
+              <button class="primary-button" type="button" id="nextPart">Tiếp theo <span aria-hidden="true">→</span></button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="reading-view is-hidden" id="readingView" aria-label="Reading">
+        <section id="readingLandingPanel" aria-labelledby="readingLandingTitle">
+          <nav class="reading-breadcrumb" aria-label="Breadcrumb">
+            <button type="button" data-home>Luyện tập</button>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">Reading</span>
+          </nav>
+
+          <div class="reading-hero">
+            <div class="reading-hero-main">
+              <span class="reading-hero-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Zm7 0v5h5M9 12h7m-7 4h7" /></svg>
+              </span>
+              <div>
+                <h1 id="readingLandingTitle">Reading</h1>
+                <p>Kỹ năng đọc hiểu · chọn Part để luyện</p>
+              </div>
+            </div>
+            <span class="reading-total-pill">22 bài</span>
+          </div>
+
+          <div class="reading-parts-heading">
+            <h2>Luyện theo Part</h2>
+            <span>4 Part</span>
+          </div>
+          <div class="reading-part-grid" id="readingPartGrid"></div>
+        </section>
+
+        <section id="readingPartPanel" aria-labelledby="readingPartTitle" hidden>
+          <nav class="reading-breadcrumb" aria-label="Breadcrumb">
+            <button type="button" data-reading-overview>Reading</button>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page" id="readingBreadcrumbPart">Part 1</span>
+          </nav>
+
+          <div class="reading-part-hero">
+            <div>
+              <h1 id="readingPartTitle"></h1>
+              <p id="readingPartDescription"></p>
+            </div>
+            <span class="reading-total-pill" id="readingPartCount"></span>
+          </div>
+
+          <section class="reading-start-banner" id="readingStartBanner">
+            <div>
+              <h2 id="readingStartTitle"></h2>
+              <p id="readingStartDescription"></p>
+            </div>
+            <button class="primary-button" type="button" data-reading-start-first>Bắt đầu luyện <span aria-hidden="true">→</span></button>
+          </section>
+
+          <div class="reading-question-list-heading">
+            <h2>Chọn bài để luyện</h2>
+            <span id="readingQuestionTotal"></span>
+          </div>
+          <div class="reading-question-grid" id="readingQuestionGrid"></div>
+        </section>
+      </section>
+
+      <section class="writing-view is-hidden" id="writingView" aria-label="Writing">
+        <nav class="reading-breadcrumb" aria-label="Breadcrumb">
+          <button type="button" data-home>Luyện tập</button>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">Writing</span>
+        </nav>
+
+        <div class="writing-hero">
+          <div class="reading-hero-main">
+            <span class="writing-hero-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="m15.5 5.5 3 3M4 20l4.3-.9L20 7.4a2.1 2.1 0 0 0-3-3L5.3 16.1 4 20Zm0 0h16" /></svg>
+            </span>
+            <div>
+              <h1>Writing</h1>
+              <p>Kỹ năng viết · thi thử toàn bộ 4 Part, 50 phút</p>
+            </div>
+          </div>
+          <div class="writing-badges" aria-label="Thông tin bài thi">
+            <span class="reading-total-pill">30 chủ đề</span>
+            <span class="reading-total-pill">50 phút / bài</span>
+          </div>
+        </div>
+
+        <section class="writing-start-banner" aria-labelledby="writingStartTitle">
+          <span class="writing-banner-icon" aria-hidden="true">✎</span>
+          <div>
+            <h2 id="writingStartTitle">Thi thử Writing</h2>
+            <p>Chọn một chủ đề để làm lần lượt cả 4 Part trong 50 phút. Các Part chưa có đề từ video nguồn sẽ được đánh dấu rõ.</p>
+          </div>
+        </section>
+
+        <div class="writing-topics-heading">
+          <h2>Chọn chủ đề</h2>
+          <span>30 chủ đề · 4 Part · 50 phút</span>
+        </div>
+        <div class="writing-topic-grid" id="writingTopicGrid"></div>
+      </section>
+
+      <section class="writing-view speaking-view is-hidden" id="speakingView" aria-label="Speaking">
+        <nav class="reading-breadcrumb" aria-label="Breadcrumb">
+          <button type="button" data-home>Ôn luyện</button>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">Speaking</span>
+        </nav>
+
+        <div class="writing-hero">
+          <div class="reading-hero-main">
+            <span class="writing-hero-icon speaking-hero-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="12" rx="3" /><path d="M5 11a7 7 0 0 0 14 0m-7 7v3m-4 0h8" /></svg>
+            </span>
+            <div>
+              <h1>Speaking</h1>
+              <p>Kỹ năng nói · 20 bộ đề, 4 Part mỗi đề</p>
+            </div>
+          </div>
+          <div class="writing-badges" aria-label="Thông tin bài thi">
+            <span class="reading-total-pill">20 bộ đề</span>
+            <span class="reading-total-pill">20 đề · dữ liệu một phần</span>
+          </div>
+        </div>
+
+        <section class="writing-start-banner speaking-start-banner" aria-labelledby="speakingStartTitle">
+          <span class="writing-banner-icon" aria-hidden="true">🎙</span>
+          <div>
+            <h2 id="speakingStartTitle">Thi thử Speaking</h2>
+            <p>Chọn một bộ đề để luyện lần lượt 4 Part. Chỉ câu hỏi và hình ảnh nhìn thấy trong video được đưa vào; phần chưa rõ sẽ được đánh dấu.</p>
+          </div>
+        </section>
+
+        <div class="writing-topics-heading">
+          <h2>Chọn bộ đề</h2>
+          <span id="speakingTopicCount"></span>
+        </div>
+        <div class="writing-topic-grid" id="speakingTopicGrid"></div>
+      </section>
+
+      <section class="listening-view is-hidden" id="listeningView" aria-label="Listening">
+        <section class="listening-landing-panel" id="listeningLandingPanel" aria-labelledby="listeningLandingTitle">
+          <nav class="listening-breadcrumb" aria-label="Breadcrumb">
+            <button type="button" data-home>Luyện tập</button>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">Listening</span>
+          </nav>
+
+          <div class="listening-hero">
+            <div class="listening-hero-main">
+              <span class="listening-hero-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M3 13v-1a9 9 0 0 1 18 0v1M3 13v4a2 2 0 0 0 2 2h2v-7H5a2 2 0 0 0-2 2Zm18 0v4a2 2 0 0 1-2 2h-2v-7h2a2 2 0 0 1 2 2Z" /></svg>
+              </span>
+              <div>
+                <h1 id="listeningLandingTitle">Listening</h1>
+                <p>Luyện nghe theo từng Part và cải thiện khả năng nắm bắt thông tin.</p>
+              </div>
+            </div>
+            <span class="listening-total-pill" id="listeningTotalCount">194 câu hỏi</span>
+          </div>
+
+          <div class="listening-parts-heading">
+            <div>
+              <h2>Luyện theo Part</h2>
+              <p>Chọn một phần để bắt đầu luyện tập</p>
+            </div>
+            <span>4 Part</span>
+          </div>
+
+          <div class="listening-part-grid" id="listeningPartGrid">
+            <button class="listening-part-card" type="button" data-listening-part="1">
+              <span class="listening-part-card-top">
+                <span class="listening-part-label">Part 1</span>
+                <span class="listening-part-arrow" aria-hidden="true">→</span>
+              </span>
+              <span class="listening-part-title">Nghe và chọn đáp án</span>
+              <span class="listening-part-description">Nghe các đoạn hội thoại ngắn và chọn câu trả lời phù hợp.</span>
+              <span class="listening-part-card-bottom">
+                <span id="listeningPart1Count">194 câu hỏi</span>
+                <span class="listening-part-status is-available">Có thể luyện tập</span>
+              </span>
+            </button>
+            <button class="listening-part-card" type="button" data-listening-part="2">
+              <span class="listening-part-card-top">
+                <span class="listening-part-label">Part 2</span>
+                <span class="listening-part-arrow" aria-hidden="true">→</span>
+              </span>
+              <span class="listening-part-title">Nghe và ghép thông tin</span>
+              <span class="listening-part-description">Lắng nghe thông tin từ người nói và tìm lựa chọn tương ứng.</span>
+              <span class="listening-part-card-bottom">
+                <span id="listeningPart2Count">16 bài</span>
+                <span class="listening-part-status is-available" id="listeningPart2Status">Có thể luyện tập</span>
+              </span>
+            </button>
+            <button class="listening-part-card" type="button" data-listening-part="3">
+              <span class="listening-part-card-top">
+                <span class="listening-part-label">Part 3</span>
+                <span class="listening-part-arrow" aria-hidden="true">→</span>
+              </span>
+              <span class="listening-part-title">Nghe hội thoại</span>
+              <span class="listening-part-description">Luyện nghe hội thoại và xác định thông tin chính xác.</span>
+              <span class="listening-part-card-bottom">
+                <span id="listeningPart3Count">16 bài</span>
+                <span class="listening-part-status is-available" id="listeningPart3Status">Có thể luyện tập</span>
+              </span>
+            </button>
+            <button class="listening-part-card" type="button" data-listening-part="4">
+              <span class="listening-part-card-top">
+                <span class="listening-part-label">Part 4</span>
+                <span class="listening-part-arrow" aria-hidden="true">→</span>
+              </span>
+              <span class="listening-part-title">Nghe bài nói dài</span>
+              <span class="listening-part-description">Theo dõi nội dung bài nói và nắm bắt các chi tiết quan trọng.</span>
+              <span class="listening-part-card-bottom">
+                <span id="listeningPart4Count">30 bài</span>
+                <span class="listening-part-status is-available" id="listeningPart4Status">Có thể luyện tập</span>
+              </span>
+            </button>
+          </div>
+        </section>
+
+        <div id="listeningListPanel">
+          <button class="listening-back-link" type="button" id="partListBack">← Listening</button>
+          <div class="listening-list-heading">
+            <div>
+              <p class="eyebrow">APTIS GENERAL · LISTENING</p>
+              <h1 id="listeningListTitle">Listening · Part 1</h1>
+              <p class="welcome-copy" id="listeningListDescription">Nghe đoạn hội thoại ngắn, chọn đáp án và kiểm tra kết quả.</p>
+            </div>
+            <span class="sample-count" id="partQuestionCount">194 câu · audio ghi âm + tổng hợp</span>
+          </div>
+          <div class="listening-question-grid" id="questionGrid"></div>
+        </div>
+
+        <div class="is-hidden" id="listeningDetailPanel">
+          <div class="listening-question-bar">
+            <button class="listen-back-button" type="button" id="detailBack" aria-label="Quay lại danh sách câu hỏi">←</button>
+            <span class="listen-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M11 5 6 9H3v6h3l5 4V5ZM15.5 8.5a5 5 0 0 1 0 7m3-10a9 9 0 0 1 0 13" /></svg>
+            </span>
+            <div class="listen-question-title">
+              <span id="listenDetailPartLabel">Listening · Part 1</span>
+              <h2 id="listenQuestionTitle"></h2>
+            </div>
+            <span class="question-progress" id="listenProgress"></span>
+          </div>
+
+          <article class="listen-exercise-card" id="listenPart1ExerciseCard">
+            <h3 id="listenPromptText"></h3>
+            <p class="audio-source-label" id="listenAudioSource"></p>
+            <audio id="listenAudio" controls preload="metadata">
+              Trình duyệt của bạn không hỗ trợ phát audio.
+            </audio>
+            <div class="transcript-section">
+              <button class="transcript-toggle" type="button" id="transcriptToggle" aria-expanded="false" aria-controls="transcriptContent">
+                <span id="transcriptLabel">Xem mô tả</span>
+                <span aria-hidden="true">⌄</span>
+              </button>
+              <div class="transcript-content" id="transcriptContent" hidden></div>
+            </div>
+            <fieldset class="listening-options" id="listenOptions">
+              <legend class="visually-hidden">Chọn một đáp án</legend>
+            </fieldset>
+            <div class="listening-feedback" id="listenFeedback" hidden>
+              <strong id="feedbackTitle"></strong>
+              <p id="feedbackScore"></p>
+              <button class="secondary-button" type="button" id="retryQuestion">↻ &nbsp; Làm lại câu này</button>
+            </div>
+            <section class="vocabulary-panel is-hidden" id="vocabularyPanel" aria-label="Sổ tay từ vựng">
+              <h3>Từ vựng trong bài</h3>
+              <div id="vocabularyEntries"></div>
+            </section>
+          </article>
+
+          <nav class="listening-footer" id="listenPart1Footer" aria-label="Điều hướng câu hỏi Listening Part 1">
+            <div class="footer-tools">
+              <button class="footer-button" type="button" id="questionListButton">☷ &nbsp; Danh sách câu</button>
+              <button class="footer-button" type="button" id="vocabularyButton" aria-expanded="false" aria-controls="vocabularyPanel">▣ &nbsp; Sổ tay từ vựng</button>
+            </div>
+            <div class="footer-question-nav">
+              <button class="footer-button" type="button" id="previousQuestion">← &nbsp; Câu trước</button>
+              <button class="primary-button check-answer-button" type="button" id="checkAnswer">Kiểm tra</button>
+              <button class="footer-button next-question-button" type="button" id="nextQuestion">Tiếp theo →</button>
+            </div>
+          </nav>
+
+          <article class="listen-exercise-card is-hidden" id="listenPart2ExerciseCard">
+            <p class="part2-instructions">Nghe từng người nói và nối với mô tả phù hợp.</p>
+            <div class="part2-speaker-list" id="part2Speakers"></div>
+            <div class="listening-feedback part2-feedback" id="part2Feedback" hidden>
+              <strong id="part2FeedbackTitle"></strong>
+              <p id="part2FeedbackScore"></p>
+            </div>
+          </article>
+
+          <nav class="listening-footer is-hidden" id="listenPart2Footer" aria-label="Điều hướng bài tập Listening Part 2">
+            <div class="footer-tools">
+              <button class="footer-button" type="button" id="part2QuestionListButton">☷ &nbsp; Danh sách bài</button>
+            </div>
+            <div class="footer-question-nav">
+              <button class="footer-button" type="button" id="part2PreviousQuestion">← &nbsp; Bài trước</button>
+              <button class="primary-button check-answer-button" type="button" id="part2CheckAnswer">Kiểm tra</button>
+              <button class="footer-button next-question-button" type="button" id="part2NextQuestion">Bài tiếp theo →</button>
+            </div>
+          </nav>
+
+          <article class="listen-exercise-card is-hidden" id="listenPart3ExerciseCard">
+            <p class="part3-instructions">Listen to the discussion and choose who expresses each opinion.</p>
+            <p class="part3-prompt" id="part3Prompt"></p>
+            <div class="part3-audio" id="part3Audio"></div>
+            <div class="transcript-section">
+              <button class="transcript-toggle" type="button" id="part3TranscriptToggle" aria-expanded="false" aria-controls="part3TranscriptContent">
+                <span id="part3TranscriptLabel">Xem mô tả</span>
+                <span aria-hidden="true">⌄</span>
+              </button>
+              <div class="transcript-content" id="part3TranscriptContent" hidden></div>
+            </div>
+            <p class="part3-source-note" id="part3SourceNote" hidden></p>
+            <div class="part3-statement-list" id="part3Statements"></div>
+            <div class="listening-feedback part3-feedback" id="part3Feedback" hidden>
+              <strong id="part3FeedbackTitle"></strong>
+              <p id="part3FeedbackScore"></p>
+            </div>
+          </article>
+
+          <nav class="listening-footer is-hidden" id="listenPart3Footer" aria-label="Điều hướng bài tập Listening Part 3">
+            <div class="footer-tools">
+              <button class="footer-button" type="button" id="part3QuestionListButton">☷ &nbsp; Danh sách bài</button>
+            </div>
+            <div class="footer-question-nav">
+              <button class="footer-button" type="button" id="part3PreviousQuestion">← &nbsp; Bài trước</button>
+              <button class="primary-button check-answer-button" type="button" id="part3CheckAnswer">Kiểm tra</button>
+              <button class="footer-button next-question-button" type="button" id="part3NextQuestion">Bài tiếp theo →</button>
+            </div>
+          </nav>
+
+          <article class="listen-exercise-card is-hidden" id="listenPart4ExerciseCard">
+            <p class="part4-prompt" id="part4Prompt"></p>
+            <div class="part4-audio" id="part4Audio"></div>
+            <div class="transcript-section">
+              <button class="transcript-toggle" type="button" id="part4DescriptionToggle" aria-expanded="false" aria-controls="part4Description">
+                <span id="part4DescriptionLabel">Xem mô tả</span>
+                <span aria-hidden="true">⌄</span>
+              </button>
+              <div class="transcript-content" id="part4Description" hidden></div>
+            </div>
+            <div class="part4-question-list" id="part4Questions"></div>
+            <div class="listening-feedback part4-feedback" id="part4Feedback" hidden>
+              <strong id="part4FeedbackTitle"></strong>
+              <p id="part4FeedbackScore"></p>
+              <button class="secondary-button" type="button" id="part4RetryQuestion">↻ &nbsp; Làm lại bài này</button>
+            </div>
+          </article>
+
+          <nav class="listening-footer is-hidden" id="listenPart4Footer" aria-label="Điều hướng bài tập Listening Part 4">
+            <div class="footer-tools">
+              <button class="footer-button" type="button" id="part4QuestionListButton">☷ &nbsp; Danh sách bài</button>
+            </div>
+            <div class="footer-question-nav">
+              <button class="footer-button" type="button" id="part4PreviousQuestion">← &nbsp; Bài trước</button>
+              <button class="primary-button check-answer-button" type="button" id="part4CheckAnswer">Kiểm tra</button>
+              <button class="footer-button next-question-button" type="button" id="part4NextQuestion">Bài tiếp theo →</button>
+            </div>
+          </nav>
+        </div>
+      </section>
+
+    </main>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
