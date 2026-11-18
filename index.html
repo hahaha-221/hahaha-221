@@ -9,13 +9,14 @@
       content="Luyện thi Aptis dễ dàng với bài tập Listening, Reading, Writing và Speaking."
     />
     <title>AptisPractice — Luyện thi Aptis mỗi ngày</title>
-    <link rel="stylesheet" href="styles.css?v=20261118-speaking-timers-2" />
+    <link rel="stylesheet" href="styles.css?v=20261119-guide-15" />
     <script src="assets/listening-part1.js" defer></script>
     <script src="assets/listening-part2.js" defer></script>
     <script src="assets/listening-part3.js" defer></script>
     <script src="assets/listening-part4.js" defer></script>
     <script src="assets/speaking-exams.js?v=20261118-speaking-sets1-20-1" defer></script>
-    <script src="script.js?v=20261118-speaking-timers-5" defer></script>
+    <script src="assets/guides.js?v=20261119-guide-15" defer></script>
+    <script src="script.js?v=20261119-speaking-timers-5-guide-15" defer></script>
   </head>
   <body>
     <header class="topbar">
@@ -161,6 +162,39 @@
           </div>
         </section>
         <footer class="page-footer">AptisPractice <span>·</span> Học đều mỗi ngày, tự tin chinh phục Aptis.</footer>
+      </section>
+
+      <section class="guide-view is-hidden" id="guideView" aria-labelledby="guideTitle">
+        <div id="guideListView">
+          <nav class="reading-breadcrumb" aria-label="Breadcrumb">
+            <button type="button" data-home>Luyện tập</button>
+            <span aria-hidden="true">/</span>
+            <span aria-current="page">Hướng dẫn</span>
+          </nav>
+          <div class="guide-page-heading">
+            <h1 id="guideTitle">Tài liệu hướng dẫn</h1>
+            <p>Tổng hợp từ vựng và tài liệu giúp bạn ôn luyện Aptis hiệu quả</p>
+          </div>
+          <div class="guide-list-heading">
+            <h2>Tất cả hướng dẫn</h2>
+            <span id="guideCount"></span>
+          </div>
+          <div class="guide-card-grid" id="guideCardGrid"></div>
+        </div>
+
+        <article class="guide-article is-hidden" id="guideArticleView" aria-labelledby="guideArticleTitle">
+          <nav class="reading-breadcrumb" aria-label="Breadcrumb">
+            <button type="button" data-guide-list>← Danh sách hướng dẫn</button>
+          </nav>
+          <div class="guide-article-heading">
+            <div>
+              <p class="eyebrow" id="guideArticleCategory">Tài liệu hướng dẫn</p>
+              <h1 id="guideArticleTitle"></h1>
+              <p id="guideArticleDescription"></p>
+            </div>
+          </div>
+          <div class="guide-article-content" id="guideArticleContent"></div>
+        </article>
       </section>
 
       <section class="practice-view is-hidden" id="practiceView" aria-labelledby="practiceTitle">

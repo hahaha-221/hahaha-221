@@ -19,6 +19,7 @@ The current site is a static, browser-only prototype built with plain HTML, CSS,
 ├── styles.css
 ├── PROJECT_CONTEXT.md
 └── assets/
+    ├── guides.js
     ├── listening-part1.js
     ├── listening-part2.js
     ├── listening-part3.js
@@ -43,6 +44,7 @@ There is no `package.json`, dependency manifest, README, test suite, or build co
 - **`assets/listening-part2.js`** — 16 Part 2 sets, four speaker records per set, choices, descriptions/transcripts, and audio paths.
 - **`assets/listening-part3.js`** — 16 Part 3 records, video titles, prompts, statements, transcripts/source notes, and optional audio paths.
 - **`assets/listening-part4.js`** — 30 Part 4 sets with source-derived titles, prompts, options, answer keys, audio references, translations/transcripts/tips, and notes for incomplete source material.
+- **`assets/guides.js`** — the 12 guide titles and article data, rendered through the guide layouts in `script.js`. All 12 articles are available, including Part 2–3 short answers, beginner Writing prompts and sample emails, and combined Speaking Part 4 story models. Reference video and Drive links are attached to the relevant guides and examples.
 - **`assets/audio/`** — the WAV files referenced by those data records. Do not rename or remove them without updating every corresponding data path.
 
 ## 3. Actual feature status (checked against current code)
@@ -91,6 +93,7 @@ There is no `package.json`, dependency manifest, README, test suite, or build co
 - Writing answers are held in memory during the current attempt and are restored when switching between Parts; they are not saved to disk.
 - Speaking now has a 20-card set selector matching the supplied AptisPractice video. Sets 1–20 include visible questions and pictures from the video or user-supplied screenshots; unseen prompts remain explicitly marked rather than invented. Set 5 Part 4 has all three visible questions but no visible picture. Set 16–20 images are stored locally under `assets/speaking/`. The text-answer fields remain, timers are visible per question where applicable, and audio recording is not implemented.
 - Speaking timing is an explicit user requirement: **Part 1: 30 seconds total for all three prompts; Part 2: 45 seconds per question; Part 3: 45 seconds per question; Part 4: 60 seconds to prepare, then 120 seconds to answer all three questions.** Only Part 1 is started manually. On entering Parts 2–4, timers start automatically; visible questions in Parts 2–3 run in sequence, and Part 4 starts with preparation. Part 4 also has a “Bỏ qua chuẩn bị” button that starts the 120-second answer timer immediately; without skipping, preparation still transitions automatically. At timer completion, Speaking automatically advances to the next Part once every visible timed response in the current Part has finished. Speaking has no separate 12-minute session countdown; only its Part/question timers are shown. Do not reinterpret Part 1 as 30 seconds per prompt or Part 4 as a 60-second response.
+- The guide catalog has 12 cards and all 12 articles are available. The final three articles cover short Part 2–3 answers across club topics, beginner Writing prompts with sample emails, and three combined Speaking Part 4 stories. These use the existing `guide-info` renderer with tables and examples. Reference links are rendered as labeled, clickable resources, including relevant Speaking/Writing videos and the Speaking Part 4 pronunciation and prompt files. The catalog is opened from both home and top navigation; article pages return to the catalog.
 - The home banner says work is not saved. The “Sẵn sàng/Chưa lưu” status is only UI feedback; there is no actual save implementation. The profile/account button is also presentational.
 
 ## 4. User requirements and history
@@ -138,6 +141,12 @@ Source videos referenced in the accessible history (stored outside this repo):
 - `2026-11-17 18-32-46.mp4` — all three Reading Part 5 sets, passage text, heading options, answer keys, and visible mnemonic notes.
 - `2026-11-17 19-30-51.mp4` — Writing topic list and the visible Part prompts for Art Club, Business Club, Car Club, College, Community Club, Health Club, Film Club, Book Club, Computer Club, Debate Club, Fitness Club, and Food Club.
 - `2026-11-17 19-53-48.mp4` — remaining Writing topics and source-visible prompts for Beautiful Home, Language, Museum, Music, Nature, Outdoor, Photography, Reading, Science, Social, Sports, Technology, Travel, TV, and Walking Clubs.
+- `2026-11-18 22-01-32.mp4` — guide catalog titles and the visible Speaking picture-description vocabulary article.
+- `2026-11-18 22-58-13.mp4` — the visible Speaking B2/C1 guide content, including scoring criteria, answer development, connectors, grammar patterns, and vocabulary groups.
+- `2026-11-18 23-01-07.mp4` — the Writing B2/C guide templates, Food Club model answer, and themed collocations.
+- `2026-11-18 23-53-42.mp4` — Part 2–3 short answers, beginner Writing prompts and sample emails, and combined Speaking Part 4 story models.
+- `2026-11-18 23-35-10.mp4` — course rules and schedule, Aptis registration/scoring FAQs, and email-writing templates.
+- `2026-11-18 23-43-47.mp4` — Writing Part 2–3 ideas, email Part 4 suggestions, and beginner A2 writing/speaking templates with Part 1 Q&A.
 
 The videos are not in `assets/`; do not assume another machine/account can access those exact local paths. The current question data and WAVs are the in-repository copies.
 

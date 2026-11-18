@@ -2191,6 +2191,15 @@ const progressLabel = document.getElementById("progressLabel");
 const previousButton = document.getElementById("previousPart");
 const nextButton = document.getElementById("nextPart");
 const toast = document.getElementById("toast");
+const guideView = document.getElementById("guideView");
+const guideListView = document.getElementById("guideListView");
+const guideArticleView = document.getElementById("guideArticleView");
+const guideCardGrid = document.getElementById("guideCardGrid");
+const guideCount = document.getElementById("guideCount");
+const guideArticleTitle = document.getElementById("guideArticleTitle");
+const guideArticleCategory = document.getElementById("guideArticleCategory");
+const guideArticleDescription = document.getElementById("guideArticleDescription");
+const guideArticleContent = document.getElementById("guideArticleContent");
 const speakingView = document.getElementById("speakingView");
 const speakingTopicGrid = document.getElementById("speakingTopicGrid");
 const speakingTopicCount = document.getElementById("speakingTopicCount");
@@ -2411,6 +2420,7 @@ const clearReadingOrderSlot = (slot) => {
 const stopSession = () => {
   window.clearInterval(timerInterval);
   stopResponseTimer("Sẵn sàng");
+  guideView.classList.add("is-hidden");
   listenAudio.pause();
   listenAudio.currentTime = 0;
   pausePart2Audio();
@@ -2552,9 +2562,11 @@ const advanceSpeakingPartIfComplete = () => {
 
 const setActiveNav = (skillName = null) => {
   document.querySelectorAll(".nav-link").forEach((link) => link.classList.remove("is-active"));
-  const activeLink = skillName
-    ? document.querySelector(`.nav-link[data-start="${skillName}"]`)
-    : document.querySelector(".nav-link[data-home]");
+  const activeLink = skillName === "Guide"
+    ? document.querySelector(".nav-link[data-guide]")
+    : skillName
+      ? document.querySelector(`.nav-link[data-start="${skillName}"]`)
+      : document.querySelector(".nav-link[data-home]");
   activeLink?.classList.add("is-active");
 };
 
@@ -2610,6 +2622,366 @@ const renderSpeakingLanding = () => {
       </button>
     `;
   }).join("");
+};
+
+const renderGuideLanding = () => {
+  const articles = window.guideArticlesData;
+  guideCount.textContent = `${articles.length} bài`;
+  guideCardGrid.innerHTML = articles.map((article) => `
+    <button class="guide-article-card" type="button" data-guide-article="${article.id}" aria-label="Xem chi tiết: ${article.title}">
+      <span class="guide-article-card-cover" aria-hidden="true">
+        <span class="guide-article-card-icon">
+          <svg viewBox="0 0 24 24"><path d="M13 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10Zm0 0v7h7M8 14h8m-8 4h8" /></svg>
+        </span>
+        <span class="guide-article-card-arrow" aria-hidden="true">→</span>
+      </span>
+      <span class="guide-article-card-copy">
+        <span class="guide-article-category">Bài viết</span>
+        <strong>${article.title}</strong>
+        <span class="guide-article-link">Xem chi tiết →</span>
+      </span>
+    </button>
+  `).join("");
+};
+
+const renderGuideTable = (headers, rows, tableClass = "") => `
+  <div class="guide-table-wrap">
+    <table class="guide-vocabulary-table ${tableClass}">
+      <thead><tr>${headers.map((header) => `<th>${header}</th>`).join("")}</tr></thead>
+      <tbody>
+        ${rows.map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join("")}</tr>`).join("")}
+      </tbody>
+    </table>
+  </div>
+`;
+
+const renderGuideResourceList = (resources) => {
+  if (!resources || resources.length === 0) {
+    return "";
+  }
+  return `
+    <ul class="guide-resource-list">
+      ${resources.map((resource) => `
+        <li>
+          <a href="${resource.url}" target="_blank" rel="noopener noreferrer">
+            <span>${resource.label}</span>
+            <span class="guide-resource-url">${resource.url}</span>
+          </a>
+        </li>
+      `).join("")}
+    </ul>
+  `;
+};
+
+const renderGuideResources = (resources, title = "") => {
+  const links = renderGuideResourceList(resources);
+  if (!links) {
+    return "";
+  }
+  return `
+    <section class="guide-vocabulary-section guide-resource-section">
+      ${title ? `<h2>${title}</h2>` : ""}
+      ${links}
+    </section>
+  `;
+};
+
+const renderSpeakingBandGuide = (sections) => sections.map((section) => {
+  let content = "";
+  if (section.type === "criteria-list") {
+    content = `
+      ${section.intro ? `<p class="guide-speaking-criteria-intro">${section.intro}</p>` : ""}
+      <ol class="guide-speaking-criteria-list">
+        ${section.entries.map(([title, meaning], index) => `
+          <li><strong>${index + 1}. ${title}</strong><span> - ${meaning}</span></li>
+        `).join("")}
+      </ol>
+    `;
+  } else if (section.type === "criteria") {
+    content = renderGuideTable(["Tiêu chí", "Ý nghĩa"], section.entries);
+  } else if (section.type === "levels") {
+    content = renderGuideTable(section.headers, section.rows, "guide-wide-table");
+    if (section.principles) {
+      content += `<ul class="guide-band-principles">${section.principles.map((principle) => `<li>${principle}</li>`).join("")}</ul>`;
+    }
+  } else if (section.type === "answer-models") {
+    content = `
+      <div class="guide-band-examples">
+        ${section.rows.map(([band, formula, example]) => `
+          <article class="guide-band-example">
+            <span>${band}</span>
+            <h3>${formula}</h3>
+            <p lang="en">${example}</p>
+          </article>
+        `).join("")}
+      </div>
+    `;
+  } else if (section.type === "phrase-groups") {
+    content = section.groups.map((group) => `
+      <div class="guide-band-group">
+        <h3>${group.title}</h3>
+        ${renderGuideTable(["Cụm từ", "Nghĩa"], group.entries)}
+      </div>
+    `).join("");
+  } else if (section.type === "patterns") {
+    content = `
+      <div class="guide-band-patterns">
+        ${section.entries.map(([pattern, meaning, example, translation], index) => `
+          <article class="guide-band-pattern">
+            <h3>${index + 1}. ${pattern}</h3>
+            <p class="guide-band-pattern-meaning">${meaning}</p>
+            <p lang="en">${example}</p>
+            <p class="guide-band-translation" lang="vi">${translation}</p>
+          </article>
+        `).join("")}
+      </div>
+    `;
+  } else if (section.type === "vocabulary") {
+    content = `
+      <p class="guide-band-section-description">${section.description}</p>
+      ${section.groups.map((group) => `
+        <div class="guide-band-group">
+          <h3>${group.title}</h3>
+          ${renderGuideTable(["Cụm từ", "Nghĩa"], group.entries)}
+        </div>
+      `).join("")}
+    `;
+  } else if (section.type === "note") {
+    content = `<div class="guide-band-note">${section.paragraphs.map((paragraph) => `<p>${paragraph}</p>`).join("")}</div>`;
+  }
+  return `
+    <section class="guide-vocabulary-section guide-band-section">
+      <h2>${section.title}</h2>
+      ${content}
+    </section>
+  `;
+}).join("");
+
+const renderWritingGuide = (sections) => sections.map((section) => {
+  let content = "";
+  if (section.type === "writing-templates") {
+    content = section.groups.map((group) => `
+      <article class="guide-writing-block">
+        <h3>${group.title}</h3>
+        <ul class="guide-writing-formulas">${group.formulas.map((formula) => `<li>${formula}</li>`).join("")}</ul>
+        ${group.examples ? `
+          <div class="guide-writing-examples">
+            ${group.examples.map(([label, example]) => `
+              <div class="guide-writing-example">
+                <strong>${label}</strong>
+                <p lang="en">${example}</p>
+              </div>
+            `).join("")}
+          </div>
+        ` : ""}
+        ${group.notes ? `<ul class="guide-writing-notes">${group.notes.map((note) => `<li>${note}</li>`).join("")}</ul>` : ""}
+      </article>
+    `).join("");
+  } else if (section.type === "writing-text") {
+    content = section.groups.map((group) => `
+      <article class="guide-writing-block">
+        <h3>${group.title}</h3>
+        <div class="guide-writing-prose">${group.paragraphs.map((paragraph) => `<p lang="en">${paragraph}</p>`).join("")}</div>
+      </article>
+    `).join("");
+  } else if (section.type === "writing-model") {
+    content = section.groups.map((group) => `
+      <article class="guide-writing-block">
+        <h3>${group.title}</h3>
+        ${group.prompt ? `<p class="guide-writing-prompt">${group.prompt}</p>` : ""}
+        ${group.questions ? `
+          <div class="guide-writing-qa">
+            ${group.questions.map(([question, answer]) => `
+              <div class="guide-writing-question">
+                <strong>${question}</strong>
+                <p lang="en">${answer}</p>
+              </div>
+            `).join("")}
+          </div>
+        ` : ""}
+        ${group.paragraphs ? `<div class="guide-writing-prose">${group.paragraphs.map((paragraph) => `<p lang="en">${paragraph}</p>`).join("")}</div>` : ""}
+        ${group.emails ? `
+          <div class="guide-writing-emails">
+            ${group.emails.map((email) => `
+              <div class="guide-writing-email">
+                <h4>${email.title}</h4>
+                <div class="guide-writing-prose">${email.paragraphs.map((paragraph) => `<p lang="en">${paragraph}</p>`).join("")}</div>
+              </div>
+            `).join("")}
+          </div>
+        ` : ""}
+      </article>
+    `).join("");
+  } else if (section.type === "collocations") {
+    content = section.groups.map((group) => `
+      <article class="guide-writing-block">
+        <h3>${group.title}</h3>
+        ${renderGuideTable(
+          ["No.", "Collocations / Cụm từ", "Ví dụ"],
+          group.entries.map(([phrase, example], index) => [String(index + 1), phrase, example]),
+          "guide-wide-table",
+        )}
+        ${group.summaries ? `<div class="guide-writing-summary">${group.summaries.map((summary) => `<p lang="en">${summary}</p>`).join("")}</div>` : ""}
+      </article>
+    `).join("");
+  }
+  return `
+    <section class="guide-vocabulary-section guide-writing-section">
+      <h2>${section.title}</h2>
+      ${content}
+    </section>
+  `;
+}).join("");
+
+const renderGuideInfo = (sections) => sections.map((section) => {
+  let content = "";
+  if (section.paragraphs) {
+    content += `<div class="guide-info-paragraphs">${section.paragraphs.map((paragraph) => `<p>${paragraph}</p>`).join("")}</div>`;
+  }
+  if (section.items) {
+    content += `<ul class="guide-info-list">${section.items.map((item) => `<li>${item}</li>`).join("")}</ul>`;
+  }
+  if (section.questions) {
+    content += `
+      <div class="guide-info-faq">
+        ${section.questions.map(([question, answer]) => `
+          <article>
+            <h3>${question}</h3>
+            <p>${answer
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/(https?:\/\/[^\s]+)/g, '<a class="guide-inline-link" href="$1" target="_blank" rel="noopener noreferrer">$1</a>')
+              .replace(/\n/g, "<br>")
+            }</p>
+          </article>
+        `).join("")}
+      </div>
+    `;
+  }
+  if (section.headers && section.rows) {
+    const tableClass = section.numbered ? "guide-wide-table guide-numbered-table" : "guide-wide-table";
+    content += renderGuideTable(section.headers, section.rows, tableClass);
+  }
+  if (section.numberedGroups) {
+    content += `
+      <div class="guide-info-groups">
+        ${section.numberedGroups.map((group) => `
+          <div class="guide-info-group">
+            <h3>${group.title}</h3>
+            <ul class="guide-info-list">${group.items.map((item) => `<li>${item}</li>`).join("")}</ul>
+          </div>
+        `).join("")}
+      </div>
+    `;
+  }
+  if (section.examples) {
+    content += `
+      <div class="guide-info-examples">
+        ${section.examples.map((example) => `
+          <article>
+            <h3>${example.title}</h3>
+            <div class="guide-info-paragraphs">${example.paragraphs.map((paragraph) => `<p lang="en">${paragraph}</p>`).join("")}</div>
+          </article>
+        `).join("")}
+      </div>
+    `;
+  }
+  if (section.note) {
+    content += `<p class="guide-info-note">${section.note}</p>`;
+  }
+  if (section.closing) {
+    content += `<p class="guide-info-closing">${section.closing}</p>`;
+  }
+  if (section.resources) {
+    content += renderGuideResourceList(section.resources);
+  }
+  return `
+    <section class="guide-vocabulary-section guide-info-section">
+      <h2>${section.title}</h2>
+      ${content}
+    </section>
+  `;
+}).join("");
+
+const openGuideArticle = (articleId) => {
+  const article = window.guideArticlesData.find((item) => item.id === articleId);
+  if (!article) {
+    return;
+  }
+  guideArticleTitle.textContent = article.title;
+  guideArticleCategory.textContent = `Tài liệu hướng dẫn · ${article.category}`;
+  guideArticleDescription.textContent = article.description || (article.available
+    ? "Từ vựng và cụm từ hữu ích để mô tả, so sánh tranh trong Speaking Part 2 và Part 3."
+    : article.category);
+  if (article.layout === "speaking-band") {
+    guideArticleContent.innerHTML = `
+      ${article.resources ? renderGuideResources(article.resources) : ""}
+      ${renderSpeakingBandGuide(article.sections)}
+    `;
+  } else if (article.layout === "writing-advanced") {
+    guideArticleContent.innerHTML = `
+      ${article.resources ? renderGuideResources(article.resources) : ""}
+      ${renderWritingGuide(article.sections)}
+    `;
+  } else if (article.layout === "guide-info") {
+    guideArticleContent.innerHTML = renderGuideInfo(article.sections);
+  } else if (article.sections) {
+    guideArticleContent.innerHTML = `
+      ${article.sections.map((section) => `
+        <section class="guide-vocabulary-section">
+          <h2>${section.title}</h2>
+          <div class="guide-table-wrap">
+            <table class="guide-vocabulary-table">
+              <thead><tr><th>Word/Phrase</th><th>IPA</th><th>Meaning</th></tr></thead>
+              <tbody>
+                ${section.entries.map(([phrase, meaning], index) => `<tr><td>${phrase}</td><td class="guide-ipa">${section.pronunciations[index]}</td><td>${meaning}</td></tr>`).join("")}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      `).join("")}
+    `;
+  } else {
+    guideArticleContent.innerHTML = `
+      <div class="guide-unavailable" role="status">
+        <strong>Nội dung chi tiết của tài liệu này đang được cập nhật.</strong>
+        <p>Vui lòng quay lại sau để xem hướng dẫn đầy đủ.</p>
+      </div>
+    `;
+  }
+  if (article.resources && article.layout !== "speaking-band" && article.layout !== "writing-advanced") {
+    guideArticleContent.insertAdjacentHTML("beforeend", renderGuideResources(article.resources, "Video hướng dẫn"));
+  }
+  guideArticleContent.insertAdjacentHTML("beforeend", `
+    <div class="guide-article-footer">
+      <button class="guide-back-button" type="button" data-guide-list>
+        <span aria-hidden="true">←</span>
+        <span>Quay lại danh sách hướng dẫn</span>
+      </button>
+    </div>
+  `);
+  guideListView.classList.add("is-hidden");
+  guideArticleView.classList.remove("is-hidden");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+const startGuide = () => {
+  hideToast();
+  stopSession();
+  activeSkill = null;
+  homeView.classList.add("is-hidden");
+  practiceView.classList.add("is-hidden");
+  readingView.classList.add("is-hidden");
+  listeningView.classList.add("is-hidden");
+  writingView.classList.add("is-hidden");
+  speakingView.classList.add("is-hidden");
+  guideListView.classList.remove("is-hidden");
+  guideArticleView.classList.add("is-hidden");
+  guideView.classList.remove("is-hidden");
+  renderGuideLanding();
+  setActiveNav("Guide");
+  window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
 const startSpeaking = () => {
@@ -3749,14 +4121,25 @@ document.querySelectorAll("[data-home]").forEach((link) => {
 });
 
 document.querySelectorAll("[data-guide]").forEach((button) => {
-  button.addEventListener("click", () => {
-    if (activeSkill || !listeningView.classList.contains("is-hidden")) {
-      returnHome();
-      window.setTimeout(() => document.getElementById("overview").scrollIntoView({ behavior: "smooth" }), 0);
-      return;
-    }
-    document.getElementById("overview").scrollIntoView({ behavior: "smooth" });
+  button.addEventListener("click", (event) => {
+    event.preventDefault();
+    startGuide();
   });
+});
+
+guideCardGrid.addEventListener("click", (event) => {
+  const articleButton = event.target.closest("[data-guide-article]");
+  if (articleButton) {
+    openGuideArticle(articleButton.dataset.guideArticle);
+  }
+});
+
+guideView.addEventListener("click", (event) => {
+  if (event.target.closest("[data-guide-list]")) {
+    guideArticleView.classList.add("is-hidden");
+    guideListView.classList.remove("is-hidden");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
 });
 
 questionGrid.addEventListener("click", (event) => {
