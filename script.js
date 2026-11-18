@@ -2317,6 +2317,7 @@ const stopResponseTimer = (statusText = "Đã dừng") => {
 
 const startResponseTimer = (responseButton, skipPreparation = false) => {
   stopResponseTimer();
+  delete responseButton.dataset.responseCompleted;
   const control = responseButton.closest("[data-response-timer-control]");
   const countdown = control.querySelector("[data-response-countdown]");
   const status = control.querySelector("[data-response-status]");
@@ -2361,9 +2362,11 @@ const startResponseTimer = (responseButton, skipPreparation = false) => {
       status.textContent = "Hết thời gian.";
       responseButton.textContent = "Làm lại";
       responseButton.disabled = false;
+      responseButton.dataset.responseCompleted = "true";
       if (skipPreparationButton) {
         skipPreparationButton.hidden = true;
       }
+      advanceSpeakingPartIfComplete();
     }
   }, 1000);
 };
@@ -2522,6 +2525,29 @@ const renderPart = () => {
     });
   }
   bindAnswerStatus(taskBody);
+  if (activeSkill.name === "Speaking" && activePart > 0) {
+    const responseButton = taskBody.querySelector("[data-response-timer]");
+    if (responseButton) {
+      startResponseTimer(responseButton);
+    }
+  }
+};
+
+const advanceSpeakingPartIfComplete = () => {
+  if (activeSkill?.name !== "Speaking") {
+    return;
+  }
+  const responseButtons = [...taskBody.querySelectorAll("[data-response-timer]")];
+  const nextResponseButton = responseButtons.find((button) => button.dataset.responseCompleted !== "true");
+  if (activePart > 0 && nextResponseButton) {
+    startResponseTimer(nextResponseButton);
+    return;
+  }
+  if (nextResponseButton || activePart >= activeSkill.parts.length - 1) {
+    return;
+  }
+  activePart += 1;
+  renderPart();
 };
 
 const setActiveNav = (skillName = null) => {
@@ -2630,14 +2656,13 @@ const startSpeakingTest = (topicId) => {
   partTabs.hidden = false;
   readingBottomLeft.hidden = true;
   readingCheckButton.hidden = true;
-  timerChip.hidden = false;
+  timerChip.hidden = true;
   setActiveNav("Speaking");
   saveStatus.textContent = "Chưa lưu";
   saveStatus.style.color = "";
   document.querySelector(".saved-dot").style.background = "";
   renderTabs();
   renderPart();
-  startSessionTimer(skills.Speaking.duration);
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
