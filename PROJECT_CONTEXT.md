@@ -67,12 +67,12 @@ There is no `package.json`, dependency manifest, README, test suite, or build co
 
 ### Listening Part 3 — implemented, 16 sets; content intentionally incomplete where source is incomplete
 
-- 16 records, 64 visible statements, 9 audio files, 7 records without audio, 7 records without a transcript, and 29 statements with an unverified (`null`) answer are present in the current runtime data.
+- 16 records, 64 visible statements, 9 audio files, 7 records without audio, 7 records without a transcript, and no unverified (`null`) answers are present in the current runtime data.
 - The UI has an exercise list, prompt, audio or source “no audio” state, expandable transcript, statement dropdowns (`Man` / `Woman` / `Both`), navigation, and partial scoring. It only includes verified answers in the score and labels unverified answers instead of guessing.
 - Full user-video titles for all 16 questions are in `assets/listening-part3.js`. Keep their spelling, punctuation, casing, and unusual `W` spellings as recorded; they are deliberately source-faithful, not text to clean up. The title is used in both the list card and exercise heading.
 - Seven no-audio records are represented without fabricated audio. Missing transcript/statement material is marked or omitted based on what the source showed. Do not infer the missing parts.
 - The latest screenshots now cover Q1–Q16. Q1 has its Vietnamese instructions, nine transcript lines, and four statements; Q3 has its complete eight-line transcript; Q5, Q8, Q9, Q14, and Q15 have their visible transcript content; Q10, Q12, Q13, and Q16 show the source's `Chưa có mô tả` text where applicable. Q11 and Q14 now include statement 4, and Q15 contains the full visible volunteer-program description and transcript.
-- Screenshot-blank or unverified answers remain `null`, including Q1 statement 3, Q3 statement 3, Q5 statement 1, Q7 statements 2–4, Q8/Q9 statements 2–4, Q11 statement 4, and Q14 statement 4. Preserve these unknowns instead of guessing.
+- All 64 Part 3 answers are populated. Transcript evidence and user-provided answer sequences were used to fill the previously blank answers; where the user provided a sequence, it takes precedence over transcript-derived choices.
 
 ### Listening Part 4 — implemented, 30 sets; source gaps remain explicit
 

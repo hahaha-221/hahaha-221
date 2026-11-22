@@ -15,10 +15,10 @@ window.listeningPart3Questions = [
       "Man: I understand, but I feel that virtual spaces can be just as meaningful. Technology adds a new layer, making it possible for communities to thrive even across distances, and that's valuable in its own way.",
     ],
     statements: [
-      { number: 1, text: "Building design can influence people's behavior.", answer: "Man" },
+      { number: 1, text: "Building design can influence people's behavior.", answer: "Both" },
       { number: 2, text: "Creating a community can take time.", answer: "Woman" },
-      { number: 3, text: "Work communities and social communities are the same.", answer: null },
-      { number: 4, text: "Technology has changed how community forms.", answer: null },
+      { number: 3, text: "Work communities and social communities are the same.", answer: "Man" },
+      { number: 4, text: "Technology has changed how community forms.", answer: "Both" },
     ],
   },
   {
@@ -30,10 +30,10 @@ window.listeningPart3Questions = [
     transcriptNote: "Chưa có mô tả",
     sourceNote: "No audio or transcript is shown in the video.",
     statements: [
-      { number: 1, text: "People share similar ideas about beauty.", answer: null },
+      { number: 1, text: "People share similar ideas about beauty.", answer: "Woman" },
       { number: 2, text: "Ideas about beauty change over time.", answer: "Man" },
-      { number: 3, text: "Beauty can be found in unlikely places.", answer: null },
-      { number: 4, text: "Traditional ideas about beauty are going to change.", answer: null },
+      { number: 3, text: "Beauty can be found in unlikely places.", answer: "Both" },
+      { number: 4, text: "Traditional ideas about beauty are going to change.", answer: "Woman" },
     ],
   },
   {
@@ -53,7 +53,7 @@ window.listeningPart3Questions = [
     statements: [
       { number: 1, text: "Auditions are most important for an actor's career.", answer: "Man" },
       { number: 2, text: "Actors tend to respond best to strong and engaging scripts.", answer: "Woman" },
-      { number: 3, text: "Theater acting and screen acting are quite different from each other.", answer: null },
+      { number: 3, text: "Theater acting and screen acting are quite different from each other.", answer: "Both" },
       { number: 4, text: "Actors should be praised and recognized as much as possible.", answer: "Both" },
     ],
   },
@@ -71,7 +71,7 @@ window.listeningPart3Questions = [
     ],
     statements: [
       { number: 1, text: "Future generations fail to cope with technology information.", answer: "Man" },
-      { number: 2, text: "Technology revolution is good for the economy.", answer: "Woman" },
+      { number: 2, text: "Technology revolution is good for the economy.", answer: "Man" },
       { number: 3, text: "No computer is superior to the human brain.", answer: "Woman" },
       { number: 4, text: "More should be done to protect individual privacy.", answer: "Both" },
     ],
@@ -94,8 +94,8 @@ window.listeningPart3Questions = [
       "Man: Exactly. That's why I think some sort of regulation is necessary - not to control people's voices, but to help improve the quality of what we see online. That might help, as long as we don't go too far with these restrictions.",
     ],
     statements: [
-      { number: 1, text: "There is too much information on the internet", answer: null },
-      { number: 2, text: "Using the internet requires skills.", answer: "Man" },
+      { number: 1, text: "There is too much information on the internet", answer: "Woman" },
+      { number: 2, text: "Using the internet requires skills.", answer: "Both" },
       { number: 3, text: "The internet is changing the way we think.", answer: "Man" },
       { number: 4, text: "Internet has made people less patient", answer: "Both" },
     ],
@@ -111,7 +111,7 @@ window.listeningPart3Questions = [
       { number: 1, text: "Art is only suitable for the privileged few.", answer: "Woman" },
       { number: 2, text: "The government should invest more in arts.", answer: "Man" },
       { number: 3, text: "Children should be exposed to art early.", answer: "Both" },
-      { number: 4, text: "In the future, art will become more accessible.", answer: null },
+      { number: 4, text: "In the future, art will become more accessible.", answer: "Man" },
     ],
   },
   {
@@ -123,9 +123,9 @@ window.listeningPart3Questions = [
     transcriptNote: "Chưa có mô tả",
     statements: [
       { number: 1, text: "Singers play a good role for young people.", answer: "Woman" },
-      { number: 2, text: "Taste in music is a highly personal thing.", answer: null },
-      { number: 3, text: "Music is a universal language.", answer: null },
-      { number: 4, text: "Music can manipulate people's feelings.", answer: null },
+      { number: 2, text: "Taste in music is a highly personal thing.", answer: "Both" },
+      { number: 3, text: "Music is a universal language.", answer: "Man" },
+      { number: 4, text: "Music can manipulate people's feelings.", answer: "Both" },
     ],
   },
   {
@@ -147,9 +147,9 @@ window.listeningPart3Questions = [
     ],
     statements: [
       { number: 1, text: "Technology helps make education more accessible.", answer: "Both" },
-      { number: 2, text: "Social interaction is important.", answer: null },
-      { number: 3, text: "The diverse curriculum is not an advantage.", answer: null },
-      { number: 4, text: "University competition should be encouraged", answer: null },
+      { number: 2, text: "Social interaction is important.", answer: "Woman" },
+      { number: 3, text: "The diverse curriculum is not an advantage.", answer: "Man" },
+      { number: 4, text: "University competition should be encouraged", answer: "Woman" },
     ],
   },
   {
@@ -167,10 +167,10 @@ window.listeningPart3Questions = [
       "W: Exactly. Women have the same education and learning abilities as men. They even lead in many areas of life. In the future, more and more women will be participating in political activities.",
     ],
     statements: [
-      { number: 1, text: "Young people are becoming more interested in politics.", answer: "Man" },
+      { number: 1, text: "Young people are becoming more interested in politics.", answer: "Both" },
       { number: 2, text: "Social media has changed political activism.", answer: "Man" },
-      { number: 3, text: "People are better informed about political issues", answer: null },
-      { number: 4, text: "More women are likely to participate in politics", answer: null },
+      { number: 3, text: "People are better informed about political issues", answer: "Woman" },
+      { number: 4, text: "More women are likely to participate in politics", answer: "Both" },
     ],
   },
   {
@@ -181,10 +181,10 @@ window.listeningPart3Questions = [
     transcript: [],
     transcriptNote: "Chưa có mô tả",
     statements: [
-      { number: 1, text: "Living space is more important than farming space.", answer: null },
-      { number: 2, text: "Urban farming sites can be visually appealing.", answer: null },
-      { number: 3, text: "Urban farming can benefit local economics.", answer: null },
-      { number: 4, text: "We really need more food in urban areas.", answer: null },
+      { number: 1, text: "Living space is more important than farming space.", answer: "Woman" },
+      { number: 2, text: "Urban farming sites can be visually appealing.", answer: "Man" },
+      { number: 3, text: "Urban farming can benefit local economics.", answer: "Man" },
+      { number: 4, text: "We really need more food in urban areas.", answer: "Both" },
     ],
   },
   {
@@ -202,7 +202,7 @@ window.listeningPart3Questions = [
       { number: 1, text: "Continuity is important in the workplace.", answer: "Man" },
       { number: 2, text: "Job security can't always be guaranteed.", answer: "Woman" },
       { number: 3, text: "Job satisfaction is an important motivator.", answer: "Both" },
-      { number: 4, text: "Technology is good for the economy", answer: null },
+      { number: 4, text: "Technology is good for the economy", answer: "Man" },
     ],
   },
   {
@@ -228,9 +228,9 @@ window.listeningPart3Questions = [
     transcriptNote: "Chưa có mô tả",
     statements: [
       { number: 1, text: "Home schooling parents should create their own curriculum.", answer: "Man" },
-      { number: 2, text: "Homeschooling multiple children at the same time is a good idea.", answer: null },
-      { number: 3, text: "Homeschooling deprives children from the important social interaction.", answer: null },
-      { number: 4, text: "Homeschooling will become less popular in the future.", answer: null },
+      { number: 2, text: "Homeschooling multiple children at the same time is a good idea.", answer: "Both" },
+      { number: 3, text: "Homeschooling deprives children from the important social interaction.", answer: "Woman" },
+      { number: 4, text: "Homeschooling will become less popular in the future.", answer: "Man" },
     ],
   },
   {
@@ -249,7 +249,7 @@ window.listeningPart3Questions = [
       { number: 1, text: "Children are interested in tech - based learning.", answer: "Both" },
       { number: 2, text: "Children find it difficult to communicate offline.", answer: "Both" },
       { number: 3, text: "Families require help with management of technology.", answer: "Man" },
-      { number: 4, text: "Children can learn to regulate their online interactions", answer: null },
+      { number: 4, text: "Children can learn to regulate their online interactions", answer: "Woman" },
     ],
   },
   {
@@ -274,7 +274,7 @@ window.listeningPart3Questions = [
     ],
     statements: [
       { number: 1, text: "Media exaggerates the benefits of the programme.", answer: "Both" },
-      { number: 2, text: "Littering will always be a problem.", answer: null },
+      { number: 2, text: "Littering will always be a problem.", answer: "Man" },
       { number: 3, text: "The volunteers' motivation do not affect the programme outcome.", answer: "Woman" },
       { number: 4, text: "Punishment is the most effective way to prevent littering.", answer: "Man" },
     ],
@@ -288,9 +288,9 @@ window.listeningPart3Questions = [
     transcriptNote: "Chưa có mô tả",
     statements: [
       { number: 1, text: "People are generally forgiving of cultural misunderstandings.", answer: "Both" },
-      { number: 2, text: "People exaggerated the extent of cultural differences.", answer: null },
-      { number: 3, text: "There is an international business culture.", answer: null },
-      { number: 4, text: "It is good that cultures are becoming more alike.", answer: null },
+      { number: 2, text: "People exaggerated the extent of cultural differences.", answer: "Woman" },
+      { number: 3, text: "There is an international business culture.", answer: "Man" },
+      { number: 4, text: "It is good that cultures are becoming more alike.", answer: "Man" },
     ],
   },
 ];
