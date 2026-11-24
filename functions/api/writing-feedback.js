@@ -206,37 +206,44 @@ export async function onRequestPost({ request, env }) {
     return jsonResponse(400, { error: "Hãy nhập ít nhất một câu trả lời hợp lệ trước khi chấm." });
   }
 
-  if (typeof env.GEMINI_API_KEY !== "string" || env.GEMINI_API_KEY.length === 0) {
+  const customGeminiKey = request.headers.get("X-Custom-Gemini-Key")?.trim() || "";
+  if (customGeminiKey.length > 512) {
+    return jsonResponse(400, { error: "Gemini API key cá nhân quá dài. Hãy kiểm tra lại key đã nhập." });
+  }
+  if (!customGeminiKey && (typeof env.GEMINI_API_KEY !== "string" || env.GEMINI_API_KEY.length === 0)) {
     return jsonResponse(503, { error: "AI chưa được cấu hình. Hãy thêm GEMINI_API_KEY vào Cloudflare Pages Secrets." });
   }
+  const geminiApiKey = customGeminiKey || env.GEMINI_API_KEY;
 
   const model = env.GEMINI_MODEL || "gemini-3.8-flash";
   if (!/^[a-zA-Z0-9._-]{1,100}$/.test(model)) {
     return jsonResponse(500, { error: "Cấu hình model Gemini không hợp lệ." });
   }
 
-  const clientIp = request.headers.get("CF-Connecting-IP")?.trim();
-  if (!clientIp || clientIp.length > 64) {
-    return jsonResponse(503, { error: "Không xác định được địa chỉ mạng để áp dụng giới hạn chấm bài." });
-  }
+  if (!customGeminiKey) {
+    const clientIp = request.headers.get("CF-Connecting-IP")?.trim();
+    if (!clientIp || clientIp.length > 64) {
+      return jsonResponse(503, { error: "Không xác định được địa chỉ mạng để áp dụng giới hạn chấm bài." });
+    }
 
-  let rateLimit;
-  try {
-    rateLimit = await consumeWritingFeedbackAttempt({
-      database: env.WRITING_RATE_LIMITS,
-      ip: clientIp,
-      secret: env.GEMINI_API_KEY,
-    });
-  } catch (error) {
-    console.error("Writing feedback rate limiter failed", error instanceof Error ? error.message : "unknown error");
-    return jsonResponse(503, {
-      error: "Hệ thống giới hạn lượt chấm đang tạm thời gián đoạn. Bài chưa được gửi tới Gemini; vui lòng thử lại sau.",
-    });
-  }
-  if (!rateLimit.allowed) {
-    return jsonResponse(429, { error: rateLimit.message }, {
-      "Retry-After": String(rateLimit.retryAfterSeconds),
-    });
+    let rateLimit;
+    try {
+      rateLimit = await consumeWritingFeedbackAttempt({
+        database: env.WRITING_RATE_LIMITS,
+        ip: clientIp,
+        secret: env.GEMINI_API_KEY,
+      });
+    } catch (error) {
+      console.error("Writing feedback rate limiter failed", error instanceof Error ? error.message : "unknown error");
+      return jsonResponse(503, {
+        error: "Hệ thống giới hạn lượt chấm đang tạm thời gián đoạn. Bài chưa được gửi tới Gemini; vui lòng thử lại sau.",
+      });
+    }
+    if (!rateLimit.allowed) {
+      return jsonResponse(429, { error: rateLimit.message }, {
+        "Retry-After": String(rateLimit.retryAfterSeconds),
+      });
+    }
   }
 
   const prompt = JSON.stringify({
@@ -254,7 +261,7 @@ export async function onRequestPost({ request, env }) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-goog-api-key": env.GEMINI_API_KEY,
+          "x-goog-api-key": geminiApiKey,
         },
         body: JSON.stringify({
           systemInstruction: {
@@ -281,10 +288,17 @@ export async function onRequestPost({ request, env }) {
 
   if (!geminiResponse.ok) {
     console.error("Gemini writing request returned HTTP", geminiResponse.status);
+    const customKeyError = customGeminiKey
+      && [400, 401, 403].includes(geminiResponse.status);
+    const customKeyQuotaError = customGeminiKey && geminiResponse.status === 429;
     return jsonResponse(502, {
-      error: geminiResponse.status === 429
-        ? "Gemini đang quá tải hoặc đã chạm giới hạn sử dụng. Vui lòng thử lại sau."
-        : "Gemini chưa thể chấm bài lúc này. Vui lòng thử lại sau.",
+      error: customKeyError
+        ? "Gemini API key cá nhân không hợp lệ hoặc đã hết hạn. Hãy kiểm tra lại key, hoặc xóa key cá nhân để dùng key mặc định của website."
+        : customKeyQuotaError
+          ? "Key cá nhân có thể đã hết hạn mức Gemini. Hãy kiểm tra hạn mức, hoặc xóa key cá nhân để dùng key mặc định của website."
+          : geminiResponse.status === 429
+            ? "Gemini đang quá tải hoặc đã chạm giới hạn sử dụng. Vui lòng thử lại sau."
+            : "Gemini chưa thể chấm bài lúc này. Vui lòng thử lại sau.",
     });
   }
 

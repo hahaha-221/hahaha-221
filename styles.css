@@ -3133,6 +3133,73 @@ p {
   opacity: 0.7;
 }
 
+.writing-ai-key-settings {
+  padding: 12px 14px;
+  border: 1px solid #e3e9f4;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.writing-ai-key-settings summary {
+  color: #34425b;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.writing-ai-key-body {
+  display: grid;
+  gap: 10px;
+  padding-top: 12px;
+}
+
+.writing-ai-key-body label {
+  display: grid;
+  gap: 6px;
+  color: #34425b;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.writing-ai-key-body input {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 11px;
+  border: 1px solid #cfd8e8;
+  border-radius: 8px;
+  color: #263a63;
+  font: inherit;
+}
+
+.writing-ai-key-body input:focus-visible {
+  outline: 3px solid rgb(33 99 246 / 20%);
+  border-color: #2163f6;
+}
+
+.writing-ai-key-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.writing-ai-key-actions .secondary-button {
+  min-height: 38px;
+  padding: 0 14px;
+}
+
+.writing-ai-key-note,
+.writing-ai-key-status {
+  margin: 0;
+  color: #66748a;
+  font-size: 12px;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.writing-ai-key-status:empty {
+  display: none;
+}
+
 .writing-ai-privacy,
 .writing-ai-status {
   margin: 0;

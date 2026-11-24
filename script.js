@@ -2285,6 +2285,7 @@ let activeSkill = null;
 let activePart = 0;
 let writingAnswerDrafts = [];
 let writingAiFeedbackDrafts = [];
+const WRITING_GEMINI_KEY_STORAGE = "aptisPractice.writingGeminiApiKey";
 let secondsRemaining = 0;
 let timerInterval = null;
 let responseInterval = null;
@@ -2512,6 +2513,20 @@ const writingAiPanelMarkup = `
       </div>
       <button class="primary-button" type="button" data-writing-ai-check>Chấm &amp; chữa bài</button>
     </div>
+    <details class="writing-ai-key-settings" data-writing-ai-key-settings>
+      <summary>Nhập Gemini API key cá nhân (tùy chọn)</summary>
+      <div class="writing-ai-key-body">
+        <label for="writingAiPersonalKey">Gemini API key cá nhân
+          <input id="writingAiPersonalKey" type="password" autocomplete="off" spellcheck="false" data-writing-ai-key />
+        </label>
+        <div class="writing-ai-key-actions">
+          <button class="secondary-button" type="button" data-writing-ai-key-save>Lưu key</button>
+          <button class="secondary-button" type="button" data-writing-ai-key-clear>Xóa key</button>
+        </div>
+        <p class="writing-ai-key-note">Key chỉ lưu cục bộ trên trình duyệt này (localStorage), không gửi lên máy chủ để lưu trữ. Khi bấm chấm bài, key được gửi trong header của yêu cầu để gọi Gemini; website công khai cần dùng HTTPS. Key cá nhân không dùng lượt giới hạn mặc định của website.</p>
+        <p class="writing-ai-key-status" data-writing-ai-key-status role="status" aria-live="polite"></p>
+      </div>
+    </details>
     <p class="writing-ai-privacy">Bài viết sẽ được gửi đến Google Gemini để đánh giá. Không nhập thông tin cá nhân.</p>
     <p class="writing-ai-status" data-writing-ai-status role="status" aria-live="polite"></p>
     <div class="writing-ai-result" data-writing-ai-result aria-live="polite"></div>
@@ -2526,6 +2541,59 @@ const appendWritingText = (parent, tagName, className, text) => {
   element.textContent = text;
   parent.append(element);
   return element;
+};
+
+const restoreWritingAiKey = (panel) => {
+  const settings = panel.querySelector("[data-writing-ai-key-settings]");
+  const input = settings.querySelector("[data-writing-ai-key]");
+  const status = settings.querySelector("[data-writing-ai-key-status]");
+  try {
+    input.value = window.localStorage.getItem(WRITING_GEMINI_KEY_STORAGE) || "";
+    if (input.value) {
+      status.textContent = "Đã nạp key cá nhân đã lưu trên trình duyệt này.";
+    }
+  } catch (error) {
+    console.error("Could not read saved Writing Gemini key", error instanceof Error ? error.name : "unknown error");
+    status.textContent = "Không truy cập được localStorage. Bạn vẫn có thể nhập key để dùng trong lượt này.";
+  }
+};
+
+const saveWritingAiKey = (button) => {
+  const settings = button.closest("[data-writing-ai-key-settings]");
+  const input = settings.querySelector("[data-writing-ai-key]");
+  const status = settings.querySelector("[data-writing-ai-key-status]");
+  const key = input.value.trim();
+  if (!key) {
+    status.textContent = "Hãy nhập key trước khi lưu hoặc chọn Xóa key.";
+    return;
+  }
+  if (key.length > 512) {
+    status.textContent = "Key quá dài. Hãy kiểm tra lại nội dung đã nhập.";
+    return;
+  }
+
+  try {
+    window.localStorage.setItem(WRITING_GEMINI_KEY_STORAGE, key);
+    input.value = key;
+    status.textContent = "Đã lưu key cá nhân trong localStorage của trình duyệt này.";
+  } catch (error) {
+    console.error("Could not save Writing Gemini key", error instanceof Error ? error.name : "unknown error");
+    status.textContent = "Không thể lưu key vào localStorage. Bạn vẫn có thể dùng key này trong lượt hiện tại.";
+  }
+};
+
+const clearWritingAiKey = (button) => {
+  const settings = button.closest("[data-writing-ai-key-settings]");
+  const input = settings.querySelector("[data-writing-ai-key]");
+  const status = settings.querySelector("[data-writing-ai-key-status]");
+  try {
+    window.localStorage.removeItem(WRITING_GEMINI_KEY_STORAGE);
+    input.value = "";
+    status.textContent = "Đã xóa key cá nhân. Lượt chấm tiếp theo sẽ dùng key mặc định và giới hạn lượt của website.";
+  } catch (error) {
+    console.error("Could not remove saved Writing Gemini key", error instanceof Error ? error.name : "unknown error");
+    status.textContent = "Không thể xóa key khỏi localStorage. Hãy kiểm tra cài đặt lưu trữ của trình duyệt.";
+  }
 };
 
 const renderWritingFeedback = (panel, feedback) => {
@@ -2615,17 +2683,24 @@ const requestWritingFeedback = async (button) => {
   const source = document.createElement("div");
   source.innerHTML = requestedSkill.parts[requestedPart].body;
   const task = source.textContent.replace(/\s+/g, " ").trim();
+  const personalKey = panel.querySelector("[data-writing-ai-key]").value.trim();
 
   button.disabled = true;
-  status.textContent = "Đang gửi bài đến Gemini để chấm...";
+  status.textContent = personalKey
+    ? "Đang gửi bài đến Gemini bằng key cá nhân..."
+    : "Đang gửi bài đến Gemini để chấm...";
   result.replaceChildren();
 
   try {
     let response;
     try {
+      const headers = { "Content-Type": "application/json" };
+      if (personalKey) {
+        headers["X-Custom-Gemini-Key"] = personalKey;
+      }
       response = await fetch("/api/writing-feedback", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({
           part: requestedPart + 1,
           topic: requestedSkill.topicTitle,
@@ -2684,9 +2759,11 @@ const renderPart = () => {
     restoreWritingAnswers();
     if (part.available) {
       taskBody.insertAdjacentHTML("beforeend", writingAiPanelMarkup);
+      const writingAiPanel = taskBody.querySelector("[data-writing-ai-panel]");
+      restoreWritingAiKey(writingAiPanel);
       const savedFeedback = writingAiFeedbackDrafts[activePart];
       if (savedFeedback) {
-        renderWritingFeedback(taskBody.querySelector("[data-writing-ai-panel]"), savedFeedback);
+        renderWritingFeedback(writingAiPanel, savedFeedback);
         taskBody.querySelector("[data-writing-ai-status]").textContent = "Đã chấm xong.";
       }
     }
@@ -4822,14 +4899,26 @@ taskBody.addEventListener("input", (event) => {
 });
 
 taskBody.addEventListener("click", (event) => {
-  const button = event.target.closest("[data-writing-ai-check]");
-  if (!button) {
+  const saveKeyButton = event.target.closest("[data-writing-ai-key-save]");
+  if (saveKeyButton) {
+    saveWritingAiKey(saveKeyButton);
     return;
   }
 
-  requestWritingFeedback(button).catch((error) => {
+  const clearKeyButton = event.target.closest("[data-writing-ai-key-clear]");
+  if (clearKeyButton) {
+    clearWritingAiKey(clearKeyButton);
+    return;
+  }
+
+  const checkButton = event.target.closest("[data-writing-ai-check]");
+  if (!checkButton) {
+    return;
+  }
+
+  requestWritingFeedback(checkButton).catch((error) => {
     console.error("Writing feedback rendering failed", error instanceof Error ? error.name : "unknown error");
-    const panel = button.closest("[data-writing-ai-panel]");
+    const panel = checkButton.closest("[data-writing-ai-panel]");
     if (panel) {
       panel.querySelector("[data-writing-ai-status]").textContent = "Không thể hiển thị nhận xét. Hãy tải lại bài và thử lại.";
     }
