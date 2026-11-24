@@ -300,47 +300,25 @@ export async function onRequestPost({ request, env }) {
     "Content-Type": "application/json",
     "x-goog-api-key": geminiApiKey,
   };
-  const primaryModel = "gemini-2.5-flash";
-  const fallbackModel = "gemini-2.0-flash";
-  const geminiEndpoint = (model) =>
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+  const model = "gemini-3.8-flash";
+  const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
   let geminiResponse;
-  let primaryModelError = null;
   try {
-    geminiResponse = await fetch(geminiEndpoint(primaryModel), {
+    geminiResponse = await fetch(geminiEndpoint, {
       method: "POST",
       headers: geminiHeaders,
       body: geminiRequestBody,
       signal: AbortSignal.timeout(45_000),
     });
-    if (geminiResponse.status === 404) {
-      primaryModelError = await getGoogleError(geminiResponse, geminiApiKey);
-      logGoogleRejection(geminiResponse, primaryModelError, primaryModel);
-      geminiResponse = await fetch(geminiEndpoint(fallbackModel), {
-        method: "POST",
-        headers: geminiHeaders,
-        body: geminiRequestBody,
-        signal: AbortSignal.timeout(45_000),
-      });
-    }
   } catch (error) {
     console.error("Gemini writing request failed", error instanceof Error ? error.name : "unknown error");
-    if (primaryModelError) {
-      return jsonResponse(502, {
-        error: `Không thể kết nối Gemini bằng model dự phòng. Lỗi model chính: ${describeGoogleError(primaryModelError)}.`,
-        googleErrorStatus: primaryModelError.status,
-        googleErrorCode: primaryModelError.code,
-        googleErrorMessage: primaryModelError.message,
-      });
-    }
     return jsonResponse(502, { error: "Không kết nối được Gemini. Vui lòng thử lại." });
   }
 
   if (!geminiResponse.ok) {
     const googleError = await getGoogleError(geminiResponse, geminiApiKey);
-    const rejectedModel = primaryModelError ? fallbackModel : primaryModel;
-    logGoogleRejection(geminiResponse, googleError, rejectedModel);
+    logGoogleRejection(geminiResponse, googleError, model);
     const customKeyError = customGeminiKey
       && [400, 401, 403].includes(geminiResponse.status);
     const customKeyQuotaError = customGeminiKey && geminiResponse.status === 429;
@@ -351,12 +329,8 @@ export async function onRequestPost({ request, env }) {
         : geminiResponse.status === 429
           ? "Gemini đang quá tải hoặc đã chạm giới hạn sử dụng. Vui lòng thử lại sau."
           : "Gemini chưa thể chấm bài lúc này. Vui lòng thử lại sau.";
-    const originalGoogleErrors = [
-      primaryModelError && `model ${primaryModel}: ${describeGoogleError(primaryModelError)}`,
-      `model ${rejectedModel}: ${describeGoogleError(googleError)}`,
-    ].filter(Boolean).join("; ");
     return jsonResponse(502, {
-      error: `${message} Lỗi Google: ${originalGoogleErrors}.`,
+      error: `${message} Lỗi Google: ${describeGoogleError(googleError)}.`,
       googleErrorStatus: googleError.status,
       googleErrorCode: googleError.code,
       googleErrorMessage: googleError.message,
