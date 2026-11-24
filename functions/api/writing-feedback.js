@@ -301,7 +301,7 @@ export async function onRequestPost({ request, env }) {
     "x-goog-api-key": geminiApiKey,
   };
   const model = "gemini-3.8-flash";
-  const geminiEndpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+  const geminiEndpoint = `https://gateway.ai.cloudflare.com/v1/9059b0f11e012e3784addbdd62024a6e/aptis-gateway/google-ai-studio/v1beta/models/${model}:generateContent`;
 
   let geminiResponse;
   try {
