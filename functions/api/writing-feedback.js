@@ -228,12 +228,6 @@ export async function onRequestPost({ request, env }) {
     return jsonResponse(503, { error: "AI chưa được cấu hình. Hãy thêm GEMINI_API_KEY vào Cloudflare Pages Secrets." });
   }
   const geminiApiKey = customGeminiKey || env.GEMINI_API_KEY;
-  const usesVertexAi = geminiApiKey.startsWith("AQ");
-
-  const model = env.GEMINI_MODEL || (usesVertexAi ? "gemini-2.5-flash" : "gemini-3.8-flash");
-  if (!/^[a-zA-Z0-9._-]{1,100}$/.test(model)) {
-    return jsonResponse(500, { error: "Cấu hình model Gemini không hợp lệ." });
-  }
 
   if (!customGeminiKey) {
     const clientIp = request.headers.get("CF-Connecting-IP")?.trim();
@@ -267,9 +261,7 @@ export async function onRequestPost({ request, env }) {
     task: payload.task,
     answers: payload.answers,
   });
-  const geminiEndpoint = usesVertexAi
-    ? `https://aiplatform.googleapis.com/v1/publishers/google/models/${model}:generateContent`
-    : `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
+  const geminiEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
 
   let geminiResponse;
   try {
