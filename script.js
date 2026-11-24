@@ -2663,7 +2663,10 @@ const captureWritingAnswers = () => {
   if (activeSkill?.name !== "Writing" || !writingAnswerDrafts[activePart]) {
     return;
   }
-  writingAnswerDrafts[activePart] = getWritingFields().map((field) => field.value);
+  const fields = getWritingFields();
+  if (fields.length > 0) {
+    writingAnswerDrafts[activePart] = fields.map((field) => field.value);
+  }
 };
 
 const restoreWritingAnswers = () => {
@@ -2840,6 +2843,7 @@ const requestWritingFeedback = async (button) => {
   const panel = button.closest("[data-writing-ai-panel]");
   const status = panel.querySelector("[data-writing-ai-status]");
   const result = panel.querySelector("[data-writing-ai-result]");
+  captureWritingAnswers();
   const parts = requestedSkill.parts.map((part, index) => {
     const source = document.createElement("div");
     source.innerHTML = part.body;
@@ -2847,7 +2851,7 @@ const requestWritingFeedback = async (button) => {
       label: field.closest(".question-card")?.querySelector("strong")?.textContent.trim()
         || field.closest(".writing-email-task")?.querySelector("h3")?.textContent.trim()
         || `Câu trả lời ${answerIndex + 1}`,
-      text: writingAnswerDrafts[index]?.[answerIndex] || "",
+      text: writingAnswerDrafts[index]?.[answerIndex] ?? "",
       maxWords: field.dataset.maxWords ? Number(field.dataset.maxWords) : null,
     }));
     return {

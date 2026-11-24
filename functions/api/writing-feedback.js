@@ -120,6 +120,7 @@ const validateRequest = (value) => {
 
   let totalTaskLength = 0;
   let totalAnswerLength = 0;
+  let totalNonWhitespaceAnswerLength = 0;
   let totalAnswers = 0;
   for (const [index, part] of value.parts.entries()) {
     if (!isRecord(part)
@@ -145,6 +146,7 @@ const validateRequest = (value) => {
         return false;
       }
       totalAnswerLength += answer.text.length;
+      totalNonWhitespaceAnswerLength += answer.text.trim().length;
       totalAnswers += 1;
     }
   }
@@ -152,7 +154,7 @@ const validateRequest = (value) => {
   return totalAnswers > 0
     && totalAnswers <= MAX_TOTAL_ANSWERS
     && totalTaskLength <= MAX_TOTAL_TASK_LENGTH
-    && totalAnswerLength > 0
+    && totalNonWhitespaceAnswerLength > 0
     && totalAnswerLength <= MAX_TOTAL_ANSWER_LENGTH;
 };
 
