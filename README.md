@@ -28,7 +28,7 @@ After finishing all four Writing parts, the results screen also provides a `.txt
 
 For local development, install Node.js and Wrangler, create a root `.dev.vars` file with `WRITING_RATE_LIMIT_HASH_SECRET="a-long-random-secret"`, configure local D1 and Workers AI bindings (`WRITING_RATE_LIMITS` and `AI`), and apply the schema to the local database. Run `npx wrangler pages dev . --ai=AI`. `.dev.vars` and `.env` files are ignored by Git. The basic Python static server does not execute Pages Functions.
 
-The results page explains which AI provider is used and advises learners not to include personal information. It returns an estimated CEFR level for the complete submission, four rubric scores, and item-level comments, corrections, and non-empty sample responses for all Parts. Samples are prompted to target the middle of the task's word range, including complete Part 4 emails, but are no longer rejected solely for missing an exact word count.
+The results page explains which AI provider is used and advises learners not to include personal information. It returns an estimated CEFR level for the complete submission, four rubric scores, and item-level comments, corrections, and non-empty sample responses for all Parts. Samples are prompted with each task's word limits and sentence/paragraph guidance, including complete Part 4 emails. The endpoint counts sample words and retries out-of-range samples up to twice; it still returns feedback if a non-empty sample remains outside the limit.
 
 ## AI Speaking feedback
 
