@@ -2284,7 +2284,7 @@ let listeningAnswerChecked = false;
 let activeSkill = null;
 let activePart = 0;
 let writingAnswerDrafts = [];
-let writingAiFeedbackDrafts = [];
+let writingAiFeedbackDraft = null;
 let speakingSessionAudioDraft = null;
 let speakingSessionAudioError = "";
 let activeSpeakingRecording = null;
@@ -2639,21 +2639,21 @@ const bindAnswerStatus = (container) => {
   });
 };
 
-const getWritingFields = () => {
-  if (activePart === 0) {
-    return [...taskBody.querySelectorAll(".question-card .answer-input")];
+const getWritingFields = (container = taskBody, partIndex = activePart) => {
+  if (partIndex === 0) {
+    return [...container.querySelectorAll(".question-card .answer-input")];
   }
 
-  if (activePart === 1) {
-    return [...taskBody.querySelectorAll(".answer-area")];
+  if (partIndex === 1) {
+    return [...container.querySelectorAll(".answer-area")];
   }
 
-  if (activePart === 2) {
-    return [...taskBody.querySelectorAll(".question-card .answer-area")];
+  if (partIndex === 2) {
+    return [...container.querySelectorAll(".question-card .answer-area")];
   }
 
-  if (activePart === 3) {
-    return [...taskBody.querySelectorAll(".writing-email-task .answer-area")];
+  if (partIndex === 3) {
+    return [...container.querySelectorAll(".writing-email-task .answer-area")];
   }
 
   return [];
@@ -2682,9 +2682,9 @@ const writingAiPanelMarkup = `
     <div class="writing-ai-panel-header">
       <div>
         <h2 id="writingAiTitle">Chấm và chữa bài bằng AI</h2>
-        <p>AI đưa ra mức CEFR và nhận xét tham khảo, không phải điểm Aptis chính thức.</p>
+        <p>AI chấm tổng hợp cả 4 Part, đưa ra mức CEFR và nhận xét tham khảo.</p>
       </div>
-      <button class="primary-button" type="button" data-writing-ai-check>Chấm &amp; chữa bài</button>
+      <button class="primary-button" type="button" data-writing-ai-check>Chấm &amp; chữa 4 Part</button>
     </div>
     <details class="writing-ai-key-settings" data-writing-ai-key-settings>
       <summary>Nhập Gemini API key cá nhân (tùy chọn)</summary>
@@ -2703,6 +2703,10 @@ const writingAiPanelMarkup = `
     <p class="writing-ai-privacy">Mặc định, bài viết được chấm bằng Cloudflare Workers AI. Nếu nhập key cá nhân, bài sẽ được gửi đến Google Gemini. Không nhập thông tin cá nhân.</p>
     <p class="writing-ai-status" data-writing-ai-status role="status" aria-live="polite"></p>
     <div class="writing-ai-result" data-writing-ai-result aria-live="polite"></div>
+    <div class="writing-ai-key-actions">
+      <button class="secondary-button" type="button" data-writing-return>Quay lại bài làm</button>
+      <button class="secondary-button" type="button" data-writing-list>Danh sách chủ đề</button>
+    </div>
   </section>
 `;
 
@@ -2801,7 +2805,7 @@ const renderWritingFeedback = (panel, feedback) => {
   feedback.answers.forEach((answer) => {
     const card = document.createElement("section");
     card.className = "writing-ai-answer";
-    appendWritingText(card, "h3", "", `${answer.label} · ${answer.score}/5`);
+    appendWritingText(card, "h3", "", `Part ${answer.part} · ${answer.label} · ${answer.score}/5`);
     appendWritingText(card, "p", "", answer.feedback);
 
     if (answer.errors.length) {
@@ -2833,35 +2837,37 @@ const requestWritingFeedback = async (button) => {
   }
 
   const requestedSkill = activeSkill;
-  const requestedPart = activePart;
   const panel = button.closest("[data-writing-ai-panel]");
   const status = panel.querySelector("[data-writing-ai-status]");
   const result = panel.querySelector("[data-writing-ai-result]");
-  const fields = getWritingFields();
-  const answers = fields.map((field, index) => ({
-    label: field.closest(".question-card")?.querySelector("strong")?.textContent.trim()
-      || field.closest(".writing-email-task")?.querySelector("h3")?.textContent.trim()
-      || `Câu trả lời ${index + 1}`,
-    text: field.value,
-    maxWords: field.dataset.maxWords ? Number(field.dataset.maxWords) : null,
-  }));
-
-  if (!answers.some((answer) => answer.text.trim())) {
-    status.textContent = "Hãy nhập ít nhất một câu trả lời trước khi chấm.";
+  const parts = requestedSkill.parts.map((part, index) => {
+    const source = document.createElement("div");
+    source.innerHTML = part.body;
+    const answers = getWritingFields(source, index).map((field, answerIndex) => ({
+      label: field.closest(".question-card")?.querySelector("strong")?.textContent.trim()
+        || field.closest(".writing-email-task")?.querySelector("h3")?.textContent.trim()
+        || `Câu trả lời ${answerIndex + 1}`,
+      text: writingAnswerDrafts[index]?.[answerIndex] || "",
+      maxWords: field.dataset.maxWords ? Number(field.dataset.maxWords) : null,
+    }));
+    return {
+      part: index + 1,
+      task: source.textContent.replace(/\s+/g, " ").trim(),
+      answers,
+    };
+  });
+  const submittedAnswers = parts.flatMap((part) => part.answers.map((answer) => answer.text));
+  if (!submittedAnswers.some((answer) => answer.trim())) {
+    status.textContent = "Hãy nhập ít nhất một câu trả lời trong 4 Part trước khi chấm.";
     return;
   }
 
-  captureWritingAnswers();
-  const submittedAnswers = answers.map((answer) => answer.text);
-  const source = document.createElement("div");
-  source.innerHTML = requestedSkill.parts[requestedPart].body;
-  const task = source.textContent.replace(/\s+/g, " ").trim();
   const personalKey = panel.querySelector("[data-writing-ai-key]").value.trim();
 
   button.disabled = true;
   status.textContent = personalKey
-    ? "Đang gửi bài đến Gemini bằng key cá nhân..."
-    : "Đang gửi bài đến Workers AI để chấm...";
+    ? "Đang gửi cả 4 Part đến Gemini bằng key cá nhân..."
+    : "Đang gửi cả 4 Part đến Workers AI để chấm...";
   result.replaceChildren();
 
   try {
@@ -2875,10 +2881,8 @@ const requestWritingFeedback = async (button) => {
         method: "POST",
         headers,
         body: JSON.stringify({
-          part: requestedPart + 1,
           topic: requestedSkill.topicTitle,
-          task,
-          answers,
+          parts,
         }),
       });
     } catch {
@@ -2904,20 +2908,47 @@ const requestWritingFeedback = async (button) => {
       return;
     }
 
-    if (activeSkill !== requestedSkill || activePart !== requestedPart) {
+    if (activeSkill !== requestedSkill || !panel.isConnected) {
       return;
     }
-    const currentAnswers = getWritingFields().map((field) => field.value);
-    if (currentAnswers.some((answer, index) => answer !== submittedAnswers[index])) {
-      status.textContent = "Câu trả lời đã thay đổi trong lúc chấm. Hãy chấm lại để nhận góp ý mới.";
-      return;
-    }
-
-    writingAiFeedbackDrafts[requestedPart] = feedback;
+    writingAiFeedbackDraft = feedback;
     renderWritingFeedback(panel, feedback);
-    status.textContent = "Đã chấm xong.";
+    status.textContent = "Đã chấm xong toàn bộ 4 Part.";
   } finally {
     button.disabled = false;
+  }
+};
+
+const returnToWritingPractice = () => {
+  if (activeSkill?.name !== "Writing") {
+    return;
+  }
+  practiceView.querySelector(".practice-actions").hidden = false;
+  partTabs.hidden = false;
+  timerChip.hidden = false;
+  activePart = activeSkill.parts.length - 1;
+  renderPart();
+};
+
+const showWritingResults = () => {
+  if (activeSkill?.name !== "Writing") {
+    return;
+  }
+  captureWritingAnswers();
+  stopSession();
+  partTabs.hidden = true;
+  practiceView.querySelector(".practice-actions").hidden = true;
+  timerChip.hidden = true;
+  taskKicker.textContent = `Writing · ${activeSkill.topicTitle} · Kết quả tổng hợp`;
+  practiceTitle.textContent = "Kết quả chấm Writing";
+  taskBody.innerHTML = writingAiPanelMarkup;
+  const panel = taskBody.querySelector("[data-writing-ai-panel]");
+  restoreWritingAiKey(panel);
+  if (writingAiFeedbackDraft) {
+    renderWritingFeedback(panel, writingAiFeedbackDraft);
+    panel.querySelector("[data-writing-ai-status]").textContent = "Đã chấm xong toàn bộ 4 Part.";
+  } else {
+    void requestWritingFeedback(panel.querySelector("[data-writing-ai-check]"));
   }
 };
 
@@ -3113,16 +3144,6 @@ const renderPart = () => {
     renderSpeakingRecordingStatus();
   } else if (activeSkill.name === "Writing") {
     restoreWritingAnswers();
-    if (part.available) {
-      taskBody.insertAdjacentHTML("beforeend", writingAiPanelMarkup);
-      const writingAiPanel = taskBody.querySelector("[data-writing-ai-panel]");
-      restoreWritingAiKey(writingAiPanel);
-      const savedFeedback = writingAiFeedbackDrafts[activePart];
-      if (savedFeedback) {
-        renderWritingFeedback(writingAiPanel, savedFeedback);
-        taskBody.querySelector("[data-writing-ai-status]").textContent = "Đã chấm xong.";
-      }
-    }
   }
   progressLabel.textContent = `${activeSkill.name} · Part ${activePart + 1} / ${activeSkill.parts.length}`;
   previousButton.disabled = activePart === 0;
@@ -3697,7 +3718,7 @@ const startWritingTopic = (topicId) => {
   activeSkill = { ...skills.Writing, parts, name: "Writing", topicId: topic.id, topicTitle: topic.title };
   activePart = 0;
   writingAnswerDrafts = Array.from({ length: skills.Writing.parts.length }, () => []);
-  writingAiFeedbackDrafts = Array.from({ length: skills.Writing.parts.length }, () => null);
+  writingAiFeedbackDraft = null;
   homeView.classList.add("is-hidden");
   readingView.classList.add("is-hidden");
   listeningView.classList.add("is-hidden");
@@ -4975,6 +4996,10 @@ nextButton.addEventListener("click", () => {
     void showSpeakingResults();
     return;
   }
+  if (activeSkill.name === "Writing") {
+    showWritingResults();
+    return;
+  }
   stopSession();
   showToast("Bạn đã hoàn thành lượt luyện tập!");
   returnHome();
@@ -5248,13 +5273,8 @@ taskBody.addEventListener("input", (event) => {
     return;
   }
 
-  if (event.isTrusted && activeSkill?.name === "Writing" && writingAiFeedbackDrafts[activePart]) {
-    writingAiFeedbackDrafts[activePart] = null;
-    const panel = taskBody.querySelector("[data-writing-ai-panel]");
-    if (panel) {
-      panel.querySelector("[data-writing-ai-result]").replaceChildren();
-      panel.querySelector("[data-writing-ai-status]").textContent = "Câu trả lời đã đổi. Hãy chấm lại để xem nhận xét mới.";
-    }
+  if (event.isTrusted && activeSkill?.name === "Writing") {
+    writingAiFeedbackDraft = null;
   }
 
   const maxWords = Number(field.dataset.maxWords);
@@ -5296,6 +5316,16 @@ taskBody.addEventListener("click", (event) => {
 
   if (event.target.closest("[data-speaking-list]")) {
     startSpeaking();
+    return;
+  }
+
+  if (event.target.closest("[data-writing-return]")) {
+    returnToWritingPractice();
+    return;
+  }
+
+  if (event.target.closest("[data-writing-list]")) {
+    startWriting();
     return;
   }
 

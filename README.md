@@ -10,7 +10,7 @@ All website source files and assets are included in this project and can be edit
 
 ## AI Writing feedback
 
-Writing feedback is provided by a Cloudflare Pages Function at `/api/writing-feedback`. By default, the function uses Cloudflare Workers AI. Learners may optionally save their own Gemini API key in this browser's `localStorage`; it is sent in a request header only when asking for feedback and is not stored by the server. Scores and CEFR levels are practice estimates, not official Aptis results.
+Writing feedback is provided by a Cloudflare Pages Function at `/api/writing-feedback`. Learners complete all four Parts and select **Hoàn thành** to open one results page and submit all answers in a single scoring request. By default, the function uses Cloudflare Workers AI. Learners may optionally save their own Gemini API key in this browser's `localStorage`; it is sent in a request header only when asking for feedback and is not stored by the server. Scores and CEFR levels are practice estimates, not official Aptis results.
 
 To enable it on Cloudflare Pages:
 
@@ -20,13 +20,13 @@ To enable it on Cloudflare Pages:
 4. Add `WRITING_RATE_LIMIT_HASH_SECRET` as an encrypted secret for Production and Preview. Use a long random value and keep it stable: changing it creates new per-IP hashes and resets existing rate-limit counters. If `WRITING_RATE_LIMIT_HASH_SECRET` is not set, the function can use `GEMINI_API_KEY` as the HMAC secret for compatibility with existing deployments.
 5. Redeploy the Pages project so the bindings and secret take effect.
 
-The endpoint allows at most 5 scoring attempts per IP in any rolling 10-minute window and 15 in any rolling 24-hour window. It uses Cloudflare's `CF-Connecting-IP` header and atomically records attempts in D1; IP addresses are HMAC-hashed before storage. If the D1 binding or HMAC secret is missing or unavailable, the endpoint fails closed and does not send the answer to an AI model.
+The endpoint allows at most 5 scoring attempts per IP in any rolling 10-minute window and 15 in any rolling 24-hour window. A single completed four-Part submission counts as one attempt. It uses Cloudflare's `CF-Connecting-IP` header and atomically records attempts in D1; IP addresses are HMAC-hashed before storage. If the D1 binding or HMAC secret is missing or unavailable, the endpoint fails closed and does not send the answers to an AI model.
 
 The Writing panel's optional personal-key controls save or remove the key in the current browser's `localStorage`. When a personal key is present, the endpoint uses it for the Gemini request through Cloudflare AI Gateway and skips the site's D1 rate limits; that key is still subject to Google's own quotas and billing. Invalid or quota-exhausted personal keys show guidance to check the key or remove it to return to the site's Workers AI scorer and D1 limits. If Google rejects a request, the response and server log include Google's status/error code without logging the key. Do not save a personal key on a shared device.
 
 For local development, install Node.js and Wrangler, create a root `.dev.vars` file with `WRITING_RATE_LIMIT_HASH_SECRET="a-long-random-secret"`, configure local D1 and Workers AI bindings (`WRITING_RATE_LIMITS` and `AI`), and apply the schema to the local database. Run `npx wrangler pages dev . --ai=AI`. `.dev.vars` and `.env` files are ignored by Git. The basic Python static server does not execute Pages Functions.
 
-The feedback panel explains which AI provider is used and advises learners not to include personal information. It returns an estimated CEFR level, four rubric scores, item-level comments, corrections, and improved examples.
+The results page explains which AI provider is used and advises learners not to include personal information. It returns an estimated CEFR level for the complete submission, four rubric scores, and item-level comments, corrections, and improved examples for the answers across all Parts.
 
 ## AI Speaking feedback
 
