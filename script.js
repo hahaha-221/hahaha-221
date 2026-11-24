@@ -224,7 +224,6 @@ const responseCard = (question, index, { questionCount, timerSeconds } = {}) => 
   <li class="question-card">
     ${questionCount ? `<span class="speaking-question-progress">QUESTION ${index + 1} OF ${questionCount}</span>` : ""}
     <strong>${index + 1}. ${question}</strong>
-    <textarea class="answer-area" aria-label="${question}" placeholder="Ghi chú câu trả lời của bạn..."></textarea>
     ${timerSeconds
       ? responseTimer({
         duration: timerSeconds,
@@ -298,6 +297,7 @@ const renderSpeakingPartBody = (exam, partIndex) => {
       <strong>Part ${partIndex + 1} · ${speakingPartTitles[partIndex]}</strong>
       <p>${partInstructions}</p>
     </div>
+    <p class="speaking-session-recording-status" data-speaking-session-recording-status aria-live="polite"></p>
     ${images ? `<div class="speaking-image-grid" data-image-count="${part.images.length}">${images}</div>` : ""}
     ${partIndex === 0 ? partTimer : ""}
     ${partialNote}${imageNote}
@@ -2285,6 +2285,12 @@ let activeSkill = null;
 let activePart = 0;
 let writingAnswerDrafts = [];
 let writingAiFeedbackDrafts = [];
+let speakingSessionAudioDraft = null;
+let speakingSessionAudioError = "";
+let activeSpeakingRecording = null;
+let stoppingSpeakingRecording = null;
+let speakingRecordingStopPromise = null;
+let speakingMicrophoneRequest = false;
 const WRITING_GEMINI_KEY_STORAGE = "aptisPractice.writingGeminiApiKey";
 let secondsRemaining = 0;
 let timerInterval = null;
@@ -2423,12 +2429,179 @@ const clearReadingOrderSlot = (slot) => {
 const stopSession = () => {
   window.clearInterval(timerInterval);
   stopResponseTimer("Sẵn sàng");
+  if (activeSpeakingRecording || stoppingSpeakingRecording) {
+    (activeSpeakingRecording || stoppingSpeakingRecording).discard = true;
+  }
+  void stopSpeakingRecording();
+  speakingSessionAudioDraft = null;
+  speakingSessionAudioError = "";
   guideView.classList.add("is-hidden");
   listenAudio.pause();
   listenAudio.currentTime = 0;
   pausePart2Audio();
   pausePart3Audio();
   pausePart4Audio();
+};
+
+const renderSpeakingRecordingStatus = () => {
+  const status = [...taskBody.querySelectorAll("[data-speaking-session-recording-status]")];
+  if (status.length === 0) {
+    return;
+  }
+  const recording = activeSpeakingRecording || stoppingSpeakingRecording;
+  const message = recording?.recorder.state === "recording"
+    ? "● Đang ghi âm liên tục toàn bài. Bản ghi sẽ dừng khi bạn bấm Hoàn thành."
+    : speakingSessionAudioError
+      ? speakingSessionAudioError
+      : speakingSessionAudioDraft
+        ? "Đã dừng ghi âm. Bản ghi của toàn bài sẵn sàng để gửi chấm."
+        : "Bấm nút bắt đầu thời gian ở Part 1 để vừa chạy giờ vừa bắt đầu ghi âm toàn bài.";
+  status.forEach((element) => {
+    element.textContent = message;
+  });
+};
+
+const stopSpeakingRecording = () => {
+  const recording = activeSpeakingRecording;
+  if (!recording) {
+    return speakingRecordingStopPromise || Promise.resolve();
+  }
+  if (recording.recorder.state === "inactive") {
+    return speakingRecordingStopPromise || Promise.resolve();
+  }
+
+  let resolveStop;
+  recording.stopPromise = new Promise((resolve) => {
+    resolveStop = resolve;
+    recording.recorder.addEventListener("stop", () => {
+      window.clearTimeout(recording.timeout);
+      recording.stream.getTracks().forEach((track) => track.stop());
+      const blob = new Blob(recording.chunks, { type: recording.recorder.mimeType || "audio/webm" });
+      if (blob.size > 0 && !recording.discard) {
+        speakingSessionAudioDraft = blob;
+        speakingSessionAudioError = recording.autoStopped
+          ? "Bản ghi đã tự dừng sau 10 phút; phần đã ghi sẵn sàng để chấm."
+          : "";
+      } else if (!recording.discard) {
+        speakingSessionAudioError = "Không thu được âm thanh. Hãy bắt đầu ghi âm lại từ Part 1.";
+      }
+      if (activeSpeakingRecording === recording) {
+        activeSpeakingRecording = null;
+      }
+      if (stoppingSpeakingRecording === recording) {
+        stoppingSpeakingRecording = null;
+      }
+      renderSpeakingRecordingStatus();
+      resolve();
+    }, { once: true });
+  });
+  activeSpeakingRecording = null;
+  stoppingSpeakingRecording = recording;
+  const stopPromise = recording.stopPromise.finally(() => {
+    if (speakingRecordingStopPromise === stopPromise) {
+      speakingRecordingStopPromise = null;
+    }
+    if (stoppingSpeakingRecording === recording) {
+      stoppingSpeakingRecording = null;
+    }
+  });
+  speakingRecordingStopPromise = stopPromise;
+  try {
+    recording.recorder.stop();
+  } catch (error) {
+    console.error("Could not stop Speaking recording", error instanceof Error ? error.name : "unknown error");
+    window.clearTimeout(recording.timeout);
+    recording.stream.getTracks().forEach((track) => track.stop());
+    activeSpeakingRecording = null;
+    stoppingSpeakingRecording = null;
+    speakingSessionAudioError = "Không thể hoàn tất bản ghi âm. Hãy thử ghi lại bài nói từ Part 1.";
+    renderSpeakingRecordingStatus();
+    resolveStop();
+  }
+  return stopPromise;
+};
+
+const startSpeakingSessionRecording = async () => {
+  if (speakingMicrophoneRequest) {
+    showToast("Đang chờ quyền truy cập micro. Hãy đợi rồi thử lại.");
+    return false;
+  }
+  if (!navigator.mediaDevices?.getUserMedia || typeof window.MediaRecorder !== "function") {
+    showToast("Trình duyệt không hỗ trợ ghi âm. Hãy thử dùng Chrome hoặc Edge qua HTTPS.");
+    return false;
+  }
+
+  let stream;
+  speakingMicrophoneRequest = true;
+  try {
+    if (activeSpeakingRecording) {
+      await stopSpeakingRecording();
+    } else if (speakingRecordingStopPromise) {
+      await speakingRecordingStopPromise;
+    }
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (error) {
+    speakingMicrophoneRequest = false;
+    showToast(error.name === "NotAllowedError"
+      ? "Bạn chưa cấp quyền micro. Hãy bật quyền truy cập micro rồi thử lại."
+      : "Không mở được micro. Hãy kiểm tra thiết bị và quyền truy cập.");
+    return false;
+  }
+  speakingMicrophoneRequest = false;
+  if (activeSkill?.name !== "Speaking" || activePart !== 0) {
+    stream.getTracks().forEach((track) => track.stop());
+    return false;
+  }
+
+  const mimeType = typeof MediaRecorder.isTypeSupported === "function"
+    ? ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"]
+      .find((type) => MediaRecorder.isTypeSupported(type))
+    : "";
+  let recorder;
+  try {
+    recorder = new MediaRecorder(stream, {
+      ...(mimeType && { mimeType }),
+      audioBitsPerSecond: 32_000,
+    });
+  } catch {
+    stream.getTracks().forEach((track) => track.stop());
+    showToast("Không thể bắt đầu ghi âm với định dạng âm thanh của trình duyệt này.");
+    return false;
+  }
+
+  const recording = {
+    recorder,
+    stream,
+    chunks: [],
+    discard: false,
+    autoStopped: false,
+    timeout: null,
+    stopPromise: null,
+  };
+  activeSpeakingRecording = recording;
+  recorder.addEventListener("dataavailable", (event) => {
+    if (event.data.size > 0) {
+      recording.chunks.push(event.data);
+    }
+  });
+  try {
+    recorder.start();
+  } catch {
+    activeSpeakingRecording = null;
+    stream.getTracks().forEach((track) => track.stop());
+    showToast("Không thể bắt đầu ghi âm. Hãy kiểm tra micro và thử lại.");
+    return false;
+  }
+  speakingSessionAudioDraft = null;
+  speakingSessionAudioError = "";
+  renderSpeakingRecordingStatus();
+  recording.timeout = window.setTimeout(() => {
+    if (recorder.state === "recording") {
+      recording.autoStopped = true;
+      void stopSpeakingRecording();
+    }
+  }, 600_000);
+  return true;
 };
 
 const startSessionTimer = (seconds) => {
@@ -2748,6 +2921,187 @@ const requestWritingFeedback = async (button) => {
   }
 };
 
+const appendSpeakingText = (parent, tagName, className, text) => {
+  const element = document.createElement(tagName);
+  if (className) {
+    element.className = className;
+  }
+  element.textContent = text;
+  parent.append(element);
+  return element;
+};
+
+const renderSpeakingFeedback = (container, feedback) => {
+  const result = document.createElement("section");
+  result.className = "speaking-feedback-result";
+  const summary = document.createElement("div");
+  summary.className = "speaking-feedback-summary";
+  appendSpeakingText(summary, "strong", "", `Điểm tham khảo: ${feedback.overallScore}/100 · ${feedback.estimatedLevel}`);
+  appendSpeakingText(summary, "p", "", feedback.summary);
+  result.append(summary);
+
+  const criteria = document.createElement("ul");
+  criteria.className = "speaking-feedback-criteria";
+  feedback.criteria.forEach((criterion) => {
+    const item = document.createElement("li");
+    appendSpeakingText(item, "strong", "", `${criterion.name} · ${criterion.score}/5`);
+    appendSpeakingText(item, "p", "", criterion.feedback);
+    criteria.append(item);
+  });
+  result.append(criteria);
+
+  const transcript = document.createElement("article");
+  transcript.className = "speaking-feedback-answer";
+  appendSpeakingText(transcript, "h3", "", "Bản chép lời toàn bài");
+  appendSpeakingText(transcript, "p", "speaking-feedback-transcript", feedback.transcript);
+  result.append(transcript);
+
+  if (feedback.corrections.length > 0) {
+    const corrections = document.createElement("section");
+    corrections.className = "speaking-feedback-answer";
+    appendSpeakingText(corrections, "h3", "", "Một số điểm cần sửa");
+    const correctionList = document.createElement("ul");
+    correctionList.className = "speaking-feedback-corrections";
+    feedback.corrections.forEach((correction) => {
+      const item = document.createElement("li");
+      appendSpeakingText(item, "strong", "", `${correction.original} → ${correction.correction}`);
+      appendSpeakingText(item, "p", "", correction.explanation);
+      correctionList.append(item);
+    });
+    corrections.append(correctionList);
+    result.append(corrections);
+  }
+  if (feedback.improvedAnswer) {
+    const example = document.createElement("article");
+    example.className = "speaking-feedback-answer";
+    appendSpeakingText(example, "h3", "", "Câu trả lời mẫu gợi ý");
+    appendSpeakingText(example, "p", "speaking-feedback-example", feedback.improvedAnswer);
+    result.append(example);
+  }
+  appendSpeakingText(
+    result,
+    "p",
+    "speaking-feedback-disclaimer",
+    "Đây là nhận xét luyện tập dựa trên nội dung bản chép lời, không phải kết quả Aptis chính thức. AI không đánh giá chính xác phát âm hoặc độ trôi chảy qua bản chép lời.",
+  );
+  container.replaceChildren(result);
+};
+
+const returnToSpeakingPractice = () => {
+  if (activeSkill?.name !== "Speaking") {
+    return;
+  }
+  practiceView.querySelector(".practice-actions").hidden = false;
+  partTabs.hidden = false;
+  activePart = 0;
+  renderPart();
+};
+
+const requestSpeakingFeedback = async (button) => {
+  const requestedSkill = activeSkill;
+  if (requestedSkill?.name !== "Speaking") {
+    return;
+  }
+  const panel = button.closest("[data-speaking-results]");
+  const status = panel.querySelector("[data-speaking-results-status]");
+  const feedbackContainer = panel.querySelector("[data-speaking-feedback]");
+  const exam = speakingExamData.exams.find((item) => item.id === requestedSkill.topicId);
+  if (!speakingSessionAudioDraft) {
+    status.textContent = "Chưa có bản ghi âm. Hãy quay lại Part 1, bấm nút thời gian để bắt đầu làm bài rồi hoàn thành các Part.";
+    return;
+  }
+
+  const questions = exam.parts.flatMap((part, partIndex) => part.questions.map((label) => ({
+    part: partIndex + 1,
+    label,
+  })));
+  const formData = new FormData();
+  formData.append("topic", requestedSkill.topicTitle);
+  formData.append("task", questions.map((question) => `Part ${question.part}: ${question.label}`).join("\n"));
+  formData.append("questions", JSON.stringify(questions));
+  const extension = speakingSessionAudioDraft.type.includes("mp4")
+    ? "mp4"
+    : speakingSessionAudioDraft.type.includes("ogg")
+      ? "ogg"
+      : "webm";
+  formData.append("audio", speakingSessionAudioDraft, `speaking-test.${extension}`);
+
+  button.disabled = true;
+  status.textContent = "Đang chuyển bản ghi toàn bài thành văn bản và gửi tới AI để chấm...";
+  feedbackContainer.replaceChildren();
+  try {
+    let response;
+    try {
+      response = await fetch("/api/speaking-feedback", {
+        method: "POST",
+        body: formData,
+      });
+    } catch {
+      status.textContent = "Không kết nối được dịch vụ chấm bài. Hãy kiểm tra mạng và thử lại.";
+      return;
+    }
+    if (!response.headers.get("content-type")?.toLowerCase().includes("application/json")) {
+      status.textContent = "AI chưa được cấu hình trên website này. Cần triển khai Pages Function và bật Workers AI binding.";
+      return;
+    }
+    let feedback;
+    try {
+      feedback = await response.json();
+    } catch {
+      status.textContent = "Dịch vụ AI trả về dữ liệu không hợp lệ. Hãy thử lại.";
+      return;
+    }
+    if (!response.ok) {
+      status.textContent = feedback.error || "Không thể chấm bài lúc này. Hãy thử lại.";
+      return;
+    }
+    if (activeSkill !== requestedSkill || !panel.isConnected) {
+      return;
+    }
+    renderSpeakingFeedback(feedbackContainer, feedback);
+    status.textContent = "Đã chấm xong.";
+  } finally {
+    button.disabled = false;
+  }
+};
+
+const showSpeakingResults = async () => {
+  if (activeSkill?.name !== "Speaking") {
+    return;
+  }
+  stopResponseTimer("Đã dừng");
+  await stopSpeakingRecording();
+  partTabs.hidden = true;
+  practiceView.querySelector(".practice-actions").hidden = true;
+  taskKicker.textContent = `Speaking · Đề ${activeSkill.topicId} · Kết quả tham khảo`;
+  practiceTitle.textContent = "Kết quả chấm Speaking";
+  taskBody.innerHTML = `
+    <section class="speaking-results" data-speaking-results aria-labelledby="speakingResultsTitle">
+      <div class="speaking-results-heading">
+        <div>
+          <h2 id="speakingResultsTitle">Chấm và chữa bài nói bằng AI</h2>
+          <p>Bản ghi liên tục từ lúc bắt đầu giờ Part 1 đến khi bấm Hoàn thành sẽ được chuyển thành văn bản để chấm nội dung, ngữ pháp và từ vựng.</p>
+        </div>
+        <button class="primary-button" type="button" data-speaking-feedback-check>Chấm bài nói</button>
+      </div>
+      <p class="speaking-results-status" data-speaking-results-status aria-live="polite">Bản ghi được gửi tới Cloudflare AI để chép lời và chấm nội dung; không lưu trong trình duyệt sau khi rời phiên này.</p>
+      <div data-speaking-feedback></div>
+      <div class="speaking-results-actions">
+        <button class="secondary-button" type="button" data-speaking-return>Quay lại bài làm</button>
+        <button class="secondary-button" type="button" data-speaking-list>Danh sách bộ đề</button>
+      </div>
+    </section>
+  `;
+  const checkButton = taskBody.querySelector("[data-speaking-feedback-check]");
+  if (speakingSessionAudioDraft) {
+    void requestSpeakingFeedback(checkButton);
+  } else {
+    taskBody.querySelector("[data-speaking-results-status]").textContent =
+      speakingSessionAudioError
+        || "Bạn chưa ghi âm bài thi. Hãy quay lại Part 1, bấm nút thời gian để bắt đầu ghi âm rồi làm lại các Part.";
+  }
+};
+
 const renderPart = () => {
   const part = activeSkill.parts[activePart];
   taskKicker.textContent = part.kicker;
@@ -2755,7 +3109,9 @@ const renderPart = () => {
   const isReading = activeSkill.name === "Reading";
   taskBody.setAttribute("aria-labelledby", isReading ? "readingQuestionTitle" : `part-tab-${activePart}`);
   taskBody.innerHTML = part.body;
-  if (activeSkill.name === "Writing") {
+  if (activeSkill.name === "Speaking") {
+    renderSpeakingRecordingStatus();
+  } else if (activeSkill.name === "Writing") {
     restoreWritingAnswers();
     if (part.available) {
       taskBody.insertAdjacentHTML("beforeend", writingAiPanelMarkup);
@@ -3270,7 +3626,9 @@ const startSpeakingTest = (topicId) => {
   }));
   hideToast();
   stopSession();
-  activeSkill = { ...skills.Speaking, name: "Speaking", parts, topicTitle: topic.title };
+  speakingSessionAudioDraft = null;
+  speakingSessionAudioError = "";
+  activeSkill = { ...skills.Speaking, name: "Speaking", parts, topicId, topicTitle: topic.title };
   activePart = 0;
   homeView.classList.add("is-hidden");
   readingView.classList.add("is-hidden");
@@ -3279,6 +3637,7 @@ const startSpeakingTest = (topicId) => {
   speakingView.classList.add("is-hidden");
   practiceView.classList.remove("is-hidden", "is-reading-detail");
   practiceView.setAttribute("aria-labelledby", "practiceTitle");
+  practiceView.querySelector(".practice-actions").hidden = false;
   practiceBackButton.innerHTML = '<span aria-hidden="true">←</span> Danh sách bộ đề';
   practiceHeading.hidden = false;
   readingQuestionHeading.hidden = true;
@@ -4613,8 +4972,7 @@ nextButton.addEventListener("click", () => {
     return;
   }
   if (activeSkill.name === "Speaking") {
-    startSpeaking();
-    showToast("Bạn đã hoàn thành bộ đề Speaking!");
+    void showSpeakingResults();
     return;
   }
   stopSession();
@@ -4820,6 +5178,26 @@ practiceView.addEventListener("click", (event) => {
 
   const responseButton = event.target.closest("[data-response-timer]");
   if (responseButton) {
+    if (activeSkill?.name === "Speaking" && activePart === 0) {
+      responseButton.disabled = true;
+      responseButton.textContent = "Đang mở micro...";
+      startSpeakingSessionRecording().then((started) => {
+        if (started) {
+          startResponseTimer(responseButton);
+        } else if (responseButton.isConnected) {
+          responseButton.disabled = false;
+          responseButton.textContent = responseButton.dataset.responseStartLabel;
+        }
+      }).catch((error) => {
+        console.error("Speaking recording failed", error instanceof Error ? error.name : "unknown error");
+        if (responseButton.isConnected) {
+          responseButton.disabled = false;
+          responseButton.textContent = responseButton.dataset.responseStartLabel;
+        }
+        showToast("Không thể bắt đầu ghi âm. Hãy kiểm tra micro và thử lại.");
+      });
+      return;
+    }
     startResponseTimer(responseButton);
   }
 
@@ -4899,6 +5277,28 @@ taskBody.addEventListener("input", (event) => {
 });
 
 taskBody.addEventListener("click", (event) => {
+  const speakingCheckButton = event.target.closest("[data-speaking-feedback-check]");
+  if (speakingCheckButton) {
+    requestSpeakingFeedback(speakingCheckButton).catch((error) => {
+      console.error("Speaking feedback rendering failed", error instanceof Error ? error.name : "unknown error");
+      const panel = speakingCheckButton.closest("[data-speaking-results]");
+      if (panel) {
+        panel.querySelector("[data-speaking-results-status]").textContent = "Không thể hiển thị nhận xét. Hãy thử chấm lại.";
+      }
+    });
+    return;
+  }
+
+  if (event.target.closest("[data-speaking-return]")) {
+    returnToSpeakingPractice();
+    return;
+  }
+
+  if (event.target.closest("[data-speaking-list]")) {
+    startSpeaking();
+    return;
+  }
+
   const saveKeyButton = event.target.closest("[data-writing-ai-key-save]");
   if (saveKeyButton) {
     saveWritingAiKey(saveKeyButton);

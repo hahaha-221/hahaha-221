@@ -4,7 +4,7 @@ A static HTML/CSS/JavaScript website for practicing Aptis Listening, Reading, Wr
 
 ## Run the website
 
-Open `index.html` in a browser for the practice features. AI Writing feedback requires the deployed API setup below.
+Open `index.html` in a browser for the practice features. AI feedback requires the deployed API setup below.
 
 All website source files and assets are included in this project and can be edited directly.
 
@@ -27,3 +27,9 @@ The Writing panel's optional personal-key controls save or remove the key in the
 For local development, install Node.js and Wrangler, create a root `.dev.vars` file with `WRITING_RATE_LIMIT_HASH_SECRET="a-long-random-secret"`, configure local D1 and Workers AI bindings (`WRITING_RATE_LIMITS` and `AI`), and apply the schema to the local database. Run `npx wrangler pages dev . --ai=AI`. `.dev.vars` and `.env` files are ignored by Git. The basic Python static server does not execute Pages Functions.
 
 The feedback panel explains which AI provider is used and advises learners not to include personal information. It returns an estimated CEFR level, four rubric scores, item-level comments, corrections, and improved examples.
+
+## AI Speaking feedback
+
+Speaking uses one continuous browser-microphone recording. It starts when the learner starts the Part 1 timer and continues through the Parts until they choose **Hoàn thành**. The site then sends the recording to the `/api/speaking-feedback` Pages Function. Cloudflare Workers AI uses `@cf/openai/whisper-large-v3-turbo` to transcribe it and `@cf/meta/llama-3.3-70b-instruct-fp8-fast` to provide practice feedback. This uses the existing `AI`, `WRITING_RATE_LIMITS`, and `WRITING_RATE_LIMIT_HASH_SECRET` bindings described above; Speaking attempts share the same per-IP limits as Writing. The browser must support `MediaRecorder` and microphone access, and microphone access requires HTTPS or localhost.
+
+Audio stays in browser memory during the practice session and is uploaded for transcription and scoring only when the learner submits the test. The browser keeps no recording after leaving the session. Feedback is based on the transcript and does not reliably grade pronunciation, accent, or spoken fluency; scores are practice estimates, not official Aptis results. The standard AI and D1 setup above also enables this endpoint.
