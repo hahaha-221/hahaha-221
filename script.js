@@ -2284,6 +2284,7 @@ let listeningAnswerChecked = false;
 let activeSkill = null;
 let activePart = 0;
 let writingAnswerDrafts = [];
+let writingAiFeedbackDrafts = [];
 let secondsRemaining = 0;
 let timerInterval = null;
 let responseInterval = null;
@@ -2502,6 +2503,176 @@ const restoreWritingAnswers = () => {
   });
 };
 
+const writingAiPanelMarkup = `
+  <section class="writing-ai-panel" data-writing-ai-panel aria-labelledby="writingAiTitle">
+    <div class="writing-ai-panel-header">
+      <div>
+        <h2 id="writingAiTitle">Chấm và chữa bài bằng AI</h2>
+        <p>AI đưa ra mức CEFR và nhận xét tham khảo, không phải điểm Aptis chính thức.</p>
+      </div>
+      <button class="primary-button" type="button" data-writing-ai-check>Chấm &amp; chữa bài</button>
+    </div>
+    <p class="writing-ai-privacy">Bài viết sẽ được gửi đến Google Gemini để đánh giá. Không nhập thông tin cá nhân.</p>
+    <p class="writing-ai-status" data-writing-ai-status role="status" aria-live="polite"></p>
+    <div class="writing-ai-result" data-writing-ai-result aria-live="polite"></div>
+  </section>
+`;
+
+const appendWritingText = (parent, tagName, className, text) => {
+  const element = document.createElement(tagName);
+  if (className) {
+    element.className = className;
+  }
+  element.textContent = text;
+  parent.append(element);
+  return element;
+};
+
+const renderWritingFeedback = (panel, feedback) => {
+  const result = panel.querySelector("[data-writing-ai-result]");
+  result.replaceChildren();
+  const criterionLabels = {
+    "Task fulfillment": "Đáp ứng yêu cầu",
+    "Grammar and accuracy": "Ngữ pháp và độ chính xác",
+    Vocabulary: "Từ vựng",
+    "Coherence and organization": "Mạch lạc và bố cục",
+  };
+
+  const overview = document.createElement("div");
+  overview.className = "writing-ai-overview";
+  appendWritingText(overview, "strong", "", `Mức CEFR ước lượng: ${feedback.estimatedLevel} · Điểm tham khảo: ${feedback.overallScore}/100`);
+  appendWritingText(overview, "p", "", feedback.summary);
+  appendWritingText(overview, "p", "writing-ai-disclaimer", "Kết quả do AI tạo để luyện tập; có thể chưa chính xác và không thay thế kết quả thi thật.");
+  result.append(overview);
+
+  const criteria = document.createElement("ul");
+  criteria.className = "writing-ai-criteria";
+  feedback.criteria.forEach((criterion) => {
+    const item = document.createElement("li");
+    appendWritingText(item, "strong", "", `${criterionLabels[criterion.name] || criterion.name}: ${criterion.score}/5`);
+    appendWritingText(item, "p", "", criterion.feedback);
+    criteria.append(item);
+  });
+  result.append(criteria);
+
+  const answers = document.createElement("div");
+  answers.className = "writing-ai-answers";
+  feedback.answers.forEach((answer) => {
+    const card = document.createElement("section");
+    card.className = "writing-ai-answer";
+    appendWritingText(card, "h3", "", `${answer.label} · ${answer.score}/5`);
+    appendWritingText(card, "p", "", answer.feedback);
+
+    if (answer.errors.length) {
+      const errorList = document.createElement("ul");
+      errorList.className = "writing-ai-errors";
+      answer.errors.forEach((error) => {
+        const item = document.createElement("li");
+        appendWritingText(item, "strong", "", `${error.original} → ${error.correction}`);
+        appendWritingText(item, "p", "", error.explanation);
+        errorList.append(item);
+      });
+      card.append(errorList);
+    }
+
+    if (answer.correctedAnswer) {
+      appendWritingText(card, "p", "writing-ai-example", `Bản sửa: ${answer.correctedAnswer}`);
+    }
+    if (answer.improvedAnswer) {
+      appendWritingText(card, "p", "writing-ai-example", `Cách viết gợi ý: ${answer.improvedAnswer}`);
+    }
+    answers.append(card);
+  });
+  result.append(answers);
+};
+
+const requestWritingFeedback = async (button) => {
+  if (activeSkill?.name !== "Writing") {
+    return;
+  }
+
+  const requestedSkill = activeSkill;
+  const requestedPart = activePart;
+  const panel = button.closest("[data-writing-ai-panel]");
+  const status = panel.querySelector("[data-writing-ai-status]");
+  const result = panel.querySelector("[data-writing-ai-result]");
+  const fields = getWritingFields();
+  const answers = fields.map((field, index) => ({
+    label: field.closest(".question-card")?.querySelector("strong")?.textContent.trim()
+      || field.closest(".writing-email-task")?.querySelector("h3")?.textContent.trim()
+      || `Câu trả lời ${index + 1}`,
+    text: field.value,
+    maxWords: field.dataset.maxWords ? Number(field.dataset.maxWords) : null,
+  }));
+
+  if (!answers.some((answer) => answer.text.trim())) {
+    status.textContent = "Hãy nhập ít nhất một câu trả lời trước khi chấm.";
+    return;
+  }
+
+  captureWritingAnswers();
+  const submittedAnswers = answers.map((answer) => answer.text);
+  const source = document.createElement("div");
+  source.innerHTML = requestedSkill.parts[requestedPart].body;
+  const task = source.textContent.replace(/\s+/g, " ").trim();
+
+  button.disabled = true;
+  status.textContent = "Đang gửi bài đến Gemini để chấm...";
+  result.replaceChildren();
+
+  try {
+    let response;
+    try {
+      response = await fetch("/api/writing-feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          part: requestedPart + 1,
+          topic: requestedSkill.topicTitle,
+          task,
+          answers,
+        }),
+      });
+    } catch {
+      status.textContent = "Không kết nối được dịch vụ chấm bài. Hãy kiểm tra mạng và thử lại.";
+      return;
+    }
+
+    if (!response.headers.get("content-type")?.toLowerCase().includes("application/json")) {
+      status.textContent = "AI chưa được cấu hình trên website này. Cần triển khai Cloudflare Pages Function và thêm Gemini API key.";
+      return;
+    }
+
+    let feedback;
+    try {
+      feedback = await response.json();
+    } catch {
+      status.textContent = "Dịch vụ AI trả về dữ liệu không hợp lệ. Hãy thử lại.";
+      return;
+    }
+
+    if (!response.ok) {
+      status.textContent = feedback.error || "Không thể chấm bài lúc này. Hãy thử lại.";
+      return;
+    }
+
+    if (activeSkill !== requestedSkill || activePart !== requestedPart) {
+      return;
+    }
+    const currentAnswers = getWritingFields().map((field) => field.value);
+    if (currentAnswers.some((answer, index) => answer !== submittedAnswers[index])) {
+      status.textContent = "Câu trả lời đã thay đổi trong lúc chấm. Hãy chấm lại để nhận góp ý mới.";
+      return;
+    }
+
+    writingAiFeedbackDrafts[requestedPart] = feedback;
+    renderWritingFeedback(panel, feedback);
+    status.textContent = "Đã chấm xong.";
+  } finally {
+    button.disabled = false;
+  }
+};
+
 const renderPart = () => {
   const part = activeSkill.parts[activePart];
   taskKicker.textContent = part.kicker;
@@ -2511,6 +2682,14 @@ const renderPart = () => {
   taskBody.innerHTML = part.body;
   if (activeSkill.name === "Writing") {
     restoreWritingAnswers();
+    if (part.available) {
+      taskBody.insertAdjacentHTML("beforeend", writingAiPanelMarkup);
+      const savedFeedback = writingAiFeedbackDrafts[activePart];
+      if (savedFeedback) {
+        renderWritingFeedback(taskBody.querySelector("[data-writing-ai-panel]"), savedFeedback);
+        taskBody.querySelector("[data-writing-ai-status]").textContent = "Đã chấm xong.";
+      }
+    }
   }
   progressLabel.textContent = `${activeSkill.name} · Part ${activePart + 1} / ${activeSkill.parts.length}`;
   previousButton.disabled = activePart === 0;
@@ -3062,22 +3241,27 @@ const startWritingTopic = (topicId) => {
     return;
   }
   const exercise = writingSourceExercises.find((item) => item.id === topic.id);
-  const parts = skills.Writing.parts.map((part, index) => ({
-    ...part,
-    kicker: `Writing · ${topic.title} · Part ${index + 1}`,
-    title: `${part.title} · ${topic.title}`,
-    body: exercise?.parts[index] ?? `
-      <div class="writing-unavailable" role="status">
-        <strong>Nội dung Part ${index + 1} chưa có trong video nguồn.</strong>
-        <p>Không tạo đề thay thế để tránh sai khác với tài liệu gốc.</p>
-      </div>
-    `,
-  }));
+  const parts = skills.Writing.parts.map((part, index) => {
+    const body = exercise?.parts[index];
+    return {
+      ...part,
+      kicker: `Writing · ${topic.title} · Part ${index + 1}`,
+      title: `${part.title} · ${topic.title}`,
+      available: typeof body === "string" && body.trim().length > 0,
+      body: body ?? `
+        <div class="writing-unavailable" role="status">
+          <strong>Nội dung Part ${index + 1} chưa có trong video nguồn.</strong>
+          <p>Không tạo đề thay thế để tránh sai khác với tài liệu gốc.</p>
+        </div>
+      `,
+    };
+  });
   hideToast();
   stopSession();
   activeSkill = { ...skills.Writing, parts, name: "Writing", topicId: topic.id, topicTitle: topic.title };
   activePart = 0;
   writingAnswerDrafts = Array.from({ length: skills.Writing.parts.length }, () => []);
+  writingAiFeedbackDrafts = Array.from({ length: skills.Writing.parts.length }, () => null);
   homeView.classList.add("is-hidden");
   readingView.classList.add("is-hidden");
   listeningView.classList.add("is-hidden");
@@ -4609,6 +4793,15 @@ taskBody.addEventListener("input", (event) => {
     return;
   }
 
+  if (event.isTrusted && activeSkill?.name === "Writing" && writingAiFeedbackDrafts[activePart]) {
+    writingAiFeedbackDrafts[activePart] = null;
+    const panel = taskBody.querySelector("[data-writing-ai-panel]");
+    if (panel) {
+      panel.querySelector("[data-writing-ai-result]").replaceChildren();
+      panel.querySelector("[data-writing-ai-status]").textContent = "Câu trả lời đã đổi. Hãy chấm lại để xem nhận xét mới.";
+    }
+  }
+
   const maxWords = Number(field.dataset.maxWords);
   if (maxWords > 0) {
     const words = field.value.match(/\S+/g) || [];
@@ -4626,4 +4819,19 @@ taskBody.addEventListener("input", (event) => {
       ? `${count}/${maxWords} words`
       : `${count} ${count === 1 ? "word" : "words"}`;
   }
+});
+
+taskBody.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-writing-ai-check]");
+  if (!button) {
+    return;
+  }
+
+  requestWritingFeedback(button).catch((error) => {
+    console.error("Writing feedback rendering failed", error instanceof Error ? error.name : "unknown error");
+    const panel = button.closest("[data-writing-ai-panel]");
+    if (panel) {
+      panel.querySelector("[data-writing-ai-status]").textContent = "Không thể hiển thị nhận xét. Hãy tải lại bài và thử lại.";
+    }
+  });
 });
