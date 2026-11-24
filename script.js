@@ -2973,26 +2973,48 @@ const requestWritingFeedback = async (button) => {
           parts,
         }),
       });
-    } catch {
-      status.textContent = "Không kết nối được dịch vụ chấm bài. Hãy kiểm tra mạng và thử lại.";
+    } catch (error) {
+      const errorName = error instanceof Error ? error.name : "UnknownError";
+      const errorMessage = error instanceof Error && error.message ? error.message : String(error);
+      console.error("Writing feedback network request failed", { errorName, errorMessage });
+      status.textContent = `Không nhận được phản hồi từ /api/writing-feedback (${errorName}: ${errorMessage}). Kiểm tra mạng và xác nhận Pages Function đã được triển khai trên domain này.`;
       return;
     }
 
-    if (!response.headers.get("content-type")?.toLowerCase().includes("application/json")) {
-      status.textContent = "AI chưa được cấu hình trên website này. Cần triển khai Pages Function và bật Workers AI binding.";
+    const responseContentType = response.headers.get("content-type")?.toLowerCase() || "";
+    let responseBody;
+    try {
+      responseBody = await response.text();
+    } catch (error) {
+      const errorName = error instanceof Error ? error.name : "UnknownError";
+      const errorMessage = error instanceof Error && error.message ? error.message : String(error);
+      status.textContent = `HTTP ${response.status}: Không đọc được phản hồi từ dịch vụ (${errorName}: ${errorMessage}).`;
+      return;
+    }
+    if (!responseContentType.includes("application/json")) {
+      const serverDetail = responseContentType.includes("text/html")
+        ? "Cloudflare trả về HTML thay vì JSON; hãy kiểm tra Pages Function, route /api/writing-feedback và phương thức deploy."
+        : responseBody.replace(/\s+/g, " ").trim().slice(0, 400);
+      const httpStatus = `HTTP ${response.status}${response.statusText ? ` ${response.statusText}` : ""}`;
+      status.textContent = `${httpStatus}: ${serverDetail || "Máy chủ không trả về JSON."}`;
       return;
     }
 
     let feedback;
     try {
-      feedback = await response.json();
+      feedback = JSON.parse(responseBody);
     } catch {
-      status.textContent = "Dịch vụ AI trả về dữ liệu không hợp lệ. Hãy thử lại.";
+      status.textContent = `HTTP ${response.status}: Dịch vụ AI trả về JSON không hợp lệ.`;
       return;
     }
 
     if (!response.ok) {
-      status.textContent = feedback.error || "Không thể chấm bài lúc này. Hãy thử lại.";
+      const serverMessage = typeof feedback.error === "string"
+        ? feedback.error
+        : typeof feedback.message === "string"
+          ? feedback.message
+          : "Máy chủ từ chối yêu cầu nhưng không gửi thông báo lỗi.";
+      status.textContent = `HTTP ${response.status}${response.statusText ? ` ${response.statusText}` : ""}: ${serverMessage}`;
       return;
     }
 
