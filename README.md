@@ -26,7 +26,7 @@ The Writing panel's optional personal-key controls save or remove the key in the
 
 For local development, install Node.js and Wrangler, create a root `.dev.vars` file with `WRITING_RATE_LIMIT_HASH_SECRET="a-long-random-secret"`, configure local D1 and Workers AI bindings (`WRITING_RATE_LIMITS` and `AI`), and apply the schema to the local database. Run `npx wrangler pages dev . --ai=AI`. `.dev.vars` and `.env` files are ignored by Git. The basic Python static server does not execute Pages Functions.
 
-The results page explains which AI provider is used and advises learners not to include personal information. It returns an estimated CEFR level for the complete submission, four rubric scores, and item-level comments, corrections, and improved examples for the answers across all Parts.
+The results page explains which AI provider is used and advises learners not to include personal information. It returns an estimated CEFR level for the complete submission, four rubric scores, and item-level comments, corrections, and full sample responses for all Parts. Part 3 and Part 4 samples are checked against the word ranges shown in each task, including complete email examples.
 
 ## AI Speaking feedback
 

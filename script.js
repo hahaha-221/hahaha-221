@@ -2659,6 +2659,22 @@ const getWritingFields = (container = taskBody, partIndex = activePart) => {
   return [];
 };
 
+const getWritingWordRange = (field, fallbackContainer, partIndex) => {
+  const scope = field.closest(".question-card, .writing-email-task") || fallbackContainer;
+  const rangeSource = [1, 2].includes(partIndex) ? fallbackContainer.textContent : scope.textContent;
+  const ranges = [...rangeSource.matchAll(/(\d{1,3})\s*[-–]\s*(\d{1,3})\s*(?:từ|words?)/gi)]
+    .map((match) => ({
+      minWords: Number(match[1]),
+      maxWords: Number(match[2]),
+    }));
+  if (!ranges.length) {
+    return null;
+  }
+  const minWords = Math.max(...ranges.map((range) => range.minWords));
+  const maxWords = Math.min(...ranges.map((range) => range.maxWords));
+  return minWords <= maxWords ? { minWords, maxWords } : null;
+};
+
 const captureWritingAnswers = () => {
   if (activeSkill?.name !== "Writing" || !writingAnswerDrafts[activePart]) {
     return;
@@ -2827,7 +2843,7 @@ const renderWritingFeedback = (panel, feedback) => {
       appendWritingText(card, "p", "writing-ai-example", `Bản sửa: ${answer.correctedAnswer}`);
     }
     if (answer.improvedAnswer) {
-      appendWritingText(card, "p", "writing-ai-example", `Cách viết gợi ý: ${answer.improvedAnswer}`);
+      appendWritingText(card, "p", "writing-ai-example", `Câu trả lời mẫu: ${answer.improvedAnswer}`);
     }
     answers.append(card);
   });
@@ -2847,13 +2863,17 @@ const requestWritingFeedback = async (button) => {
   const parts = requestedSkill.parts.map((part, index) => {
     const source = document.createElement("div");
     source.innerHTML = part.body;
-    const answers = getWritingFields(source, index).map((field, answerIndex) => ({
-      label: field.closest(".question-card")?.querySelector("strong")?.textContent.trim()
-        || field.closest(".writing-email-task")?.querySelector("h3")?.textContent.trim()
-        || `Câu trả lời ${answerIndex + 1}`,
-      text: writingAnswerDrafts[index]?.[answerIndex] ?? "",
-      maxWords: field.dataset.maxWords ? Number(field.dataset.maxWords) : null,
-    }));
+    const answers = getWritingFields(source, index).map((field, answerIndex) => {
+      const wordRange = getWritingWordRange(field, source, index);
+      return {
+        label: field.closest(".question-card")?.querySelector("strong")?.textContent.trim()
+          || field.closest(".writing-email-task")?.querySelector("h3")?.textContent.trim()
+          || `Câu trả lời ${answerIndex + 1}`,
+        text: writingAnswerDrafts[index]?.[answerIndex] ?? "",
+        minWords: wordRange?.minWords ?? null,
+        maxWords: field.dataset.maxWords ? Number(field.dataset.maxWords) : wordRange?.maxWords ?? null,
+      };
+    });
     return {
       part: index + 1,
       task: source.textContent.replace(/\s+/g, " ").trim(),
