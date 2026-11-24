@@ -168,18 +168,38 @@ const validateFeedback = (value, expectedAnswers) => {
     && answer.improvedAnswer.length <= MAX_ANSWER_LENGTH);
 };
 
-const getGoogleErrorCode = async (response) => {
+const getGoogleError = async (response, apiKey) => {
   try {
-    const body = await response.json();
+    const body = await response.clone().json();
     const error = isRecord(body) && isRecord(body.error) ? body.error : null;
     const status = typeof error?.status === "string" && /^[A-Z0-9_]{1,80}$/.test(error.status)
       ? error.status
       : null;
     const code = Number.isInteger(error?.code) ? error.code : response.status;
-    return { status, code };
+    const message = typeof error?.message === "string"
+      ? error.message.split(apiKey).join("[REDACTED]").slice(0, 2000)
+      : null;
+    return { status, code, message };
   } catch {
-    return { status: null, code: response.status };
+    return { status: null, code: response.status, message: null };
   }
+};
+
+const logGoogleRejection = (response, googleError, model) => {
+  console.error("Gemini writing request rejected", JSON.stringify({
+    model,
+    httpStatus: response.status,
+    googleErrorStatus: googleError.status,
+    googleErrorCode: googleError.code,
+    googleErrorMessage: googleError.message,
+  }));
+};
+
+const describeGoogleError = (googleError) => {
+  const label = googleError.status
+    ? `${googleError.status} (${googleError.code})`
+    : `HTTP ${googleError.code}`;
+  return `${label}${googleError.message ? `: ${googleError.message}` : ""}`;
 };
 
 export async function onRequestPost({ request, env }) {
@@ -261,48 +281,66 @@ export async function onRequestPost({ request, env }) {
     task: payload.task,
     answers: payload.answers,
   });
-  const geminiEndpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
+  const geminiRequestBody = JSON.stringify({
+    systemInstruction: {
+      parts: [{ text: systemInstruction }],
+    },
+    contents: [{
+      role: "user",
+      parts: [{ text: prompt }],
+    }],
+    generationConfig: {
+      responseMimeType: "application/json",
+      responseSchema: feedbackSchema,
+      temperature: 0.2,
+      maxOutputTokens: 3000,
+    },
+  });
+  const geminiHeaders = {
+    "Content-Type": "application/json",
+    "x-goog-api-key": geminiApiKey,
+  };
+  const primaryModel = "gemini-2.5-flash";
+  const fallbackModel = "gemini-2.0-flash";
+  const geminiEndpoint = (model) =>
+    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
   let geminiResponse;
+  let primaryModelError = null;
   try {
-    geminiResponse = await fetch(geminiEndpoint, {
+    geminiResponse = await fetch(geminiEndpoint(primaryModel), {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": geminiApiKey,
-      },
-      body: JSON.stringify({
-        systemInstruction: {
-          parts: [{ text: systemInstruction }],
-        },
-        contents: [{
-          role: "user",
-          parts: [{ text: prompt }],
-        }],
-        generationConfig: {
-          responseMimeType: "application/json",
-          responseSchema: feedbackSchema,
-          temperature: 0.2,
-          maxOutputTokens: 3000,
-        },
-      }),
+      headers: geminiHeaders,
+      body: geminiRequestBody,
       signal: AbortSignal.timeout(45_000),
     });
+    if (geminiResponse.status === 404) {
+      primaryModelError = await getGoogleError(geminiResponse, geminiApiKey);
+      logGoogleRejection(geminiResponse, primaryModelError, primaryModel);
+      geminiResponse = await fetch(geminiEndpoint(fallbackModel), {
+        method: "POST",
+        headers: geminiHeaders,
+        body: geminiRequestBody,
+        signal: AbortSignal.timeout(45_000),
+      });
+    }
   } catch (error) {
     console.error("Gemini writing request failed", error instanceof Error ? error.name : "unknown error");
+    if (primaryModelError) {
+      return jsonResponse(502, {
+        error: `Không thể kết nối Gemini bằng model dự phòng. Lỗi model chính: ${describeGoogleError(primaryModelError)}.`,
+        googleErrorStatus: primaryModelError.status,
+        googleErrorCode: primaryModelError.code,
+        googleErrorMessage: primaryModelError.message,
+      });
+    }
     return jsonResponse(502, { error: "Không kết nối được Gemini. Vui lòng thử lại." });
   }
 
   if (!geminiResponse.ok) {
-    const googleError = await getGoogleErrorCode(geminiResponse);
-    const googleErrorLabel = googleError.status
-      ? `${googleError.status} (${googleError.code})`
-      : `HTTP ${googleError.code}`;
-    console.error("Gemini writing request rejected", JSON.stringify({
-      httpStatus: geminiResponse.status,
-      googleErrorStatus: googleError.status,
-      googleErrorCode: googleError.code,
-    }));
+    const googleError = await getGoogleError(geminiResponse, geminiApiKey);
+    const rejectedModel = primaryModelError ? fallbackModel : primaryModel;
+    logGoogleRejection(geminiResponse, googleError, rejectedModel);
     const customKeyError = customGeminiKey
       && [400, 401, 403].includes(geminiResponse.status);
     const customKeyQuotaError = customGeminiKey && geminiResponse.status === 429;
@@ -313,10 +351,15 @@ export async function onRequestPost({ request, env }) {
         : geminiResponse.status === 429
           ? "Gemini đang quá tải hoặc đã chạm giới hạn sử dụng. Vui lòng thử lại sau."
           : "Gemini chưa thể chấm bài lúc này. Vui lòng thử lại sau.";
+    const originalGoogleErrors = [
+      primaryModelError && `model ${primaryModel}: ${describeGoogleError(primaryModelError)}`,
+      `model ${rejectedModel}: ${describeGoogleError(googleError)}`,
+    ].filter(Boolean).join("; ");
     return jsonResponse(502, {
-      error: `${message} Mã lỗi Google: ${googleErrorLabel}.`,
+      error: `${message} Lỗi Google: ${originalGoogleErrors}.`,
       googleErrorStatus: googleError.status,
       googleErrorCode: googleError.code,
+      googleErrorMessage: googleError.message,
       googleHttpStatus: geminiResponse.status,
     });
   }
