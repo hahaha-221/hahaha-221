@@ -320,8 +320,9 @@ const writingFormTask = (instruction, questions, note = "", maxWords = 10) => `
     ${questions.map((question, index) => `
       <li class="question-card">
         <strong>${typeof question === "string" ? index + 1 : question.number}. ${typeof question === "string" ? question : question.text}</strong>
-        <input class="answer-input" aria-label="Writing answer ${typeof question === "string" ? index + 1 : question.number}" maxlength="100" />
+        <input class="answer-input" aria-label="Writing answer ${typeof question === "string" ? index + 1 : question.number}" maxlength="100" data-max-words="${maxWords}" />
         <p class="inline-hint">Maximum ${maxWords} words</p>
+        <p class="inline-hint word-count">0/${maxWords} words</p>
       </li>
     `).join("")}
   </ul>
@@ -4600,12 +4601,29 @@ taskBody.addEventListener("drop", (event) => {
   }
 });
 
+const countWords = (text) => text.trim().split(/\s+/).filter(Boolean).length;
+
 taskBody.addEventListener("input", (event) => {
-  if (event.target.matches("textarea, .answer-input")) {
-    const counter = event.target.closest(".question-card, .writing-email-task")?.querySelector(".word-count");
-    if (counter) {
-      const count = event.target.value.trim().split(/\s+/).filter(Boolean).length;
-      counter.textContent = `${count} ${count === 1 ? "word" : "words"}`;
+  const field = event.target;
+  if (!field.matches("textarea, .answer-input")) {
+    return;
+  }
+
+  const maxWords = Number(field.dataset.maxWords);
+  if (maxWords > 0) {
+    const words = field.value.match(/\S+/g) || [];
+    if (words.length > maxWords) {
+      field.value = words.slice(0, maxWords).join(" ");
+      field.setSelectionRange(field.value.length, field.value.length);
     }
+  }
+
+  const counter = field.closest(".question-card, .writing-email-task")?.querySelector(".word-count")
+    || field.parentElement.querySelector(".word-count");
+  if (counter) {
+    const count = countWords(field.value);
+    counter.textContent = maxWords > 0
+      ? `${count}/${maxWords} words`
+      : `${count} ${count === 1 ? "word" : "words"}`;
   }
 });
