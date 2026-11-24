@@ -168,6 +168,20 @@ const validateFeedback = (value, expectedAnswers) => {
     && answer.improvedAnswer.length <= MAX_ANSWER_LENGTH);
 };
 
+const getGoogleErrorCode = async (response) => {
+  try {
+    const body = await response.json();
+    const error = isRecord(body) && isRecord(body.error) ? body.error : null;
+    const status = typeof error?.status === "string" && /^[A-Z0-9_]{1,80}$/.test(error.status)
+      ? error.status
+      : null;
+    const code = Number.isInteger(error?.code) ? error.code : response.status;
+    return { status, code };
+  } catch {
+    return { status: null, code: response.status };
+  }
+};
+
 export async function onRequestPost({ request, env }) {
   const origin = request.headers.get("Origin");
   if (!origin) {
@@ -214,8 +228,9 @@ export async function onRequestPost({ request, env }) {
     return jsonResponse(503, { error: "AI chưa được cấu hình. Hãy thêm GEMINI_API_KEY vào Cloudflare Pages Secrets." });
   }
   const geminiApiKey = customGeminiKey || env.GEMINI_API_KEY;
+  const usesVertexAi = geminiApiKey.startsWith("AQ");
 
-  const model = env.GEMINI_MODEL || "gemini-3.8-flash";
+  const model = env.GEMINI_MODEL || (usesVertexAi ? "gemini-2.5-flash" : "gemini-3.8-flash");
   if (!/^[a-zA-Z0-9._-]{1,100}$/.test(model)) {
     return jsonResponse(500, { error: "Cấu hình model Gemini không hợp lệ." });
   }
@@ -252,53 +267,65 @@ export async function onRequestPost({ request, env }) {
     task: payload.task,
     answers: payload.answers,
   });
+  const geminiEndpoint = usesVertexAi
+    ? `https://aiplatform.googleapis.com/v1/publishers/google/models/${model}:generateContent`
+    : `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
   let geminiResponse;
   try {
-    geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": geminiApiKey,
-        },
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [{ text: systemInstruction }],
-          },
-          contents: [{
-            role: "user",
-            parts: [{ text: prompt }],
-          }],
-          generationConfig: {
-            responseMimeType: "application/json",
-            responseSchema: feedbackSchema,
-            temperature: 0.2,
-            maxOutputTokens: 3000,
-          },
-        }),
-        signal: AbortSignal.timeout(45_000),
+    geminiResponse = await fetch(geminiEndpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": geminiApiKey,
       },
-    );
+      body: JSON.stringify({
+        systemInstruction: {
+          parts: [{ text: systemInstruction }],
+        },
+        contents: [{
+          role: "user",
+          parts: [{ text: prompt }],
+        }],
+        generationConfig: {
+          responseMimeType: "application/json",
+          responseSchema: feedbackSchema,
+          temperature: 0.2,
+          maxOutputTokens: 3000,
+        },
+      }),
+      signal: AbortSignal.timeout(45_000),
+    });
   } catch (error) {
     console.error("Gemini writing request failed", error instanceof Error ? error.name : "unknown error");
     return jsonResponse(502, { error: "Không kết nối được Gemini. Vui lòng thử lại." });
   }
 
   if (!geminiResponse.ok) {
-    console.error("Gemini writing request returned HTTP", geminiResponse.status);
+    const googleError = await getGoogleErrorCode(geminiResponse);
+    const googleErrorLabel = googleError.status
+      ? `${googleError.status} (${googleError.code})`
+      : `HTTP ${googleError.code}`;
+    console.error("Gemini writing request rejected", JSON.stringify({
+      httpStatus: geminiResponse.status,
+      googleErrorStatus: googleError.status,
+      googleErrorCode: googleError.code,
+    }));
     const customKeyError = customGeminiKey
       && [400, 401, 403].includes(geminiResponse.status);
     const customKeyQuotaError = customGeminiKey && geminiResponse.status === 429;
+    const message = customKeyError
+      ? "Gemini API key cá nhân không hợp lệ hoặc đã hết hạn. Hãy kiểm tra lại key, hoặc xóa key cá nhân để dùng key mặc định của website."
+      : customKeyQuotaError
+        ? "Key cá nhân có thể đã hết hạn mức Gemini. Hãy kiểm tra hạn mức, hoặc xóa key cá nhân để dùng key mặc định của website."
+        : geminiResponse.status === 429
+          ? "Gemini đang quá tải hoặc đã chạm giới hạn sử dụng. Vui lòng thử lại sau."
+          : "Gemini chưa thể chấm bài lúc này. Vui lòng thử lại sau.";
     return jsonResponse(502, {
-      error: customKeyError
-        ? "Gemini API key cá nhân không hợp lệ hoặc đã hết hạn. Hãy kiểm tra lại key, hoặc xóa key cá nhân để dùng key mặc định của website."
-        : customKeyQuotaError
-          ? "Key cá nhân có thể đã hết hạn mức Gemini. Hãy kiểm tra hạn mức, hoặc xóa key cá nhân để dùng key mặc định của website."
-          : geminiResponse.status === 429
-            ? "Gemini đang quá tải hoặc đã chạm giới hạn sử dụng. Vui lòng thử lại sau."
-            : "Gemini chưa thể chấm bài lúc này. Vui lòng thử lại sau.",
+      error: `${message} Mã lỗi Google: ${googleErrorLabel}.`,
+      googleErrorStatus: googleError.status,
+      googleErrorCode: googleError.code,
+      googleHttpStatus: geminiResponse.status,
     });
   }
 
