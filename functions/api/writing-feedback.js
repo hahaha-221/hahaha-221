@@ -6,6 +6,9 @@ const MAX_ANSWER_LENGTH = 5_000;
 const MAX_TOTAL_ANSWER_LENGTH = 12_000;
 const MAX_TOTAL_TASK_LENGTH = 32_000;
 const MAX_TOTAL_ANSWERS = 24;
+const GEMINI_MODEL = "gemini-3.8-flash";
+const AI_STUDIO_ENDPOINT = `https://gateway.ai.cloudflare.com/v1/9059b0f11e012e3784addbdd62024a6e/aptis-gateway/google-ai-studio/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const VERTEX_EXPRESS_ENDPOINT = `https://aiplatform.googleapis.com/v1/publishers/google/models/${GEMINI_MODEL}:generateContent`;
 const ALLOWED_LEVELS = ["A1", "A2", "B1", "B2", "C"];
 const CRITERION_NAMES = [
   "Task fulfillment",
@@ -339,6 +342,13 @@ export async function onRequestPost({ request, env }) {
   });
   let responseText = "";
   if (customGeminiKey) {
+    const usesVertexExpressMode = customGeminiKey.startsWith("AQ");
+    const geminiEndpoints = usesVertexExpressMode
+      ? [
+        { provider: "Google Cloud Express Mode", url: VERTEX_EXPRESS_ENDPOINT },
+        { provider: "Gemini API", url: AI_STUDIO_ENDPOINT },
+      ]
+      : [{ provider: "Gemini API", url: AI_STUDIO_ENDPOINT }];
     const geminiRequestBody = JSON.stringify({
       systemInstruction: {
         parts: [{ text: systemInstruction }],
@@ -354,30 +364,47 @@ export async function onRequestPost({ request, env }) {
         maxOutputTokens: 5000,
       },
     });
-    const geminiEndpoint = "https://gateway.ai.cloudflare.com/v1/9059b0f11e012e3784addbdd62024a6e/aptis-gateway/google-ai-studio/v1beta/models/gemini-3.8-flash:generateContent";
 
-    let geminiResponse;
-    try {
-      geminiResponse = await fetch(geminiEndpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": customGeminiKey,
-        },
-        body: geminiRequestBody,
-        signal: AbortSignal.timeout(45_000),
-      });
-    } catch (error) {
-      console.error("Personal Gemini writing request failed", error instanceof Error ? error.name : "unknown error");
-      return jsonResponse(502, { error: "Không kết nối được Gemini bằng key cá nhân. Hãy thử lại." });
+    let geminiResponse = null;
+    let geminiProvider = "";
+    for (const [index, endpoint] of geminiEndpoints.entries()) {
+      try {
+        geminiResponse = await fetch(endpoint.url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-goog-api-key": customGeminiKey,
+          },
+          body: geminiRequestBody,
+          signal: AbortSignal.timeout(45_000),
+        });
+        geminiProvider = endpoint.provider;
+      } catch (error) {
+        if (index < geminiEndpoints.length - 1) {
+          console.warn("Personal Gemini endpoint request failed; trying alternate endpoint", error instanceof Error ? error.name : "unknown error");
+          continue;
+        }
+        console.error("Personal Gemini writing request failed", error instanceof Error ? error.name : "unknown error");
+        return jsonResponse(502, { error: "Không kết nối được Gemini bằng key cá nhân. Hãy thử lại." });
+      }
+
+      if (geminiResponse.ok
+        || index === geminiEndpoints.length - 1
+        || ![400, 401, 403, 404].includes(geminiResponse.status)) {
+        break;
+      }
+      console.warn("Personal Gemini endpoint rejected key; trying alternate endpoint", JSON.stringify({
+        provider: endpoint.provider,
+        httpStatus: geminiResponse.status,
+      }));
     }
 
     if (!geminiResponse.ok) {
       const googleError = await getGoogleError(geminiResponse, customGeminiKey);
-      logGoogleRejection(geminiResponse, googleError, "gemini-3.8-flash");
-      const customKeyError = [400, 401, 403].includes(geminiResponse.status);
+      logGoogleRejection(geminiResponse, googleError, GEMINI_MODEL);
+      const customKeyError = [400, 401, 403, 404].includes(geminiResponse.status);
       const message = customKeyError
-        ? "Gemini API key cá nhân không hợp lệ hoặc đã hết hạn. Hãy kiểm tra lại key, hoặc xóa key cá nhân để dùng AI mặc định của website."
+        ? `Google từ chối key cá nhân khi gọi ${geminiProvider}. Hãy kiểm tra nguồn tạo key, quyền truy cập Gemini API và model; hoặc xóa key để dùng AI mặc định của website.`
         : geminiResponse.status === 429
           ? "Key cá nhân có thể đã hết hạn mức Gemini. Hãy kiểm tra hạn mức, hoặc xóa key cá nhân để dùng AI mặc định của website."
           : "Gemini chưa thể chấm bài bằng key cá nhân lúc này. Vui lòng thử lại sau.";

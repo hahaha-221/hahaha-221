@@ -2703,7 +2703,10 @@ const writingAiPanelMarkup = `
         <h2 id="writingAiTitle">Chấm và chữa bài bằng AI</h2>
         <p>AI chấm tổng hợp cả 4 Part, đưa ra mức CEFR và nhận xét tham khảo.</p>
       </div>
-      <button class="primary-button" type="button" data-writing-ai-check>Chấm &amp; chữa 4 Part</button>
+      <div class="writing-ai-panel-actions">
+        <button class="secondary-button" type="button" data-writing-download>Tải bài làm (.txt)</button>
+        <button class="primary-button" type="button" data-writing-ai-check>Chấm &amp; chữa 4 Part</button>
+      </div>
     </div>
     <details class="writing-ai-key-settings" data-writing-ai-key-settings>
       <summary>Nhập Gemini API key cá nhân (tùy chọn)</summary>
@@ -2715,7 +2718,7 @@ const writingAiPanelMarkup = `
           <button class="secondary-button" type="button" data-writing-ai-key-save>Lưu key</button>
           <button class="secondary-button" type="button" data-writing-ai-key-clear>Xóa key</button>
         </div>
-        <p class="writing-ai-key-note">Key chỉ lưu cục bộ trên trình duyệt này (localStorage), không gửi lên máy chủ để lưu trữ. Khi bấm chấm bài, key được gửi trong header của yêu cầu để gọi Gemini; website công khai cần dùng HTTPS. Key cá nhân không dùng lượt giới hạn mặc định của website.</p>
+        <p class="writing-ai-key-note">Key chỉ lưu cục bộ trên trình duyệt này (localStorage), không gửi lên máy chủ để lưu trữ. Hỗ trợ key AI Studio và Google Cloud Express Mode; key bắt đầu bằng AQ sẽ thử Express Mode trước rồi tự động thử Gemini API nếu Google từ chối endpoint đầu tiên. Website công khai cần dùng HTTPS. Key cá nhân không dùng lượt giới hạn mặc định của website.</p>
         <p class="writing-ai-key-status" data-writing-ai-key-status role="status" aria-live="polite"></p>
       </div>
     </details>
@@ -2850,17 +2853,19 @@ const renderWritingFeedback = (panel, feedback) => {
   result.append(answers);
 };
 
-const requestWritingFeedback = async (button) => {
-  if (activeSkill?.name !== "Writing") {
-    return;
-  }
+const formatWritingPromptForDownload = (source) => {
+  source.querySelectorAll("br").forEach((lineBreak) => lineBreak.replaceWith("\n"));
+  source.querySelectorAll("p, li, h1, h2, h3").forEach((block) => block.append("\n"));
+  return source.textContent
+    .split(/\r?\n/)
+    .map((line) => line.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .join("\n");
+};
 
-  const requestedSkill = activeSkill;
-  const panel = button.closest("[data-writing-ai-panel]");
-  const status = panel.querySelector("[data-writing-ai-status]");
-  const result = panel.querySelector("[data-writing-ai-result]");
+const collectWritingSubmissionParts = () => {
   captureWritingAnswers();
-  const parts = requestedSkill.parts.map((part, index) => {
+  return activeSkill.parts.map((part, index) => {
     const source = document.createElement("div");
     source.innerHTML = part.body;
     const answers = getWritingFields(source, index).map((field, answerIndex) => {
@@ -2877,9 +2882,68 @@ const requestWritingFeedback = async (button) => {
     return {
       part: index + 1,
       task: source.textContent.replace(/\s+/g, " ").trim(),
+      taskForDownload: formatWritingPromptForDownload(source),
       answers,
     };
   });
+};
+
+const downloadWritingSubmission = () => {
+  if (activeSkill?.name !== "Writing") {
+    return;
+  }
+
+  let downloadUrl = "";
+  try {
+    const parts = collectWritingSubmissionParts();
+    const content = [
+      "AptisPractice - Bài làm Writing",
+      `Chủ đề: ${activeSkill.topicTitle}`,
+      `Ngày tải: ${new Date().toLocaleString("vi-VN")}`,
+      "",
+      ...parts.flatMap(({ part, taskForDownload, answers }) => [
+        `===== PART ${part} =====`,
+        "Đề bài / yêu cầu:",
+        taskForDownload || "Chưa có nội dung đề bài.",
+        "",
+        "Câu trả lời:",
+        ...answers.map(({ label, text }) => `${label}:\n${text.trim() || "(Chưa nhập)"}`),
+        "",
+      ]),
+    ].join("\n");
+    const topicSlug = activeSkill.topicTitle.normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") || "bai-lam";
+    const file = new Blob(["\uFEFF", content], { type: "text/plain;charset=utf-8" });
+    downloadUrl = URL.createObjectURL(file);
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = `aptispractice-writing-${topicSlug}.txt`;
+    document.body.append(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+  } catch (error) {
+    if (downloadUrl) {
+      URL.revokeObjectURL(downloadUrl);
+    }
+    console.error("Could not download Writing submission", error instanceof Error ? error.name : "unknown error");
+    showToast("Không tạo được file bài làm. Hãy thử lại.");
+  }
+};
+
+const requestWritingFeedback = async (button) => {
+  if (activeSkill?.name !== "Writing") {
+    return;
+  }
+
+  const requestedSkill = activeSkill;
+  const panel = button.closest("[data-writing-ai-panel]");
+  const status = panel.querySelector("[data-writing-ai-status]");
+  const result = panel.querySelector("[data-writing-ai-result]");
+  const parts = collectWritingSubmissionParts().map(({ taskForDownload, ...part }) => part);
   const submittedAnswers = parts.flatMap((part) => part.answers.map((answer) => answer.text));
   if (!submittedAnswers.some((answer) => answer.trim())) {
     status.textContent = "Hãy nhập ít nhất một câu trả lời trong 4 Part trước khi chấm.";
@@ -5345,6 +5409,11 @@ taskBody.addEventListener("click", (event) => {
 
   if (event.target.closest("[data-writing-return]")) {
     returnToWritingPractice();
+    return;
+  }
+
+  if (event.target.closest("[data-writing-download]")) {
+    downloadWritingSubmission();
     return;
   }
 

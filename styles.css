@@ -3107,6 +3107,13 @@ p {
   gap: 16px;
 }
 
+.writing-ai-panel-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .writing-ai-panel-header h2 {
   margin: 0;
   color: #263a63;
@@ -3124,11 +3131,12 @@ p {
   line-height: 1.6;
 }
 
-.writing-ai-panel-header .primary-button {
-  flex: 0 0 auto;
+.writing-ai-panel-actions .primary-button,
+.writing-ai-panel-actions .secondary-button {
+  min-height: 40px;
 }
 
-.writing-ai-panel-header .primary-button:disabled {
+.writing-ai-panel-actions .primary-button:disabled {
   cursor: wait;
   opacity: 0.7;
 }
@@ -3293,7 +3301,12 @@ p {
     flex-direction: column;
   }
 
-  .writing-ai-panel-header .primary-button {
+  .writing-ai-panel-actions {
+    flex-direction: column;
+  }
+
+  .writing-ai-panel-actions .primary-button,
+  .writing-ai-panel-actions .secondary-button {
     width: 100%;
   }
 
