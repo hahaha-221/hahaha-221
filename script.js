@@ -2527,7 +2527,7 @@ const writingAiPanelMarkup = `
         <p class="writing-ai-key-status" data-writing-ai-key-status role="status" aria-live="polite"></p>
       </div>
     </details>
-    <p class="writing-ai-privacy">Bài viết sẽ được gửi đến Google Gemini để đánh giá. Không nhập thông tin cá nhân.</p>
+    <p class="writing-ai-privacy">Mặc định, bài viết được chấm bằng Cloudflare Workers AI. Nếu nhập key cá nhân, bài sẽ được gửi đến Google Gemini. Không nhập thông tin cá nhân.</p>
     <p class="writing-ai-status" data-writing-ai-status role="status" aria-live="polite"></p>
     <div class="writing-ai-result" data-writing-ai-result aria-live="polite"></div>
   </section>
@@ -2688,7 +2688,7 @@ const requestWritingFeedback = async (button) => {
   button.disabled = true;
   status.textContent = personalKey
     ? "Đang gửi bài đến Gemini bằng key cá nhân..."
-    : "Đang gửi bài đến Gemini để chấm...";
+    : "Đang gửi bài đến Workers AI để chấm...";
   result.replaceChildren();
 
   try {
@@ -2714,7 +2714,7 @@ const requestWritingFeedback = async (button) => {
     }
 
     if (!response.headers.get("content-type")?.toLowerCase().includes("application/json")) {
-      status.textContent = "AI chưa được cấu hình trên website này. Cần triển khai Cloudflare Pages Function và thêm Gemini API key.";
+      status.textContent = "AI chưa được cấu hình trên website này. Cần triển khai Pages Function và bật Workers AI binding.";
       return;
     }
 

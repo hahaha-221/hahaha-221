@@ -67,6 +67,26 @@ const feedbackSchema = {
   required: ["estimatedLevel", "overallScore", "summary", "criteria", "answers"],
 };
 
+const WORKERS_AI_SCHEMA_TYPES = {
+  OBJECT: "object",
+  STRING: "string",
+  INTEGER: "integer",
+  ARRAY: "array",
+};
+
+const toJsonSchema = (schema) => ({
+  ...schema,
+  type: WORKERS_AI_SCHEMA_TYPES[schema.type] || schema.type,
+  ...(schema.properties && {
+    properties: Object.fromEntries(
+      Object.entries(schema.properties).map(([name, property]) => [name, toJsonSchema(property)]),
+    ),
+  }),
+  ...(schema.items && { items: toJsonSchema(schema.items) }),
+});
+
+const workersAiFeedbackSchema = toJsonSchema(feedbackSchema);
+
 const systemInstruction = `You are a supportive but accurate Aptis General Writing tutor. Evaluate the student's responses against the supplied task and the four criteria: Task fulfillment, Grammar and accuracy, Vocabulary, and Coherence and organization. Return exactly one score and feedback for each criterion, using those exact criterion names. Give each criterion an integer score from 0 to 5; calculate overallScore as their total multiplied by 5 (0 to 100). Give each individual answer a score from 0 to 5. Estimate a CEFR level using only A1, A2, B1, B2, or C. This is practice feedback, never claim it is an official Aptis result.
 
 Return one answer review per supplied response, in the same order and with the exact same label. For unanswered responses, give a score of 0, explain that it is blank, and leave the corrected and improved answers empty. List concrete grammar or word-choice errors; use an empty errors array when there are none. correctedAnswer should minimally fix the student's wording while preserving their meaning. improvedAnswer should be a natural example that answers the task, adds no unsupported personal facts, and respects any word limit or range in the task.
@@ -244,12 +264,18 @@ export async function onRequestPost({ request, env }) {
   if (customGeminiKey.length > 512) {
     return jsonResponse(400, { error: "Gemini API key cá nhân quá dài. Hãy kiểm tra lại key đã nhập." });
   }
-  if (!customGeminiKey && (typeof env.GEMINI_API_KEY !== "string" || env.GEMINI_API_KEY.length === 0)) {
-    return jsonResponse(503, { error: "AI chưa được cấu hình. Hãy thêm GEMINI_API_KEY vào Cloudflare Pages Secrets." });
+  if (!customGeminiKey && (!env.AI || typeof env.AI.run !== "function")) {
+    return jsonResponse(503, { error: "Workers AI chưa được cấu hình. Hãy thêm binding AI cho Cloudflare Pages." });
   }
-  const geminiApiKey = customGeminiKey || env.GEMINI_API_KEY;
+  const rateLimitHashSecret = env.WRITING_RATE_LIMIT_HASH_SECRET || env.GEMINI_API_KEY;
 
   if (!customGeminiKey) {
+    if (typeof rateLimitHashSecret !== "string" || rateLimitHashSecret.length === 0) {
+      return jsonResponse(503, {
+        error: "Chưa cấu hình khóa bảo vệ bộ đếm lượt chấm. Hãy thêm WRITING_RATE_LIMIT_HASH_SECRET vào Cloudflare Pages Secrets.",
+      });
+    }
+
     const clientIp = request.headers.get("CF-Connecting-IP")?.trim();
     if (!clientIp || clientIp.length > 64) {
       return jsonResponse(503, { error: "Không xác định được địa chỉ mạng để áp dụng giới hạn chấm bài." });
@@ -260,12 +286,12 @@ export async function onRequestPost({ request, env }) {
       rateLimit = await consumeWritingFeedbackAttempt({
         database: env.WRITING_RATE_LIMITS,
         ip: clientIp,
-        secret: env.GEMINI_API_KEY,
+        secret: rateLimitHashSecret,
       });
     } catch (error) {
       console.error("Writing feedback rate limiter failed", error instanceof Error ? error.message : "unknown error");
       return jsonResponse(503, {
-        error: "Hệ thống giới hạn lượt chấm đang tạm thời gián đoạn. Bài chưa được gửi tới Gemini; vui lòng thử lại sau.",
+        error: "Hệ thống giới hạn lượt chấm đang tạm thời gián đoạn. Bài chưa được gửi tới AI; vui lòng thử lại sau.",
       });
     }
     if (!rateLimit.allowed) {
@@ -281,90 +307,114 @@ export async function onRequestPost({ request, env }) {
     task: payload.task,
     answers: payload.answers,
   });
-  const geminiRequestBody = JSON.stringify({
-    systemInstruction: {
-      parts: [{ text: systemInstruction }],
-    },
-    contents: [{
-      role: "user",
-      parts: [{ text: prompt }],
-    }],
-    generationConfig: {
-      responseMimeType: "application/json",
-      responseSchema: feedbackSchema,
-      temperature: 0.2,
-      maxOutputTokens: 3000,
-    },
-  });
-  const geminiHeaders = {
-    "Content-Type": "application/json",
-    "x-goog-api-key": geminiApiKey,
-  };
-  const model = "gemini-3.8-flash";
-  const geminiEndpoint = `https://gateway.ai.cloudflare.com/v1/9059b0f11e012e3784addbdd62024a6e/aptis-gateway/google-ai-studio/v1beta/models/${model}:generateContent`;
-
-  let geminiResponse;
-  try {
-    geminiResponse = await fetch(geminiEndpoint, {
-      method: "POST",
-      headers: geminiHeaders,
-      body: geminiRequestBody,
-      signal: AbortSignal.timeout(45_000),
+  let responseText = "";
+  if (customGeminiKey) {
+    const geminiRequestBody = JSON.stringify({
+      systemInstruction: {
+        parts: [{ text: systemInstruction }],
+      },
+      contents: [{
+        role: "user",
+        parts: [{ text: prompt }],
+      }],
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: feedbackSchema,
+        temperature: 0.2,
+        maxOutputTokens: 3000,
+      },
     });
-  } catch (error) {
-    console.error("Gemini writing request failed", error instanceof Error ? error.name : "unknown error");
-    return jsonResponse(502, { error: "Không kết nối được Gemini. Vui lòng thử lại." });
-  }
+    const geminiEndpoint = "https://gateway.ai.cloudflare.com/v1/9059b0f11e012e3784addbdd62024a6e/aptis-gateway/google-ai-studio/v1beta/models/gemini-3.8-flash:generateContent";
 
-  if (!geminiResponse.ok) {
-    const googleError = await getGoogleError(geminiResponse, geminiApiKey);
-    logGoogleRejection(geminiResponse, googleError, model);
-    const customKeyError = customGeminiKey
-      && [400, 401, 403].includes(geminiResponse.status);
-    const customKeyQuotaError = customGeminiKey && geminiResponse.status === 429;
-    const message = customKeyError
-      ? "Gemini API key cá nhân không hợp lệ hoặc đã hết hạn. Hãy kiểm tra lại key, hoặc xóa key cá nhân để dùng key mặc định của website."
-      : customKeyQuotaError
-        ? "Key cá nhân có thể đã hết hạn mức Gemini. Hãy kiểm tra hạn mức, hoặc xóa key cá nhân để dùng key mặc định của website."
+    let geminiResponse;
+    try {
+      geminiResponse = await fetch(geminiEndpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": customGeminiKey,
+        },
+        body: geminiRequestBody,
+        signal: AbortSignal.timeout(45_000),
+      });
+    } catch (error) {
+      console.error("Personal Gemini writing request failed", error instanceof Error ? error.name : "unknown error");
+      return jsonResponse(502, { error: "Không kết nối được Gemini bằng key cá nhân. Hãy thử lại." });
+    }
+
+    if (!geminiResponse.ok) {
+      const googleError = await getGoogleError(geminiResponse, customGeminiKey);
+      logGoogleRejection(geminiResponse, googleError, "gemini-3.8-flash");
+      const customKeyError = [400, 401, 403].includes(geminiResponse.status);
+      const message = customKeyError
+        ? "Gemini API key cá nhân không hợp lệ hoặc đã hết hạn. Hãy kiểm tra lại key, hoặc xóa key cá nhân để dùng AI mặc định của website."
         : geminiResponse.status === 429
-          ? "Gemini đang quá tải hoặc đã chạm giới hạn sử dụng. Vui lòng thử lại sau."
-          : "Gemini chưa thể chấm bài lúc này. Vui lòng thử lại sau.";
-    return jsonResponse(502, {
-      error: `${message} Lỗi Google: ${describeGoogleError(googleError)}.`,
-      googleErrorStatus: googleError.status,
-      googleErrorCode: googleError.code,
-      googleErrorMessage: googleError.message,
-      googleHttpStatus: geminiResponse.status,
-    });
+          ? "Key cá nhân có thể đã hết hạn mức Gemini. Hãy kiểm tra hạn mức, hoặc xóa key cá nhân để dùng AI mặc định của website."
+          : "Gemini chưa thể chấm bài bằng key cá nhân lúc này. Vui lòng thử lại sau.";
+      return jsonResponse(502, {
+        error: `${message} Lỗi Google: ${describeGoogleError(googleError)}.`,
+        googleErrorStatus: googleError.status,
+        googleErrorCode: googleError.code,
+        googleErrorMessage: googleError.message,
+        googleHttpStatus: geminiResponse.status,
+      });
+    }
+
+    let geminiData;
+    try {
+      geminiData = await geminiResponse.json();
+    } catch {
+      console.error("Gemini writing response was not valid JSON");
+      return jsonResponse(502, { error: "Gemini trả về phản hồi không hợp lệ. Vui lòng thử lại." });
+    }
+
+    responseText = geminiData.candidates?.[0]?.content?.parts
+      ?.map((part) => typeof part.text === "string" ? part.text : "")
+      .join("")
+      .trim() || "";
+  } else {
+    let workersAiResult;
+    try {
+      workersAiResult = await env.AI.run("@cf/meta/llama-3.3-70b-instruct-fp8-fast", {
+        messages: [
+          { role: "system", content: systemInstruction },
+          { role: "user", content: prompt },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: workersAiFeedbackSchema,
+        },
+        temperature: 0.2,
+        max_tokens: 3000,
+      });
+    } catch (error) {
+      console.error("Workers AI writing request failed", error instanceof Error ? error.name : "unknown error");
+      return jsonResponse(502, { error: "Workers AI chưa thể chấm bài lúc này. Vui lòng thử lại sau." });
+    }
+
+    const aiResponse = workersAiResult?.response;
+    responseText = typeof aiResponse === "string"
+      ? aiResponse.trim()
+      : isRecord(aiResponse)
+        ? JSON.stringify(aiResponse)
+        : "";
   }
 
-  let geminiData;
-  try {
-    geminiData = await geminiResponse.json();
-  } catch {
-    console.error("Gemini writing response was not valid JSON");
-    return jsonResponse(502, { error: "Gemini trả về phản hồi không hợp lệ. Vui lòng thử lại." });
-  }
-
-  const responseText = geminiData.candidates?.[0]?.content?.parts
-    ?.map((part) => typeof part.text === "string" ? part.text : "")
-    .join("")
-    .trim();
   if (!responseText) {
-    return jsonResponse(502, { error: "Gemini không tạo được nhận xét cho bài này." });
+    return jsonResponse(502, { error: "AI không tạo được nhận xét cho bài này." });
   }
 
   let feedback;
   try {
     feedback = JSON.parse(responseText);
   } catch {
-    console.error("Gemini writing feedback was not valid structured JSON");
-    return jsonResponse(502, { error: "Gemini trả về nhận xét không đúng định dạng. Vui lòng thử lại." });
+    console.error("Writing AI feedback was not valid structured JSON");
+    return jsonResponse(502, { error: "AI trả về nhận xét không đúng định dạng. Vui lòng thử lại." });
   }
 
   if (!validateFeedback(feedback, payload.answers)) {
-    console.error("Gemini writing feedback did not match the expected schema");
-    return jsonResponse(502, { error: "Gemini trả về nhận xét chưa đầy đủ. Vui lòng thử lại." });
+    console.error("Writing AI feedback did not match the expected schema");
+    return jsonResponse(502, { error: "AI trả về nhận xét chưa đầy đủ. Vui lòng thử lại." });
   }
 
   const overallScore = feedback.criteria.reduce((total, criterion) => total + criterion.score, 0) * 5;
