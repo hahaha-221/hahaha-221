@@ -9,14 +9,14 @@
       content="Luyện thi Aptis dễ dàng với bài tập Listening, Reading, Writing và Speaking."
     />
     <title>AptisPractice — Luyện thi Aptis mỗi ngày</title>
-    <link rel="stylesheet" href="styles.css?v=20261124-speaking-ai-1" />
+    <link rel="stylesheet" href="styles.css?v=20261125-speaking-timer-stop-1" />
     <script src="assets/listening-part1.js" defer></script>
     <script src="assets/listening-part2.js" defer></script>
     <script src="assets/listening-part3.js?v=20261123-listening-p3-answers-5" defer></script>
     <script src="assets/listening-part4.js" defer></script>
     <script src="assets/speaking-exams.js?v=20261118-speaking-sets1-20-1" defer></script>
     <script src="assets/guides.js?v=20261119-guide-15" defer></script>
-    <script src="script.js?v=20261125-writing-api-errors-1" defer></script>
+    <script src="script.js?v=20261125-speaking-timer-stop-1" defer></script>
   </head>
   <body>
     <header class="topbar">
@@ -209,6 +209,7 @@
         <div class="practice-heading" id="practiceHeading">
           <button class="back-button" id="practiceBackButton" type="button" data-home><span aria-hidden="true">←</span> Trang chủ</button>
           <div class="session-status"><span class="saved-dot"></span><span id="saveStatus">Sẵn sàng</span></div>
+          <button class="secondary-button speaking-timer-toggle" id="speakingTimerToggle" type="button" aria-pressed="false" hidden disabled>Dừng thời gian</button>
           <div class="timer-chip"><svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="11" r="7" /><path d="M10 7v4l2.5 1.5M7 2h6" /></svg><span id="timer">12:00</span></div>
         </div>
         <div class="part-tabs" id="partTabs" role="tablist" aria-label="Các phần thi"></div>

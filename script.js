@@ -2187,6 +2187,7 @@ const practiceTitle = document.getElementById("practiceTitle");
 const taskBody = document.getElementById("taskBody");
 const timerDisplay = document.getElementById("timer");
 const timerChip = timerDisplay.closest(".timer-chip");
+const speakingTimerToggle = document.getElementById("speakingTimerToggle");
 const saveStatus = document.getElementById("saveStatus");
 const progressLabel = document.getElementById("progressLabel");
 const previousButton = document.getElementById("previousPart");
@@ -2294,6 +2295,7 @@ let speakingPartAudioDrafts = {
   4: null,
 };
 let activeSpeakingPartRecording = null;
+let speakingPartRecordingStopPromise = null;
 let activeSpeakingRecording = null;
 let stoppingSpeakingRecording = null;
 let speakingRecordingStopPromise = null;
@@ -2303,6 +2305,7 @@ let secondsRemaining = 0;
 let timerInterval = null;
 let responseInterval = null;
 let activeResponseControl = null;
+let activeResponseState = null;
 let toastTimeout = null;
 
 const formatTime = (seconds) => {
@@ -2338,6 +2341,50 @@ const stopResponseTimer = (statusText = "Đã dừng") => {
     }
   }
   activeResponseControl = null;
+  activeResponseState = null;
+  updateSpeakingTimerToggle();
+};
+
+const updateSpeakingTimerToggle = () => {
+  const isPaused = Boolean(activeResponseState && !responseInterval);
+  speakingTimerToggle.textContent = isPaused ? "Tiếp tục thời gian" : "Dừng thời gian";
+  speakingTimerToggle.setAttribute("aria-pressed", String(isPaused));
+  speakingTimerToggle.disabled = !activeResponseState;
+};
+
+const tickResponseTimer = () => {
+  if (!activeResponseState) {
+    return;
+  }
+  const { responseButton, countdown, status, skipPreparationButton } = activeResponseState;
+  activeResponseState.remaining = Math.max(activeResponseState.remaining - 1, 0);
+  countdown.textContent = formatSpeakingCountdown(activeResponseState.remaining);
+  if (activeResponseState.remaining > 0) {
+    return;
+  }
+  if (activeResponseState.phase === "preparation") {
+    activeResponseState.phase = "answer";
+    activeResponseState.remaining = Number(responseButton.dataset.responseDuration);
+    countdown.textContent = formatSpeakingCountdown(activeResponseState.remaining);
+    status.textContent = "Đang trả lời cả 3 câu.";
+    if (skipPreparationButton) {
+      skipPreparationButton.hidden = true;
+    }
+    return;
+  }
+  window.clearInterval(responseInterval);
+  responseInterval = null;
+  activeResponseControl = null;
+  activeResponseState = null;
+  status.textContent = "Hết thời gian.";
+  responseButton.textContent = "Làm lại";
+  responseButton.disabled = false;
+  responseButton.dataset.responseCompleted = "true";
+  if (skipPreparationButton) {
+    skipPreparationButton.hidden = true;
+  }
+  updateSpeakingTimerToggle();
+  advanceSpeakingPartIfComplete();
 };
 
 const startResponseTimer = (responseButton, skipPreparation = false) => {
@@ -2353,6 +2400,14 @@ const startResponseTimer = (responseButton, skipPreparation = false) => {
     ? Number(responseButton.dataset.responsePreparation)
     : Number(responseButton.dataset.responseDuration);
   activeResponseControl = control;
+  activeResponseState = {
+    responseButton,
+    countdown,
+    status,
+    skipPreparationButton,
+    phase,
+    remaining,
+  };
   responseButton.disabled = true;
   responseButton.textContent = phase === "preparation" ? "Đang đếm ngược..." : "Đang trả lời...";
   if (skipPreparationButton) {
@@ -2364,37 +2419,29 @@ const startResponseTimer = (responseButton, skipPreparation = false) => {
       ? "Bỏ qua chuẩn bị. Đang trả lời cả 3 câu."
       : "Đang trả lời.";
   countdown.textContent = formatSpeakingCountdown(remaining);
-  responseInterval = window.setInterval(() => {
-    remaining = Math.max(remaining - 1, 0);
-    countdown.textContent = formatSpeakingCountdown(remaining);
-    if (remaining > 0) {
-      return;
-    }
-    if (phase === "preparation") {
-      phase = "answer";
-      remaining = Number(responseButton.dataset.responseDuration);
-      countdown.textContent = formatSpeakingCountdown(remaining);
-      status.textContent = "Đang trả lời cả 3 câu.";
-      if (skipPreparationButton) {
-        skipPreparationButton.hidden = true;
-      }
-      return;
-    }
-    if (remaining === 0) {
-      window.clearInterval(responseInterval);
-      responseInterval = null;
-      activeResponseControl = null;
-      status.textContent = "Hết thời gian.";
-      responseButton.textContent = "Làm lại";
-      responseButton.disabled = false;
-      responseButton.dataset.responseCompleted = "true";
-      if (skipPreparationButton) {
-        skipPreparationButton.hidden = true;
-      }
-      advanceSpeakingPartIfComplete();
-    }
-  }, 1000);
+  responseInterval = window.setInterval(tickResponseTimer, 1000);
+  updateSpeakingTimerToggle();
 };
+
+speakingTimerToggle.addEventListener("click", () => {
+  if (!activeResponseState) {
+    return;
+  }
+  if (responseInterval) {
+    window.clearInterval(responseInterval);
+    responseInterval = null;
+    activeResponseState.status.textContent = "Đã tạm dừng thời gian.";
+  } else {
+    const isExtended = activeResponseState.responseButton.dataset.responseMode === "extended";
+    activeResponseState.status.textContent = activeResponseState.phase === "preparation"
+      ? "Đang chuẩn bị."
+      : isExtended
+        ? "Đang trả lời cả 3 câu."
+        : "Đang trả lời.";
+    responseInterval = window.setInterval(tickResponseTimer, 1000);
+  }
+  updateSpeakingTimerToggle();
+});
 
 const hideToast = () => {
   window.clearTimeout(toastTimeout);
@@ -2436,8 +2483,12 @@ const clearReadingOrderSlot = (slot) => {
 const stopSession = () => {
   window.clearInterval(timerInterval);
   stopResponseTimer("Sẵn sàng");
+  speakingTimerToggle.hidden = true;
   if (activeSpeakingRecording || stoppingSpeakingRecording) {
     (activeSpeakingRecording || stoppingSpeakingRecording).discard = true;
+  }
+  if (activeSpeakingPartRecording) {
+    activeSpeakingPartRecording.discard = true;
   }
   void stopSpeakingRecording();
   void stopSpeakingPartRecording();
@@ -2463,8 +2514,8 @@ const renderSpeakingRecordingStatus = () => {
     : speakingSessionAudioError
       ? speakingSessionAudioError
       : speakingSessionAudioDraft
-        ? "Đã dừng ghi âm. Bản ghi của toàn bài sẵn sàng để gửi chấm."
-        : "Bấm nút bắt đầu thời gian ở Part 1 để vừa chạy giờ vừa bắt đầu ghi âm toàn bài.";
+        ? "Đã dừng ghi âm. Các bản ghi theo Part sẵn sàng để gửi chấm."
+      : "Bấm bắt đầu ở Part 1 để ghi âm liên tục và tách bản ghi riêng cho từng Part.";
   status.forEach((element) => {
     element.textContent = message;
   });
@@ -2531,45 +2582,39 @@ const stopSpeakingRecording = () => {
 };
 
 const stopSpeakingPartRecording = () => {
+  if (speakingPartRecordingStopPromise) {
+    return speakingPartRecordingStopPromise;
+  }
   const recording = activeSpeakingPartRecording;
   if (!recording) {
     return Promise.resolve();
   }
-  if (recording.recorder.state === "inactive") {
-    activeSpeakingPartRecording = null;
-    return Promise.resolve();
-  }
-
-  return new Promise((resolve) => {
-    recording.recorder.addEventListener("stop", () => {
-      window.clearTimeout(recording.timeout);
-      const blob = new Blob(recording.chunks, { type: recording.recorder.mimeType || "audio/webm" });
-      if (blob.size > 0 && !recording.discard) {
-        speakingPartAudioDrafts[recording.part] = blob;
-      }
-      if (activeSpeakingPartRecording === recording) {
-        activeSpeakingPartRecording = null;
-      }
-      resolve();
-    }, { once: true });
+  activeSpeakingPartRecording = null;
+  const stopPromise = recording.stopPromise.finally(() => {
+    if (speakingPartRecordingStopPromise === stopPromise) {
+      speakingPartRecordingStopPromise = null;
+    }
+  });
+  speakingPartRecordingStopPromise = stopPromise;
+  if (recording.recorder.state === "recording") {
     try {
       recording.recorder.stop();
     } catch (error) {
       console.error("Could not stop Speaking Part recording", error instanceof Error ? error.name : "unknown error");
       window.clearTimeout(recording.timeout);
-      if (activeSpeakingPartRecording === recording) {
-        activeSpeakingPartRecording = null;
-      }
-      resolve();
+      recording.resolveStop();
     }
-  });
+  }
+  return speakingPartRecordingStopPromise;
 };
 
 const startSpeakingPartRecording = (partNumber) => {
   const fullRecording = activeSpeakingRecording;
   if (!fullRecording || fullRecording.recorder.state !== "recording"
+    || speakingPartRecordingStopPromise
     || activeSpeakingPartRecording?.part === partNumber
-    || speakingPartAudioDrafts[partNumber]) {
+    || partNumber < 1
+    || partNumber > 4) {
     return;
   }
 
@@ -2595,12 +2640,26 @@ const startSpeakingPartRecording = (partNumber) => {
     discard: false,
     timeout: null,
   };
+  recording.stopPromise = new Promise((resolve) => {
+    recording.resolveStop = resolve;
+  });
   activeSpeakingPartRecording = recording;
   recorder.addEventListener("dataavailable", (event) => {
     if (event.data.size > 0) {
       recording.chunks.push(event.data);
     }
   });
+  recorder.addEventListener("stop", () => {
+    window.clearTimeout(recording.timeout);
+    const blob = new Blob(recording.chunks, { type: recorder.mimeType || "audio/webm" });
+    if (blob.size > 0 && !recording.discard) {
+      speakingPartAudioDrafts[recording.part] = blob;
+    }
+    if (activeSpeakingPartRecording === recording) {
+      activeSpeakingPartRecording = null;
+    }
+    recording.resolveStop();
+  }, { once: true });
   try {
     recorder.start(1000);
   } catch (error) {
@@ -2623,8 +2682,10 @@ const startSpeakingSessionRecording = async () => {
   speakingMicrophoneRequest = true;
   try {
     if (activeSpeakingRecording) {
+      await stopSpeakingPartRecording();
       await stopSpeakingRecording();
     } else if (speakingRecordingStopPromise) {
+      await stopSpeakingPartRecording();
       await speakingRecordingStopPromise;
     }
     stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -3219,7 +3280,7 @@ const renderSpeakingFeedback = (container, feedback) => {
 
   const transcript = document.createElement("article");
   transcript.className = "speaking-feedback-answer";
-  appendSpeakingText(transcript, "h3", "", "Bản chép lời toàn bài");
+  appendSpeakingText(transcript, "h3", "", "Bản chép lời theo từng Part");
   appendSpeakingText(transcript, "p", "speaking-feedback-transcript", feedback.transcript);
   result.append(transcript);
 
@@ -3249,7 +3310,7 @@ const renderSpeakingFeedback = (container, feedback) => {
     result,
     "p",
     "speaking-feedback-disclaimer",
-    "Đây là nhận xét luyện tập dựa trên nội dung bản chép lời, không phải kết quả Aptis chính thức. AI không đánh giá chính xác phát âm hoặc độ trôi chảy qua bản chép lời.",
+    "Đây là nhận xét luyện tập dựa trên bản chép lời theo Part và hình đề, không phải kết quả Aptis chính thức. AI không đánh giá chính xác phát âm hoặc độ trôi chảy.",
   );
   container.replaceChildren(result);
 };
@@ -3273,28 +3334,70 @@ const requestSpeakingFeedback = async (button) => {
   const status = panel.querySelector("[data-speaking-results-status]");
   const feedbackContainer = panel.querySelector("[data-speaking-feedback]");
   const exam = speakingExamData.exams.find((item) => item.id === requestedSkill.topicId);
-  if (!speakingSessionAudioDraft) {
-    status.textContent = "Chưa có bản ghi âm. Hãy quay lại Part 1, bấm nút thời gian để bắt đầu làm bài rồi hoàn thành các Part.";
+  if (!Object.values(speakingPartAudioDrafts).some((audio) => audio)) {
+    status.textContent = "Chưa có bản ghi theo Part. Hãy quay lại Part 1, bấm nút thời gian để bắt đầu ghi âm rồi thử lại.";
     return;
   }
 
-  const questions = exam.parts.flatMap((part, partIndex) => part.questions.map((label) => ({
-    part: partIndex + 1,
-    label,
-  })));
+  const partInstructions = [
+    "Bạn có tổng cộng 30 giây để trả lời cả 3 câu hỏi.",
+    "Bạn có 45 giây cho mỗi câu hỏi.",
+    "Bạn có 45 giây cho mỗi câu hỏi.",
+    "Bạn có 1 phút chuẩn bị, sau đó 2 phút để trả lời cả 3 câu hỏi.",
+  ];
+  const parts = exam.parts.map((part, index) => ({
+    part: index + 1,
+    title: speakingPartTitles[index],
+    instructions: partInstructions[index],
+    questions: part.questions,
+    missingQuestions: part.missingQuestions || 0,
+    images: part.images.map((image, imageIndex) => ({
+      index: imageIndex,
+      alt: image.alt,
+    })),
+  }));
   const formData = new FormData();
   formData.append("topic", requestedSkill.topicTitle);
-  formData.append("task", questions.map((question) => `Part ${question.part}: ${question.label}`).join("\n"));
-  formData.append("questions", JSON.stringify(questions));
-  const extension = speakingSessionAudioDraft.type.includes("mp4")
-    ? "mp4"
-    : speakingSessionAudioDraft.type.includes("ogg")
-      ? "ogg"
-      : "webm";
-  formData.append("audio", speakingSessionAudioDraft, `speaking-test.${extension}`);
-
+  formData.append("parts", JSON.stringify(parts));
   button.disabled = true;
-  status.textContent = "Đang chuyển bản ghi toàn bài thành văn bản và gửi tới AI để chấm...";
+  status.textContent = "Đang chuẩn bị bản ghi và ảnh theo từng Part...";
+  for (const part of parts) {
+    const audio = speakingPartAudioDrafts[part.part];
+    if (audio) {
+      const extension = audio.type.includes("mp4")
+        ? "mp4"
+        : audio.type.includes("ogg")
+          ? "ogg"
+          : "webm";
+      formData.append(`audio-part-${part.part}`, audio, `speaking-part-${part.part}.${extension}`);
+    }
+
+    for (const image of part.images) {
+      try {
+        const imageResponse = await fetch(exam.parts[part.part - 1].images[image.index].src);
+        if (!imageResponse.ok) {
+          throw new Error(`HTTP ${imageResponse.status}`);
+        }
+        const imageBlob = await imageResponse.blob();
+        if (!imageBlob.type.startsWith("image/")) {
+          throw new Error("Unsupported image content type");
+        }
+        const extension = imageBlob.type.includes("png") ? "png" : "jpg";
+        formData.append(
+          `image-part-${part.part}-${image.index}`,
+          imageBlob,
+          `speaking-part-${part.part}-image-${image.index}.${extension}`,
+        );
+      } catch (error) {
+        console.error("Could not load Speaking prompt image", error instanceof Error ? error.message : "unknown error");
+        status.textContent = `Không tải được ảnh đề Part ${part.part}; chưa gửi bài đi chấm. Hãy tải lại trang rồi thử lại.`;
+        button.disabled = false;
+        return;
+      }
+    }
+  }
+
+  status.textContent = "Đang gửi bản ghi, câu hỏi và hình ảnh theo từng Part để AI nhận diện và chấm...";
   feedbackContainer.replaceChildren();
   try {
     let response;
@@ -3337,6 +3440,7 @@ const showSpeakingResults = async () => {
     return;
   }
   stopResponseTimer("Đã dừng");
+  speakingTimerToggle.hidden = true;
   await stopSpeakingPartRecording();
   await stopSpeakingRecording();
   partTabs.hidden = true;
@@ -3348,11 +3452,11 @@ const showSpeakingResults = async () => {
       <div class="speaking-results-heading">
         <div>
           <h2 id="speakingResultsTitle">Chấm và chữa bài nói bằng AI</h2>
-          <p>Bản ghi liên tục từ lúc bắt đầu giờ Part 1 đến khi bấm Hoàn thành sẽ được chuyển thành văn bản để chấm nội dung, ngữ pháp và từ vựng.</p>
+          <p>Bản ghi âm từng Part sẽ được gửi cùng câu hỏi và hình ảnh tương ứng để AI chép lời, nhận diện nội dung ảnh và chấm câu trả lời.</p>
         </div>
         <button class="primary-button" type="button" data-speaking-feedback-check>Chấm bài nói</button>
       </div>
-      <p class="speaking-results-status" data-speaking-results-status aria-live="polite">Bản ghi được gửi tới Cloudflare AI để chép lời và chấm nội dung; không lưu trong trình duyệt sau khi rời phiên này.</p>
+      <p class="speaking-results-status" data-speaking-results-status aria-live="polite">Bản ghi và hình đề được gửi tới Cloudflare AI để nhận diện và chấm; dữ liệu chỉ giữ trong bộ nhớ của phiên luyện tập.</p>
       <div class="speaking-recording-downloads" data-speaking-recording-downloads>
         <strong>Bản ghi từng Part</strong>
         <div class="speaking-recording-download-grid">
@@ -3370,7 +3474,7 @@ const showSpeakingResults = async () => {
     </section>
   `;
   const checkButton = taskBody.querySelector("[data-speaking-feedback-check]");
-  if (speakingSessionAudioDraft) {
+  if (Object.values(speakingPartAudioDrafts).some((audio) => audio)) {
     void requestSpeakingFeedback(checkButton);
   } else {
     taskBody.querySelector("[data-speaking-results-status]").textContent =
@@ -3389,10 +3493,26 @@ const renderPart = () => {
   if (activeSkill.name === "Speaking") {
     renderSpeakingRecordingStatus();
     if (activeSpeakingRecording) {
-      if (activeSpeakingPartRecording && activeSpeakingPartRecording.part !== activePart + 1) {
-        void stopSpeakingPartRecording();
+      const desiredPart = activePart + 1;
+      if (activeSpeakingPartRecording && activeSpeakingPartRecording.part !== desiredPart) {
+        void stopSpeakingPartRecording().then(() => {
+          if (activeSkill?.name === "Speaking"
+            && activePart + 1 === desiredPart
+            && activeSpeakingRecording) {
+            startSpeakingPartRecording(desiredPart);
+          }
+        });
+      } else if (speakingPartRecordingStopPromise) {
+        void speakingPartRecordingStopPromise.then(() => {
+          if (activeSkill?.name === "Speaking"
+            && activePart + 1 === desiredPart
+            && activeSpeakingRecording) {
+            startSpeakingPartRecording(desiredPart);
+          }
+        });
+      } else {
+        startSpeakingPartRecording(desiredPart);
       }
-      startSpeakingPartRecording(activePart + 1);
     }
   } else if (activeSkill.name === "Writing") {
     restoreWritingAnswers();
@@ -3442,7 +3562,6 @@ const advanceSpeakingPartIfComplete = () => {
   if (nextResponseButton || activePart >= activeSkill.parts.length - 1) {
     return;
   }
-  void stopSpeakingPartRecording();
   activePart += 1;
   renderPart();
 };
@@ -3875,6 +3994,7 @@ const startSpeaking = () => {
   hideToast();
   stopSession();
   activeSkill = null;
+  speakingTimerToggle.hidden = true;
   homeView.classList.add("is-hidden");
   practiceView.classList.add("is-hidden");
   readingView.classList.add("is-hidden");
@@ -3904,6 +4024,8 @@ const startSpeakingTest = (topicId) => {
   speakingSessionAudioError = "";
   speakingPartAudioDrafts = { 1: null, 2: null, 3: null, 4: null };
   activeSkill = { ...skills.Speaking, name: "Speaking", parts, topicId, topicTitle: topic.title };
+  speakingTimerToggle.hidden = false;
+  updateSpeakingTimerToggle();
   activePart = 0;
   homeView.classList.add("is-hidden");
   readingView.classList.add("is-hidden");
@@ -3933,6 +4055,7 @@ const startWriting = () => {
   hideToast();
   stopSession();
   activeSkill = null;
+  speakingTimerToggle.hidden = true;
   homeView.classList.add("is-hidden");
   practiceView.classList.add("is-hidden");
   readingView.classList.add("is-hidden");

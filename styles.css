@@ -2304,6 +2304,25 @@ p {
   stroke-width: 1.6;
 }
 
+.speaking-timer-toggle {
+  flex: 0 0 auto;
+  min-height: 36px;
+  margin-left: auto;
+  padding: 0 12px;
+  color: #a64b37;
+  font-size: 12px;
+}
+
+.speaking-timer-toggle:hover:not(:disabled) {
+  border-color: #e8b8aa;
+  background: #fff3ef;
+}
+
+.speaking-timer-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .part-tabs {
   display: flex;
   gap: 8px;
