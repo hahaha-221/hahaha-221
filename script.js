@@ -241,6 +241,15 @@ const speakingPartTitles = [
   "Extended Discussion",
 ];
 
+const speakingPartInstructionParagraphs = [
+  "In this part, I am going to ask you three short questions about yourself and your interests. You will have 30 seconds to reply to each question.",
+  "In this part, I'm going to ask you to describe a picture. Then I will ask you two questions about it. You will have 45 seconds for each response.",
+  "In this part, I'm going to ask you to compare two pictures, and I will then ask you two questions about them. You will have 45 seconds for each response.",
+  "In this part, I'm going to show you a picture and ask you three questions. You will have one minute to think about your answers before you start speaking. You will have two minutes to answer all three questions.",
+];
+const speakingPartSpokenInstructions = speakingPartInstructionParagraphs.map((instruction, index) =>
+  `Part ${index + 1}. ${speakingPartTitles[index]}. ${instruction}`);
+
 const renderSpeakingPartBody = (exam, partIndex) => {
   const part = exam.parts[partIndex];
   if (!part) {
@@ -270,12 +279,7 @@ const renderSpeakingPartBody = (exam, partIndex) => {
   const imageNote = part.sourceNote
     ? `<p class="speaking-source-note">${part.sourceNote}</p>`
     : "";
-  const partInstructions = [
-    "Bạn có tổng cộng 30 giây để trả lời cả 3 câu hỏi.",
-    "Bạn có 45 giây cho mỗi câu hỏi.",
-    "Bạn có 45 giây cho mỗi câu hỏi.",
-    "Bạn có 1 phút chuẩn bị, sau đó 2 phút để trả lời cả 3 câu hỏi.",
-  ][partIndex];
+  const partInstructions = speakingPartInstructionParagraphs[partIndex];
   const partTimer = partIndex === 0
     ? responseTimer({
       duration: 30,
@@ -297,7 +301,7 @@ const renderSpeakingPartBody = (exam, partIndex) => {
       <strong>Part ${partIndex + 1} · ${speakingPartTitles[partIndex]}</strong>
       <p>${partInstructions}</p>
     </div>
-    <p class="speaking-session-recording-status" data-speaking-session-recording-status aria-live="polite"></p>
+    <p class="speaking-session-recording-status" data-speaking-session-recording-status aria-live="polite">Hướng dẫn và câu hỏi của mỗi Part sẽ được đọc trước khi bộ đếm bắt đầu.</p>
     ${images ? `<div class="speaking-image-grid" data-image-count="${part.images.length}">${images}</div>` : ""}
     ${partIndex === 0 ? partTimer : ""}
     ${partialNote}${imageNote}
@@ -2307,6 +2311,7 @@ let responseInterval = null;
 let activeResponseControl = null;
 let activeResponseState = null;
 let speakingPromptReadId = 0;
+let speakingPartInstructionsRead = false;
 let toastTimeout = null;
 
 const formatTime = (seconds) => {
@@ -2378,13 +2383,18 @@ const readSpeakingPrompt = (responseButton, onReady) => {
     .map((element) => element.textContent.replace(/^\d+\.\s*/, "").trim())
     .filter(Boolean)
     .join(". ");
+  const instructionText = speakingPartInstructionsRead
+    ? ""
+    : speakingPartSpokenInstructions[requestedPart] || "";
+  const textToSpeak = [instructionText, questionText].filter(Boolean).join(" ");
 
-  if (!questionText) {
+  if (!textToSpeak) {
     onReady();
     return;
   }
   if (!("speechSynthesis" in window) || typeof window.SpeechSynthesisUtterance !== "function") {
-    showToast("Trình duyệt không hỗ trợ đọc câu hỏi; sẽ tiếp tục bài thi.");
+    showToast("Trình duyệt không hỗ trợ đọc hướng dẫn; sẽ tiếp tục bài thi.");
+    speakingPartInstructionsRead = true;
     onReady();
     return;
   }
@@ -2392,9 +2402,9 @@ const readSpeakingPrompt = (responseButton, onReady) => {
   const status = responseButton.closest("[data-response-timer-control]")
     .querySelector("[data-response-status]");
   responseButton.disabled = true;
-  responseButton.textContent = "Đang đọc câu hỏi...";
-  status.textContent = "Đang đọc câu hỏi...";
-  const utterance = new window.SpeechSynthesisUtterance(questionText);
+  responseButton.textContent = "Đang đọc đề...";
+  status.textContent = instructionText ? "Đang đọc hướng dẫn và câu hỏi..." : "Đang đọc câu hỏi...";
+  const utterance = new window.SpeechSynthesisUtterance(textToSpeak);
   const voices = window.speechSynthesis.getVoices();
   const englishVoice = voices.find((voice) => /^en-GB/i.test(voice.lang))
     || voices.find((voice) => /^en/i.test(voice.lang));
@@ -2408,9 +2418,10 @@ const readSpeakingPrompt = (responseButton, onReady) => {
     if (!canContinue()) {
       return;
     }
+    speakingPartInstructionsRead = true;
     if (errorMessage) {
       console.error("Speaking question playback failed", errorMessage);
-      showToast("Không đọc được câu hỏi bằng giọng nói; bài thi sẽ tiếp tục.");
+      showToast("Không đọc được hướng dẫn hoặc câu hỏi; bài thi sẽ tiếp tục.");
     }
     onReady();
   };
@@ -2617,7 +2628,7 @@ const renderSpeakingRecordingStatus = () => {
       ? speakingSessionAudioError
       : speakingSessionAudioDraft
         ? "Đã dừng ghi âm. Các bản ghi theo Part sẵn sàng để gửi chấm."
-      : "Bấm bắt đầu ở Part 1 để ghi âm liên tục và tách bản ghi riêng cho từng Part.";
+      : "Hướng dẫn và câu hỏi của mỗi Part sẽ được đọc trước khi bộ đếm bắt đầu.";
   status.forEach((element) => {
     element.textContent = message;
   });
@@ -3437,7 +3448,7 @@ const requestSpeakingFeedback = async (button) => {
   const feedbackContainer = panel.querySelector("[data-speaking-feedback]");
   const exam = speakingExamData.exams.find((item) => item.id === requestedSkill.topicId);
   if (!Object.values(speakingPartAudioDrafts).some((audio) => audio)) {
-    status.textContent = "Chưa có bản ghi theo Part. Hãy quay lại Part 1, bấm nút thời gian để bắt đầu ghi âm rồi thử lại.";
+    status.textContent = "Chưa có bản ghi theo Part. Hãy quay lại Part 1 và bấm nút bắt đầu để thử lại việc ghi âm.";
     return;
   }
 
@@ -3582,13 +3593,14 @@ const showSpeakingResults = async () => {
   } else {
     taskBody.querySelector("[data-speaking-results-status]").textContent =
       speakingSessionAudioError
-        || "Bạn chưa ghi âm bài thi. Hãy quay lại Part 1, bấm nút thời gian để bắt đầu ghi âm rồi làm lại các Part.";
+        || "Bạn chưa ghi âm bài thi. Hãy quay lại danh sách đề và chọn một đề; nếu micro chưa được cấp quyền, hãy cho phép rồi thử lại.";
   }
 };
 
 const renderPart = () => {
   if (activeSkill.name === "Speaking") {
     cancelSpeakingPrompt();
+    speakingPartInstructionsRead = false;
   }
   const part = activeSkill.parts[activePart];
   taskKicker.textContent = part.kicker;
