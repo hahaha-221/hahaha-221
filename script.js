@@ -2287,6 +2287,13 @@ let writingAnswerDrafts = [];
 let writingAiFeedbackDraft = null;
 let speakingSessionAudioDraft = null;
 let speakingSessionAudioError = "";
+let speakingPartAudioDrafts = {
+  1: null,
+  2: null,
+  3: null,
+  4: null,
+};
+let activeSpeakingPartRecording = null;
 let activeSpeakingRecording = null;
 let stoppingSpeakingRecording = null;
 let speakingRecordingStopPromise = null;
@@ -2433,8 +2440,10 @@ const stopSession = () => {
     (activeSpeakingRecording || stoppingSpeakingRecording).discard = true;
   }
   void stopSpeakingRecording();
+  void stopSpeakingPartRecording();
   speakingSessionAudioDraft = null;
   speakingSessionAudioError = "";
+  speakingPartAudioDrafts = { 1: null, 2: null, 3: null, 4: null };
   guideView.classList.add("is-hidden");
   listenAudio.pause();
   listenAudio.currentTime = 0;
@@ -2450,7 +2459,7 @@ const renderSpeakingRecordingStatus = () => {
   }
   const recording = activeSpeakingRecording || stoppingSpeakingRecording;
   const message = recording?.recorder.state === "recording"
-    ? "● Đang ghi âm liên tục toàn bài. Bản ghi sẽ dừng khi bạn bấm Hoàn thành."
+    ? "● Đang ghi âm bản liên tục và bản riêng từng Part. Bản ghi sẽ dừng khi bạn bấm Hoàn thành."
     : speakingSessionAudioError
       ? speakingSessionAudioError
       : speakingSessionAudioDraft
@@ -2519,6 +2528,85 @@ const stopSpeakingRecording = () => {
     resolveStop();
   }
   return stopPromise;
+};
+
+const stopSpeakingPartRecording = () => {
+  const recording = activeSpeakingPartRecording;
+  if (!recording) {
+    return Promise.resolve();
+  }
+  if (recording.recorder.state === "inactive") {
+    activeSpeakingPartRecording = null;
+    return Promise.resolve();
+  }
+
+  return new Promise((resolve) => {
+    recording.recorder.addEventListener("stop", () => {
+      window.clearTimeout(recording.timeout);
+      const blob = new Blob(recording.chunks, { type: recording.recorder.mimeType || "audio/webm" });
+      if (blob.size > 0 && !recording.discard) {
+        speakingPartAudioDrafts[recording.part] = blob;
+      }
+      if (activeSpeakingPartRecording === recording) {
+        activeSpeakingPartRecording = null;
+      }
+      resolve();
+    }, { once: true });
+    try {
+      recording.recorder.stop();
+    } catch (error) {
+      console.error("Could not stop Speaking Part recording", error instanceof Error ? error.name : "unknown error");
+      window.clearTimeout(recording.timeout);
+      if (activeSpeakingPartRecording === recording) {
+        activeSpeakingPartRecording = null;
+      }
+      resolve();
+    }
+  });
+};
+
+const startSpeakingPartRecording = (partNumber) => {
+  const fullRecording = activeSpeakingRecording;
+  if (!fullRecording || fullRecording.recorder.state !== "recording"
+    || activeSpeakingPartRecording?.part === partNumber
+    || speakingPartAudioDrafts[partNumber]) {
+    return;
+  }
+
+  const mimeType = typeof MediaRecorder.isTypeSupported === "function"
+    ? ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"]
+      .find((type) => MediaRecorder.isTypeSupported(type))
+    : "";
+  let recorder;
+  try {
+    recorder = new MediaRecorder(fullRecording.stream, {
+      ...(mimeType && { mimeType }),
+      audioBitsPerSecond: 32_000,
+    });
+  } catch (error) {
+    console.error("Could not start Speaking Part recording", error instanceof Error ? error.name : "unknown error");
+    return;
+  }
+
+  const recording = {
+    recorder,
+    part: partNumber,
+    chunks: [],
+    discard: false,
+    timeout: null,
+  };
+  activeSpeakingPartRecording = recording;
+  recorder.addEventListener("dataavailable", (event) => {
+    if (event.data.size > 0) {
+      recording.chunks.push(event.data);
+    }
+  });
+  try {
+    recorder.start(1000);
+  } catch (error) {
+    activeSpeakingPartRecording = null;
+    console.error("Could not begin Speaking Part recorder", error instanceof Error ? error.name : "unknown error");
+  }
 };
 
 const startSpeakingSessionRecording = async () => {
@@ -2594,6 +2682,8 @@ const startSpeakingSessionRecording = async () => {
   }
   speakingSessionAudioDraft = null;
   speakingSessionAudioError = "";
+  speakingPartAudioDrafts = { 1: null, 2: null, 3: null, 4: null };
+  startSpeakingPartRecording(1);
   renderSpeakingRecordingStatus();
   recording.timeout = window.setTimeout(() => {
     if (recorder.state === "recording") {
@@ -2885,6 +2975,42 @@ const collectWritingSubmissionParts = () => {
       taskForDownload: formatWritingPromptForDownload(source),
       answers,
     };
+  });
+};
+
+const downloadSpeakingPartRecording = (partNumber) => {
+  const blob = speakingPartAudioDrafts[partNumber];
+  if (!blob) {
+    showToast(`Chưa có bản ghi Part ${partNumber}.`);
+    return;
+  }
+  const extension = blob.type.includes("mp4")
+    ? "mp4"
+    : blob.type.includes("ogg")
+      ? "ogg"
+      : "webm";
+  const topicSlug = String(activeSkill?.topicTitle || "speaking")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "") || "speaking";
+  const link = document.createElement("a");
+  const downloadUrl = URL.createObjectURL(blob);
+  link.href = downloadUrl;
+  link.download = `aptispractice-speaking-${topicSlug}-part-${partNumber}.${extension}`;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
+};
+
+const downloadAllSpeakingPartRecordings = () => {
+  const availableParts = [1, 2, 3, 4].filter((part) => speakingPartAudioDrafts[part]);
+  if (availableParts.length === 0) {
+    showToast("Chưa có bản ghi từng Part để tải.");
+    return;
+  }
+  availableParts.forEach((part, index) => {
+    window.setTimeout(() => downloadSpeakingPartRecording(part), index * 300);
   });
 };
 
@@ -3211,6 +3337,7 @@ const showSpeakingResults = async () => {
     return;
   }
   stopResponseTimer("Đã dừng");
+  await stopSpeakingPartRecording();
   await stopSpeakingRecording();
   partTabs.hidden = true;
   practiceView.querySelector(".practice-actions").hidden = true;
@@ -3226,6 +3353,15 @@ const showSpeakingResults = async () => {
         <button class="primary-button" type="button" data-speaking-feedback-check>Chấm bài nói</button>
       </div>
       <p class="speaking-results-status" data-speaking-results-status aria-live="polite">Bản ghi được gửi tới Cloudflare AI để chép lời và chấm nội dung; không lưu trong trình duyệt sau khi rời phiên này.</p>
+      <div class="speaking-recording-downloads" data-speaking-recording-downloads>
+        <strong>Bản ghi từng Part</strong>
+        <div class="speaking-recording-download-grid">
+          ${[1, 2, 3, 4].map((part) => `
+            <button class="secondary-button" type="button" data-speaking-download-part="${part}" ${speakingPartAudioDrafts[part] ? "" : "disabled"}>Tải Part ${part}</button>
+          `).join("")}
+          <button class="primary-button" type="button" data-speaking-download-all ${Object.values(speakingPartAudioDrafts).some((blob) => blob) ? "" : "disabled"}>Tải tất cả Part</button>
+        </div>
+      </div>
       <div data-speaking-feedback></div>
       <div class="speaking-results-actions">
         <button class="secondary-button" type="button" data-speaking-return>Quay lại bài làm</button>
@@ -3252,6 +3388,12 @@ const renderPart = () => {
   taskBody.innerHTML = part.body;
   if (activeSkill.name === "Speaking") {
     renderSpeakingRecordingStatus();
+    if (activeSpeakingRecording) {
+      if (activeSpeakingPartRecording && activeSpeakingPartRecording.part !== activePart + 1) {
+        void stopSpeakingPartRecording();
+      }
+      startSpeakingPartRecording(activePart + 1);
+    }
   } else if (activeSkill.name === "Writing") {
     restoreWritingAnswers();
   }
@@ -3300,6 +3442,7 @@ const advanceSpeakingPartIfComplete = () => {
   if (nextResponseButton || activePart >= activeSkill.parts.length - 1) {
     return;
   }
+  void stopSpeakingPartRecording();
   activePart += 1;
   renderPart();
 };
@@ -3759,6 +3902,7 @@ const startSpeakingTest = (topicId) => {
   stopSession();
   speakingSessionAudioDraft = null;
   speakingSessionAudioError = "";
+  speakingPartAudioDrafts = { 1: null, 2: null, 3: null, 4: null };
   activeSkill = { ...skills.Speaking, name: "Speaking", parts, topicId, topicTitle: topic.title };
   activePart = 0;
   homeView.classList.add("is-hidden");
@@ -5407,6 +5551,16 @@ taskBody.addEventListener("input", (event) => {
 });
 
 taskBody.addEventListener("click", (event) => {
+  const speakingPartDownload = event.target.closest("[data-speaking-download-part]");
+  if (speakingPartDownload) {
+    downloadSpeakingPartRecording(Number(speakingPartDownload.dataset.speakingDownloadPart));
+    return;
+  }
+  if (event.target.closest("[data-speaking-download-all]")) {
+    downloadAllSpeakingPartRecordings();
+    return;
+  }
+
   const speakingCheckButton = event.target.closest("[data-speaking-feedback-check]");
   if (speakingCheckButton) {
     requestSpeakingFeedback(speakingCheckButton).catch((error) => {

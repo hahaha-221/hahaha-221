@@ -3376,6 +3376,26 @@ p {
   line-height: 1.55;
 }
 
+.speaking-recording-downloads {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #dce7ff;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.speaking-recording-downloads strong {
+  color: #263a63;
+  font-size: 13px;
+}
+
+.speaking-recording-download-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .speaking-results {
   display: grid;
   gap: 16px;
