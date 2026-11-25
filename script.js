@@ -2306,6 +2306,7 @@ let timerInterval = null;
 let responseInterval = null;
 let activeResponseControl = null;
 let activeResponseState = null;
+let speakingPromptReadId = 0;
 let toastTimeout = null;
 
 const formatTime = (seconds) => {
@@ -2350,6 +2351,106 @@ const updateSpeakingTimerToggle = () => {
   speakingTimerToggle.textContent = isPaused ? "Tiếp tục thời gian" : "Dừng thời gian";
   speakingTimerToggle.setAttribute("aria-pressed", String(isPaused));
   speakingTimerToggle.disabled = !activeResponseState;
+};
+
+const cancelSpeakingPrompt = () => {
+  speakingPromptReadId += 1;
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+  }
+};
+
+const readSpeakingPrompt = (responseButton, onReady) => {
+  cancelSpeakingPrompt();
+  const requestId = speakingPromptReadId;
+  const requestedSkill = activeSkill;
+  const requestedPart = activePart;
+  const canContinue = () => requestId === speakingPromptReadId
+    && responseButton.isConnected
+    && activeSkill === requestedSkill
+    && activePart === requestedPart;
+  const questionCard = responseButton.closest(".question-card");
+  const questionElements = questionCard
+    ? [questionCard.querySelector("strong")]
+    : [...taskBody.querySelectorAll(".question-card > strong")];
+  const questionText = questionElements
+    .filter(Boolean)
+    .map((element) => element.textContent.replace(/^\d+\.\s*/, "").trim())
+    .filter(Boolean)
+    .join(". ");
+
+  if (!questionText) {
+    onReady();
+    return;
+  }
+  if (!("speechSynthesis" in window) || typeof window.SpeechSynthesisUtterance !== "function") {
+    showToast("Trình duyệt không hỗ trợ đọc câu hỏi; sẽ tiếp tục bài thi.");
+    onReady();
+    return;
+  }
+
+  const status = responseButton.closest("[data-response-timer-control]")
+    .querySelector("[data-response-status]");
+  responseButton.disabled = true;
+  responseButton.textContent = "Đang đọc câu hỏi...";
+  status.textContent = "Đang đọc câu hỏi...";
+  const utterance = new window.SpeechSynthesisUtterance(questionText);
+  const voices = window.speechSynthesis.getVoices();
+  const englishVoice = voices.find((voice) => /^en-GB/i.test(voice.lang))
+    || voices.find((voice) => /^en/i.test(voice.lang));
+  utterance.lang = englishVoice?.lang || "en-GB";
+  utterance.rate = 0.9;
+  if (englishVoice) {
+    utterance.voice = englishVoice;
+  }
+
+  const continueAfterReading = (errorMessage = "") => {
+    if (!canContinue()) {
+      return;
+    }
+    if (errorMessage) {
+      console.error("Speaking question playback failed", errorMessage);
+      showToast("Không đọc được câu hỏi bằng giọng nói; bài thi sẽ tiếp tục.");
+    }
+    onReady();
+  };
+  utterance.onend = () => continueAfterReading();
+  utterance.onerror = (event) => continueAfterReading(event.error || "unknown error");
+  try {
+    window.speechSynthesis.speak(utterance);
+  } catch (error) {
+    continueAfterReading(error instanceof Error ? error.message : "unknown error");
+  }
+};
+
+const readSpeakingPromptThenStartTimer = (responseButton, skipPreparation = false) => {
+  readSpeakingPrompt(responseButton, () => startResponseTimer(responseButton, skipPreparation));
+};
+
+const startSpeakingPartOne = (responseButton) => {
+  const requestedSkill = activeSkill;
+  readSpeakingPrompt(responseButton, () => {
+    if (!responseButton.isConnected || activeSkill !== requestedSkill || activePart !== 0) {
+      return;
+    }
+    responseButton.disabled = true;
+    responseButton.textContent = "Đang mở micro...";
+    startSpeakingSessionRecording().then((started) => {
+      if (started && responseButton.isConnected && activeSkill === requestedSkill && activePart === 0) {
+        startResponseTimer(responseButton);
+      } else if (responseButton.isConnected) {
+        responseButton.disabled = false;
+        responseButton.textContent = responseButton.dataset.responseStartLabel;
+      }
+    }).catch((error) => {
+      console.error("Speaking recording failed", error instanceof Error ? error.name : "unknown error");
+      if (responseButton.isConnected) {
+        responseButton.disabled = false;
+        responseButton.textContent = responseButton.dataset.responseStartLabel;
+      }
+      showToast("Không thể bắt đầu ghi âm. Hãy kiểm tra micro và thử lại.");
+    });
+  });
 };
 
 const tickResponseTimer = () => {
@@ -2482,6 +2583,7 @@ const clearReadingOrderSlot = (slot) => {
 
 const stopSession = () => {
   window.clearInterval(timerInterval);
+  cancelSpeakingPrompt();
   stopResponseTimer("Sẵn sàng");
   speakingTimerToggle.hidden = true;
   if (activeSpeakingRecording || stoppingSpeakingRecording) {
@@ -3439,6 +3541,7 @@ const showSpeakingResults = async () => {
   if (activeSkill?.name !== "Speaking") {
     return;
   }
+  cancelSpeakingPrompt();
   stopResponseTimer("Đã dừng");
   speakingTimerToggle.hidden = true;
   await stopSpeakingPartRecording();
@@ -3484,6 +3587,9 @@ const showSpeakingResults = async () => {
 };
 
 const renderPart = () => {
+  if (activeSkill.name === "Speaking") {
+    cancelSpeakingPrompt();
+  }
   const part = activeSkill.parts[activePart];
   taskKicker.textContent = part.kicker;
   practiceTitle.textContent = part.title;
@@ -3544,7 +3650,7 @@ const renderPart = () => {
   if (activeSkill.name === "Speaking" && activePart > 0) {
     const responseButton = taskBody.querySelector("[data-response-timer]");
     if (responseButton) {
-      startResponseTimer(responseButton);
+      readSpeakingPromptThenStartTimer(responseButton);
     }
   }
 };
@@ -3556,7 +3662,7 @@ const advanceSpeakingPartIfComplete = () => {
   const responseButtons = [...taskBody.querySelectorAll("[data-response-timer]")];
   const nextResponseButton = responseButtons.find((button) => button.dataset.responseCompleted !== "true");
   if (activePart > 0 && nextResponseButton) {
-    startResponseTimer(nextResponseButton);
+    readSpeakingPromptThenStartTimer(nextResponseButton);
     return;
   }
   if (nextResponseButton || activePart >= activeSkill.parts.length - 1) {
@@ -4048,6 +4154,10 @@ const startSpeakingTest = (topicId) => {
   document.querySelector(".saved-dot").style.background = "";
   renderTabs();
   renderPart();
+  const partOneTimer = taskBody.querySelector("[data-response-timer]");
+  if (partOneTimer) {
+    startSpeakingPartOne(partOneTimer);
+  }
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
 
@@ -5581,26 +5691,10 @@ practiceView.addEventListener("click", (event) => {
   const responseButton = event.target.closest("[data-response-timer]");
   if (responseButton) {
     if (activeSkill?.name === "Speaking" && activePart === 0) {
-      responseButton.disabled = true;
-      responseButton.textContent = "Đang mở micro...";
-      startSpeakingSessionRecording().then((started) => {
-        if (started) {
-          startResponseTimer(responseButton);
-        } else if (responseButton.isConnected) {
-          responseButton.disabled = false;
-          responseButton.textContent = responseButton.dataset.responseStartLabel;
-        }
-      }).catch((error) => {
-        console.error("Speaking recording failed", error instanceof Error ? error.name : "unknown error");
-        if (responseButton.isConnected) {
-          responseButton.disabled = false;
-          responseButton.textContent = responseButton.dataset.responseStartLabel;
-        }
-        showToast("Không thể bắt đầu ghi âm. Hãy kiểm tra micro và thử lại.");
-      });
+      startSpeakingPartOne(responseButton);
       return;
     }
-    startResponseTimer(responseButton);
+    readSpeakingPromptThenStartTimer(responseButton);
   }
 
 });
