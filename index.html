@@ -9,14 +9,14 @@
       content="Luyện thi Aptis dễ dàng với bài tập Listening, Reading, Writing và Speaking."
     />
     <title>AptisPractice — Luyện thi Aptis mỗi ngày</title>
-    <link rel="stylesheet" href="styles.css?v=20261125-speaking-timer-stop-1" />
+    <link rel="stylesheet" href="styles.css?v=20261126-vocabulary-notebook-1" />
     <script src="assets/listening-part1.js?v=20261126-listening-q184-194-update-1" defer></script>
     <script src="assets/listening-part2.js" defer></script>
     <script src="assets/listening-part3.js?v=20261123-listening-p3-answers-5" defer></script>
     <script src="assets/listening-part4.js" defer></script>
     <script src="assets/speaking-exams.js?v=20261118-speaking-sets1-20-1" defer></script>
     <script src="assets/guides.js?v=20261119-guide-15" defer></script>
-    <script src="script.js?v=20261126-listening-clean-display-3" defer></script>
+    <script src="script.js?v=20261126-vocabulary-notebook-1" defer></script>
   </head>
   <body>
     <header class="topbar">
@@ -30,7 +30,7 @@
         <a class="nav-link" href="#practice" data-start="Reading">Reading</a>
         <a class="nav-link" href="#practice" data-start="Writing">Writing</a>
         <a class="nav-link" href="#practice" data-start="Speaking">Speaking</a>
-        <a class="nav-link" href="#vocabulary" data-toast="Mở Sổ tay từ vựng trong bài Listening để xem từ mới.">Từ vựng <span class="nav-count">10</span></a>
+        <a class="nav-link" href="#vocabulary" data-vocabulary>Từ vựng <span class="nav-count" id="vocabularyNavCount">0</span></a>
         <a class="nav-link" href="#guide" data-guide>Hướng dẫn</a>
       </nav>
       <button class="profile-button" type="button" aria-label="Tài khoản Nhân">
@@ -195,6 +195,42 @@
           </div>
           <div class="guide-article-content" id="guideArticleContent"></div>
         </article>
+      </section>
+
+      <section class="vocabulary-view is-hidden" id="vocabularyView" aria-labelledby="vocabularyPageTitle">
+        <nav class="reading-breadcrumb" aria-label="Breadcrumb">
+          <button type="button" data-home>Luyện tập</button>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">Từ vựng</span>
+        </nav>
+        <div class="vocabulary-page-heading">
+          <div class="vocabulary-heading-icon" aria-hidden="true">▣</div>
+          <div>
+            <h1 id="vocabularyPageTitle">Sổ tay từ vựng</h1>
+            <p>Lưu từ mới khi luyện tập · dữ liệu lưu trên trình duyệt này</p>
+          </div>
+          <span class="vocabulary-count" id="vocabularyCount">0 từ đã lưu</span>
+        </div>
+        <form class="vocabulary-save-form" id="vocabularyPageForm">
+          <label>
+            <span>Từ / cụm từ</span>
+            <input id="vocabularyPageTerm" name="term" autocomplete="off" required />
+          </label>
+          <label>
+            <span>Nghĩa / ghi chú</span>
+            <input id="vocabularyPageMeaning" name="meaning" />
+          </label>
+          <button class="primary-button" type="submit">Lưu từ</button>
+        </form>
+        <p class="vocabulary-status" id="vocabularyPageStatus" role="status" aria-live="polite"></p>
+        <section class="vocabulary-list-card" aria-labelledby="vocabularyListTitle">
+          <div class="vocabulary-list-heading">
+            <h2 id="vocabularyListTitle">Danh sách từ</h2>
+            <label class="visually-hidden" for="vocabularySearch">Tìm từ đã lưu</label>
+            <input id="vocabularySearch" placeholder="Tìm từ..." autocomplete="off" />
+          </div>
+          <div class="vocabulary-saved-list" id="vocabularySavedList"></div>
+        </section>
       </section>
 
       <section class="practice-view is-hidden" id="practiceView" aria-labelledby="practiceTitle">
@@ -505,8 +541,8 @@
 
           <nav class="listening-footer" id="listenPart1Footer" aria-label="Điều hướng câu hỏi Listening Part 1">
             <div class="footer-tools">
-              <button class="footer-button" type="button" id="questionListButton">☷ &nbsp; Danh sách câu</button>
-              <button class="footer-button" type="button" id="vocabularyButton" aria-expanded="false" aria-controls="vocabularyPanel">▣ &nbsp; Sổ tay từ vựng</button>
+              <button class="footer-button" type="button" id="questionListButton" aria-expanded="false" aria-controls="questionPicker">☷ &nbsp; Danh sách câu</button>
+              <button class="footer-button" type="button" id="vocabularyButton">▣ &nbsp; Sổ tay từ vựng</button>
             </div>
             <div class="footer-question-nav">
               <button class="footer-button" type="button" id="previousQuestion">← &nbsp; Câu trước</button>
@@ -514,6 +550,17 @@
               <button class="footer-button next-question-button" type="button" id="nextQuestion">Tiếp theo →</button>
             </div>
           </nav>
+          <section class="question-picker is-hidden" id="questionPicker" aria-label="Danh sách câu hỏi">
+            <div class="question-picker-heading">
+              <h3>Danh sách câu hỏi</h3>
+              <button class="icon-button" type="button" id="closeQuestionPicker" aria-label="Đóng danh sách câu hỏi">×</button>
+            </div>
+            <label class="question-picker-search">
+              <span class="visually-hidden">Tìm trong nội dung đề</span>
+              <input id="questionPickerSearch" type="search" placeholder="Tìm trong nội dung đề..." autocomplete="off" />
+            </label>
+            <div class="question-picker-list" id="questionPickerList"></div>
+          </section>
 
           <article class="listen-exercise-card is-hidden" id="listenPart2ExerciseCard">
             <p class="part2-instructions">Nghe từng người nói và nối với mô tả phù hợp.</p>
@@ -595,6 +642,35 @@
           </nav>
         </div>
       </section>
+
+      <dialog class="vocabulary-dialog" id="vocabularyDialog" aria-labelledby="vocabularyDialogTitle">
+        <form class="vocabulary-dialog-content" id="vocabularyDialogForm">
+          <div class="vocabulary-dialog-heading">
+            <h2 id="vocabularyDialogTitle">Sổ tay từ vựng</h2>
+            <button class="icon-button" type="button" id="closeVocabularyDialog" aria-label="Đóng sổ tay từ vựng">×</button>
+          </div>
+          <p class="vocabulary-tip">Mẹo: bôi đen một từ trong lời rồi bấm “Sổ tay từ vựng” để điền sẵn.</p>
+          <label>
+            <span>Từ / cụm từ</span>
+            <input id="vocabularyDialogTerm" name="term" autocomplete="off" required />
+          </label>
+          <label>
+            <span>Nghĩa / ghi chú</span>
+            <textarea id="vocabularyDialogMeaning" name="meaning" rows="2"></textarea>
+          </label>
+          <section class="vocabulary-current-entries" id="vocabularyCurrentEntries" aria-label="Từ vựng trong bài">
+            <h3>Từ vựng trong bài</h3>
+            <div id="vocabularyEntries"></div>
+          </section>
+          <p class="vocabulary-status" id="vocabularyDialogStatus" role="status" aria-live="polite"></p>
+          <div class="vocabulary-dialog-actions">
+            <button class="text-button" type="button" id="viewVocabularyButton">Xem sổ tay (0)</button>
+            <span class="vocabulary-dialog-spacer"></span>
+            <button class="footer-button" type="button" id="cancelVocabularyDialog">Đóng</button>
+            <button class="primary-button" type="submit">Lưu từ</button>
+          </div>
+        </form>
+      </dialog>
 
     </main>
     <div class="toast" id="toast" role="status" aria-live="polite"></div>

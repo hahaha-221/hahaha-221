@@ -2197,6 +2197,25 @@ const progressLabel = document.getElementById("progressLabel");
 const previousButton = document.getElementById("previousPart");
 const nextButton = document.getElementById("nextPart");
 const toast = document.getElementById("toast");
+const vocabularyView = document.getElementById("vocabularyView");
+const vocabularyNavCount = document.getElementById("vocabularyNavCount");
+const vocabularyCount = document.getElementById("vocabularyCount");
+const vocabularyPageForm = document.getElementById("vocabularyPageForm");
+const vocabularyPageTerm = document.getElementById("vocabularyPageTerm");
+const vocabularyPageMeaning = document.getElementById("vocabularyPageMeaning");
+const vocabularyPageStatus = document.getElementById("vocabularyPageStatus");
+const vocabularySearch = document.getElementById("vocabularySearch");
+const vocabularySavedList = document.getElementById("vocabularySavedList");
+const vocabularyDialog = document.getElementById("vocabularyDialog");
+const vocabularyDialogForm = document.getElementById("vocabularyDialogForm");
+const vocabularyDialogTerm = document.getElementById("vocabularyDialogTerm");
+const vocabularyDialogMeaning = document.getElementById("vocabularyDialogMeaning");
+const vocabularyDialogStatus = document.getElementById("vocabularyDialogStatus");
+const vocabularyCurrentEntries = document.getElementById("vocabularyCurrentEntries");
+const questionPicker = document.getElementById("questionPicker");
+const questionPickerSearch = document.getElementById("questionPickerSearch");
+const questionPickerList = document.getElementById("questionPickerList");
+const questionListButton = document.getElementById("questionListButton");
 const guideView = document.getElementById("guideView");
 const guideListView = document.getElementById("guideListView");
 const guideArticleView = document.getElementById("guideArticleView");
@@ -2306,8 +2325,13 @@ let stoppingSpeakingRecording = null;
 let speakingRecordingStopPromise = null;
 let speakingMicrophoneRequest = false;
 const WRITING_GEMINI_KEY_STORAGE = "aptisPractice.writingGeminiApiKey";
+const VOCABULARY_STORAGE_KEY = "aptisPractice.vocabularyNotebook";
 let secondsRemaining = 0;
 let timerInterval = null;
+let savedVocabulary = [];
+let vocabularyStorageError = "";
+let questionPickerQuery = "";
+let selectedTranscriptText = "";
 let responseInterval = null;
 let activeResponseControl = null;
 let activeResponseState = null;
@@ -3689,6 +3713,8 @@ const setActiveNav = (skillName = null) => {
   document.querySelectorAll(".nav-link").forEach((link) => link.classList.remove("is-active"));
   const activeLink = skillName === "Guide"
     ? document.querySelector(".nav-link[data-guide]")
+    : skillName === "Vocabulary"
+      ? document.querySelector(".nav-link[data-vocabulary]")
     : skillName
       ? document.querySelector(`.nav-link[data-start="${skillName}"]`)
       : document.querySelector(".nav-link[data-home]");
@@ -4101,6 +4127,7 @@ const startGuide = () => {
   listeningView.classList.add("is-hidden");
   writingView.classList.add("is-hidden");
   speakingView.classList.add("is-hidden");
+  vocabularyView.classList.add("is-hidden");
   guideListView.classList.remove("is-hidden");
   guideArticleView.classList.add("is-hidden");
   guideView.classList.remove("is-hidden");
@@ -4120,6 +4147,7 @@ const startSpeaking = () => {
   listeningView.classList.add("is-hidden");
   writingView.classList.add("is-hidden");
   speakingView.classList.remove("is-hidden");
+  vocabularyView.classList.add("is-hidden");
   timerChip.hidden = true;
   renderSpeakingLanding();
   setActiveNav("Speaking");
@@ -4185,6 +4213,7 @@ const startWriting = () => {
   listeningView.classList.add("is-hidden");
   speakingView.classList.add("is-hidden");
   writingView.classList.remove("is-hidden");
+  vocabularyView.classList.add("is-hidden");
   practiceView.classList.remove("is-reading-detail");
   timerChip.hidden = true;
   renderWritingLanding();
@@ -4300,6 +4329,7 @@ const startReading = () => {
   listeningView.classList.add("is-hidden");
   speakingView.classList.add("is-hidden");
   readingView.classList.remove("is-hidden");
+  vocabularyView.classList.add("is-hidden");
   practiceView.classList.remove("is-reading-detail");
   readingQuestionHeading.hidden = true;
   practiceHeading.hidden = false;
@@ -4359,6 +4389,216 @@ const returnToReadingList = () => {
   setActiveNav("Reading");
   window.scrollTo({ top: 0, behavior: "smooth" });
 };
+
+const normalizeVocabularyText = (value) => value.trim().replace(/\s+/g, " ").toLocaleLowerCase();
+
+const loadSavedVocabulary = () => {
+  try {
+    const stored = window.localStorage.getItem(VOCABULARY_STORAGE_KEY);
+    if (!stored) {
+      return [];
+    }
+    const entries = JSON.parse(stored);
+    if (!Array.isArray(entries) || entries.some((entry) => (
+      !entry || typeof entry.term !== "string" || typeof entry.meaning !== "string"
+    ))) {
+      throw new Error("invalid vocabulary data");
+    }
+    return entries;
+  } catch {
+    vocabularyStorageError = "Không thể đọc sổ tay từ vựng trong trình duyệt này.";
+    return [];
+  }
+};
+
+const setVocabularyStatus = (message) => {
+  vocabularyPageStatus.textContent = message;
+  vocabularyDialogStatus.textContent = message;
+};
+
+const renderVocabularyBook = () => {
+  const count = savedVocabulary.length;
+  const countText = `${count} từ đã lưu`;
+  vocabularyNavCount.textContent = String(count);
+  vocabularyCount.textContent = countText;
+  document.getElementById("viewVocabularyButton").textContent = `Xem sổ tay (${count})`;
+
+  const query = normalizeVocabularyText(vocabularySearch.value);
+  const filteredEntries = savedVocabulary
+    .map((entry, index) => ({ ...entry, index }))
+    .filter(({ term, meaning }) => !query
+      || normalizeVocabularyText(`${term} ${meaning}`).includes(query));
+  vocabularySavedList.replaceChildren();
+
+  if (vocabularyStorageError) {
+    vocabularySavedList.innerHTML = "";
+    const message = document.createElement("p");
+    message.className = "vocabulary-empty-state";
+    message.textContent = vocabularyStorageError;
+    vocabularySavedList.append(message);
+    setVocabularyStatus(vocabularyStorageError);
+    return;
+  }
+
+  if (!filteredEntries.length) {
+    const emptyState = document.createElement("p");
+    emptyState.className = "vocabulary-empty-state";
+    emptyState.textContent = count
+      ? "Không tìm thấy từ phù hợp."
+      : "Chưa có từ nào. Khi làm bài, bôi đen một từ rồi bấm “Sổ tay từ vựng” để lưu.";
+    vocabularySavedList.append(emptyState);
+  } else {
+    filteredEntries.forEach(({ term, meaning, index }) => {
+      const row = document.createElement("div");
+      row.className = "vocabulary-saved-entry";
+      const word = document.createElement("strong");
+      word.className = "vocabulary-saved-word";
+      word.textContent = term;
+      const note = document.createElement("span");
+      note.className = "vocabulary-saved-meaning";
+      note.textContent = meaning || "Chưa thêm nghĩa / ghi chú";
+      const removeButton = document.createElement("button");
+      removeButton.className = "vocabulary-delete-button";
+      removeButton.type = "button";
+      removeButton.dataset.vocabularyDelete = String(index);
+      removeButton.textContent = "Xóa";
+      removeButton.setAttribute("aria-label", `Xóa từ ${term}`);
+      row.append(word, note, removeButton);
+      vocabularySavedList.append(row);
+    });
+  }
+  if (!vocabularyPageStatus.textContent.startsWith("Không thể")) {
+    setVocabularyStatus("");
+  }
+};
+
+const persistVocabulary = (entries) => {
+  if (vocabularyStorageError) {
+    setVocabularyStatus(vocabularyStorageError);
+    return false;
+  }
+  try {
+    window.localStorage.setItem(VOCABULARY_STORAGE_KEY, JSON.stringify(entries));
+    savedVocabulary = entries;
+    renderVocabularyBook();
+    return true;
+  } catch {
+    const message = "Không thể lưu sổ tay. Hãy kiểm tra dung lượng hoặc cài đặt lưu trữ của trình duyệt.";
+    setVocabularyStatus(message);
+    return false;
+  }
+};
+
+const saveVocabularyEntry = (termValue, meaningValue) => {
+  const term = termValue.trim().replace(/\s+/g, " ");
+  const meaning = meaningValue.trim();
+  if (!term) {
+    setVocabularyStatus("Nhập từ hoặc cụm từ trước khi lưu.");
+    return false;
+  }
+  const normalizedTerm = normalizeVocabularyText(term);
+  const existingIndex = savedVocabulary.findIndex((entry) => (
+    normalizeVocabularyText(entry.term) === normalizedTerm
+  ));
+  const nextEntries = [...savedVocabulary];
+  if (existingIndex >= 0) {
+    nextEntries[existingIndex] = {
+      ...nextEntries[existingIndex],
+      meaning: meaning || nextEntries[existingIndex].meaning,
+    };
+  } else {
+    nextEntries.push({ term, meaning });
+  }
+  return persistVocabulary(nextEntries);
+};
+
+const renderQuestionPicker = () => {
+  const query = normalizeVocabularyText(questionPickerQuery);
+  const matches = listeningQuestions
+    .map((question, index) => ({ question, index }))
+    .filter(({ question }) => !query || normalizeVocabularyText([
+      question.title,
+      question.transcriptTitle || "",
+      question.transcriptNote || "",
+      question.description || "",
+      ...(question.options || []),
+      ...(question.transcript || []),
+    ].join(" ")).includes(query));
+
+  questionPickerList.replaceChildren();
+  if (!matches.length) {
+    const emptyState = document.createElement("p");
+    emptyState.className = "question-picker-empty";
+    emptyState.textContent = "Không tìm thấy câu hỏi phù hợp.";
+    questionPickerList.append(emptyState);
+    return;
+  }
+  matches.forEach(({ question, index }) => {
+    const button = document.createElement("button");
+    button.className = "question-picker-item";
+    button.type = "button";
+    button.dataset.questionPickerIndex = String(index);
+    if (index === activeListeningQuestion) {
+      button.setAttribute("aria-current", "true");
+    }
+    const number = document.createElement("span");
+    number.className = "question-picker-number";
+    number.textContent = String(index + 1);
+    const title = document.createElement("span");
+    title.className = "question-picker-title";
+    title.textContent = question.title;
+    button.append(number, title);
+    questionPickerList.append(button);
+  });
+};
+
+const closeQuestionPicker = () => {
+  questionPicker.classList.add("is-hidden");
+  questionListButton.setAttribute("aria-expanded", "false");
+};
+
+const openVocabularyDialog = () => {
+  closeQuestionPicker();
+  const selection = window.getSelection();
+  const selectedNode = selection?.anchorNode;
+  const selectedText = selectedNode && transcriptContent.contains(selectedNode)
+    ? selection.toString().trim()
+    : selectedTranscriptText;
+  selectedTranscriptText = "";
+  vocabularyDialogTerm.value = selectedText;
+  vocabularyDialogMeaning.value = "";
+  vocabularyDialogStatus.textContent = vocabularyStorageError;
+  vocabularyCurrentEntries.hidden = vocabularyEntries.childElementCount === 0;
+  vocabularyDialog.showModal();
+  vocabularyDialogTerm.focus();
+};
+
+const showVocabularyView = () => {
+  hideToast();
+  stopSession();
+  listenAudio.pause();
+  pausePart2Audio();
+  pausePart3Audio();
+  pausePart4Audio();
+  closeQuestionPicker();
+  if (vocabularyDialog.open) {
+    vocabularyDialog.close();
+  }
+  homeView.classList.add("is-hidden");
+  practiceView.classList.add("is-hidden");
+  readingView.classList.add("is-hidden");
+  listeningView.classList.add("is-hidden");
+  writingView.classList.add("is-hidden");
+  speakingView.classList.add("is-hidden");
+  guideView.classList.add("is-hidden");
+  vocabularyView.classList.remove("is-hidden");
+  renderVocabularyBook();
+  setActiveNav("Vocabulary");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+};
+
+savedVocabulary = loadSavedVocabulary();
+renderVocabularyBook();
 
 const renderQuestionList = () => {
   const isPart2 = activeListeningPart === 2;
@@ -4483,6 +4723,8 @@ const renderListeningQuestion = () => {
   vocabularyEntries.innerHTML = question.vocabulary.map(([word, meaning]) => `
     <div class="vocabulary-entry"><strong>${word}</strong><span>${meaning}</span></div>
   `).join("");
+  vocabularyCurrentEntries.hidden = vocabularyEntries.childElementCount === 0;
+  selectedTranscriptText = "";
   checkAnswerButton.hidden = false;
   previousQuestionButton.disabled = activeListeningQuestion === 0;
   nextQuestionButton.textContent = activeListeningQuestion === listeningQuestions.length - 1
@@ -4906,6 +5148,8 @@ const openListeningQuestion = (index) => {
   pausePart3Audio();
   pausePart4Audio();
   activeListeningQuestion = index;
+  selectedTranscriptText = "";
+  closeQuestionPicker();
   listeningListPanel.classList.add("is-hidden");
   listeningDetailPanel.classList.remove("is-hidden");
   renderListeningQuestion();
@@ -4947,6 +5191,7 @@ const showListeningList = () => {
   pausePart2Audio();
   pausePart3Audio();
   pausePart4Audio();
+  closeQuestionPicker();
   listeningLandingPanel.classList.add("is-hidden");
   listeningDetailPanel.classList.add("is-hidden");
   listeningListPanel.classList.remove("is-hidden");
@@ -4959,6 +5204,7 @@ const showListeningLanding = () => {
   pausePart2Audio();
   pausePart3Audio();
   pausePart4Audio();
+  closeQuestionPicker();
   listeningLandingPanel.classList.remove("is-hidden");
   listeningListPanel.classList.add("is-hidden");
   listeningDetailPanel.classList.add("is-hidden");
@@ -4974,6 +5220,7 @@ const startListening = () => {
   writingView.classList.add("is-hidden");
   speakingView.classList.add("is-hidden");
   listeningView.classList.remove("is-hidden");
+  vocabularyView.classList.add("is-hidden");
   renderListeningLanding();
   showListeningLanding();
   setActiveNav("Listening");
@@ -5206,6 +5453,7 @@ const returnHome = () => {
   readingView.classList.add("is-hidden");
   writingView.classList.add("is-hidden");
   speakingView.classList.add("is-hidden");
+  vocabularyView.classList.add("is-hidden");
   practiceBackButton.innerHTML = '<span aria-hidden="true">←</span> Trang chủ';
   practiceView.classList.remove("is-reading-detail");
   practiceView.setAttribute("aria-labelledby", "practiceTitle");
@@ -5321,7 +5569,6 @@ questionGrid.addEventListener("click", (event) => {
 });
 
 document.getElementById("detailBack").addEventListener("click", showListeningList);
-document.getElementById("questionListButton").addEventListener("click", showListeningList);
 document.getElementById("partListBack").addEventListener("click", showListeningLanding);
 
 listeningPartGrid.addEventListener("click", (event) => {
@@ -5457,9 +5704,101 @@ part4NextQuestionButton.addEventListener("click", () => {
 
 document.getElementById("part4RetryQuestion").addEventListener("click", renderListeningPart4Question);
 
-document.getElementById("vocabularyButton").addEventListener("click", () => {
-  const isHidden = vocabularyPanel.classList.toggle("is-hidden");
-  document.getElementById("vocabularyButton").setAttribute("aria-expanded", String(!isHidden));
+questionListButton.addEventListener("click", () => {
+  const isOpening = questionPicker.classList.contains("is-hidden");
+  if (!isOpening) {
+    closeQuestionPicker();
+    return;
+  }
+  questionPickerQuery = questionPickerSearch.value;
+  renderQuestionPicker();
+  questionPicker.classList.remove("is-hidden");
+  questionListButton.setAttribute("aria-expanded", "true");
+  questionPickerSearch.focus();
+});
+
+document.getElementById("closeQuestionPicker").addEventListener("click", closeQuestionPicker);
+questionPickerSearch.addEventListener("input", () => {
+  questionPickerQuery = questionPickerSearch.value;
+  renderQuestionPicker();
+});
+questionPickerList.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-question-picker-index]");
+  if (button) {
+    openListeningQuestion(Number(button.dataset.questionPickerIndex));
+  }
+});
+document.addEventListener("pointerdown", (event) => {
+  if (!questionPicker.classList.contains("is-hidden")
+      && !questionPicker.contains(event.target)
+      && !questionListButton.contains(event.target)) {
+    closeQuestionPicker();
+  }
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !questionPicker.classList.contains("is-hidden")) {
+    closeQuestionPicker();
+  }
+});
+document.addEventListener("selectionchange", () => {
+  const selection = window.getSelection();
+  if (!selection || selection.isCollapsed || !selection.rangeCount) {
+    return;
+  }
+  const range = selection.getRangeAt(0);
+  if (transcriptContent.contains(range.commonAncestorContainer)) {
+    selectedTranscriptText = selection.toString().trim();
+  }
+});
+
+document.getElementById("vocabularyButton").addEventListener("click", openVocabularyDialog);
+document.getElementById("closeVocabularyDialog").addEventListener("click", () => vocabularyDialog.close());
+document.getElementById("cancelVocabularyDialog").addEventListener("click", () => vocabularyDialog.close());
+document.getElementById("viewVocabularyButton").addEventListener("click", showVocabularyView);
+vocabularyDialog.addEventListener("click", (event) => {
+  if (event.target === vocabularyDialog) {
+    vocabularyDialog.close();
+  }
+});
+vocabularyDialogForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  if (saveVocabularyEntry(vocabularyDialogTerm.value, vocabularyDialogMeaning.value)) {
+    vocabularyDialogTerm.value = "";
+    vocabularyDialogMeaning.value = "";
+    vocabularyDialog.close();
+    showToast("Đã lưu từ vào sổ tay.");
+  }
+});
+vocabularyPageForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  if (saveVocabularyEntry(vocabularyPageTerm.value, vocabularyPageMeaning.value)) {
+    vocabularyPageTerm.value = "";
+    vocabularyPageMeaning.value = "";
+    setVocabularyStatus("Đã lưu từ vào sổ tay.");
+    vocabularyPageTerm.focus();
+  }
+});
+vocabularySearch.addEventListener("input", renderVocabularyBook);
+vocabularySavedList.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-vocabulary-delete]");
+  if (!button) {
+    return;
+  }
+  const index = Number(button.dataset.vocabularyDelete);
+  if (!Number.isInteger(index) || index < 0 || index >= savedVocabulary.length) {
+    return;
+  }
+  const nextEntries = savedVocabulary.filter((_, entryIndex) => entryIndex !== index);
+  if (persistVocabulary(nextEntries)) {
+    setVocabularyStatus("Đã xóa từ khỏi sổ tay.");
+  }
+});
+
+document.querySelectorAll("[data-vocabulary]").forEach((link) => {
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+    showVocabularyView();
+  });
 });
 
 document.querySelectorAll("[data-toast]").forEach((link) => {
