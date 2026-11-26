@@ -76,6 +76,7 @@ There is no `package.json`, dependency manifest, README, test suite, or build co
 - Each speaker has an audio player, optional expandable description/transcript, and a dropdown matching the speaker to one of four descriptions. Checking requires all four selections and reports each result.
 - Descriptions and transcript layout were updated from user screenshots. In particular, keep the visible vertical separation between the description and transcript (`.part2-transcript-content p + p` has a 38px top margin), bolding behavior, and spacing around the literal `=>` separator. Do not normalize these strings just for style.
 - Prior checkpoints say the 64 audio clips were cut from the source video's audio using visible playback timers; not every clip boundary has been independently listened to and verified.
+- The `2026-11-27 01-15-41.mp4` playback was compared with Q1 speakers A–D. All four existing WAVs already match the audio in the clip (22.3, 19.3, 18.3, and 20.3 seconds), so they were left unchanged rather than re-encoded from the screen recording.
 
 ### Listening Part 3 — implemented, 16 sets; content intentionally incomplete where source is incomplete
 
@@ -145,6 +146,7 @@ Source videos referenced in the accessible history (stored outside this repo):
 - `2026-11-16 19-09-01.mp4` — Part 1 questions 101–150; source recordings extracted where available; Q125 had no audio in the video.
 - `2026-11-16 21-27-37.mp4` — Part 1 questions 151–194; source recordings plus synthesized audio for the 12 questions whose video showed no audio.
 - `2026-11-16 22-09-13.mp4` — Listening Part 2.
+- `2026-11-27 01-15-41.mp4` — playback verification of Listening Part 2 Q1 audio.
 - `2026-11-16 23-40-57.mp4` — Listening Part 3.
 - `2026-11-17 16-40-45.mp4` — Reading Part 1 question 1.
 - `2026-11-17 17-11-31.mp4` — Reading overview, Part 1 question list, and question-detail interface.
