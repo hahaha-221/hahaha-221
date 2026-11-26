@@ -14,6 +14,9 @@ const recordedAudioQuestions = new Set([
 ]);
 const unavailableAudioQuestions = new Set([54, 55, 66, 76, 81, 89, 125]);
 const sourceAudioCacheVersion = "?v=20261126-listening-q2-150-source-audio-1";
+const recentSourceAudioCacheVersion = "?v=20261126-listening-q151-157-source-audio-1";
+const nextSourceAudioCacheVersion = "?v=20261126-listening-q158-175-source-audio-1";
+const finalSourceAudioCacheVersion = "?v=20261126-listening-q184-194-source-audio-1";
 
 window.listeningPart1Questions = [
   {
@@ -1590,6 +1593,7 @@ window.listeningPart1Questions = [
   },
   {
     title: "A man is talking to a group of people. Where are they standing?",
+    transcriptTitle: "University area",
     transcript: [
       "We're currently standing in the main building complex.",
       "Just nearby, you'll see the library, a place where you'll likely spend a lot of your time studying and working on projects.",
@@ -1602,6 +1606,7 @@ window.listeningPart1Questions = [
   },
   {
     title: "A man is calling his friend, Maria. When will he see her?",
+    transcriptTitle: "At 9 am on Sunday",
     transcript: [
       "Hey Maria, it's me! I wanted to give you a quick call to let you know that I'll be visiting your town this weekend.",
       "I've got a few things planned, going to check out the local market and maybe explore some of the nearby parks.",
@@ -1613,6 +1618,7 @@ window.listeningPart1Questions = [
   },
   {
     title: "A man is talking on the phone. What did the man lose?",
+    transcriptTitle: "Glasses",
     transcript: [
       "Hello! This is Mark. I think I might have lost my glasses when I was at your store earlier today.",
       "I remember trying on a jacket, and I may have left them there. They are brown and round.",
@@ -1624,6 +1630,7 @@ window.listeningPart1Questions = [
   },
   {
     title: "How long does it take to get to the station?",
+    transcriptTitle: "20 minutes",
     transcript: [
       "Attention, passengers travelling to the city centre.",
       "Your train will arrive at Riverside Station in approximately 20 minutes.",
@@ -1635,6 +1642,7 @@ window.listeningPart1Questions = [
   },
   {
     title: "A mom talks to her son about buying food. How much money is left in the kitchen?",
+    transcriptTitle: "10 pounds",
     transcript: [
       "Before we go shopping, I checked the money we keep in the kitchen drawer.",
       "Yesterday evening, there were 15 pounds in it, but this morning my brother used 5 pounds to buy some bread and milk from the supermarket.",
@@ -1646,6 +1654,7 @@ window.listeningPart1Questions = [
   },
   {
     title: "How much does a bus card cost?",
+    transcriptTitle: "$20",
     transcript: [
       "If you travel around the city by bus every day, it is probably better to buy a bus card instead of paying for single tickets.",
       "The card can be used on all city buses and is valid for one month.",
@@ -1657,6 +1666,7 @@ window.listeningPart1Questions = [
   },
   {
     title: "What bus number stops near the boy's home?",
+    transcriptTitle: "Eight",
     transcript: [
       "To get to my house, you can take the bus from the city center.",
       "Several buses stop near my neighborhood, but the easiest one is bus number eight.",
@@ -1667,6 +1677,7 @@ window.listeningPart1Questions = [
   },
   {
     title: "What time does the party start?",
+    transcriptTitle: "Three o'clock",
     transcript: [
       "Hello everyone. Just a quick reminder about Anna's birthday party this Saturday.",
       "The party will start at three o'clock in the afternoon at her house.",
@@ -1686,6 +1697,7 @@ window.listeningPart1Questions = [
   },
   {
     title: "What time is the dinner?",
+    transcriptTitle: "7.30",
     transcript: [
       "Just a reminder about tonight's family dinner at my grandparents' house.",
       "Some people thought it would begin at seven o'clock, but the time has changed slightly because a few family members will arrive later than expected.",
@@ -1697,6 +1709,7 @@ window.listeningPart1Questions = [
   },
   {
     title: "A man has a new job. How many days does the man have to work?",
+    transcriptTitle: "3 days",
     transcript: [
       "My brother has recently started a new job at a small restaurant in town.",
       "At first, he thought he would need to work every weekday, but the manager later explained the schedule more clearly.",
@@ -1707,7 +1720,8 @@ window.listeningPart1Questions = [
     answer: 2,
   },
   {
-    title: "Why can't he do the job today?",
+    title: "Why can't he do the job today? / Why can the repairman not do the job today?",
+    transcriptTitle: "He has another appointment",
     transcript: [
       "Tom said he would like to help us with the job today, but unfortunately he can't come anymore.",
       "This morning, he remembered that he already has another appointment in the afternoon.",
@@ -1719,6 +1733,7 @@ window.listeningPart1Questions = [
   },
   {
     title: "What is the man going to?",
+    transcriptTitle: "Get something to eat",
     transcript: [
       "After finishing work this evening, Daniel realized he had not eaten anything since lunch.",
       "He first thought about going straight home, but he felt too hungry to wait that long.",
@@ -1730,6 +1745,7 @@ window.listeningPart1Questions = [
   },
   {
     title: "What is the new health center next to?",
+    transcriptTitle: "A train station",
     transcript: [
       "The town has recently opened a new health center for local people.",
       "It is in a very convenient location, so it is easy for everyone to visit.",
@@ -1741,6 +1757,7 @@ window.listeningPart1Questions = [
   },
   {
     title: "In which room will the director's presentation happen?",
+    transcriptTitle: "The meeting room",
     transcript: [
       "There has been a small change to today's schedule.",
       "The director's presentation will not take place in the main hall as planned because the room is being prepared for another event.",
@@ -1761,17 +1778,20 @@ window.listeningPart1Questions = [
   {
     title: "Talking about a report, when do they meet?",
     transcript: [
-      "Have you finished writing the report for our manager?",
-      "Almost. I just need to check a few details before we discuss it.",
-      "When should we meet to go through everything? Is Tuesday convenient for you?",
-      "I'm afraid I'm busy on Tuesday, but I'm available on Thursday.",
-      "What about Friday morning? Friday is too late because the report is due soon. Let's meet on Thursday instead.",
+      "Emma: Have you finished writing the report for our manager?",
+      "James: Almost. I just need to check a few details before we discuss it.",
+      "Emma: When should we meet to go through everything? Is Tuesday convenient for you?",
+      "James: I'm afraid I'm busy on Tuesday, but I'm available on Thursday.",
+      "Emma: What about Friday morning?",
+      "James: Friday is too late because the report is due soon. Let's meet on Thursday instead.",
+      "Question: When do they meet to discuss the report?",
     ],
     options: ["Friday.", "Tuesday.", "Thursday."],
     answer: 2,
   },
   {
     title: "What is she going to take with her?",
+    transcriptTitle: "Games",
     transcript: [
       "Sarah is getting ready for the school camping trip this weekend.",
       "She has already packed clothes, food, and a flashlight in her bag.",
@@ -1791,6 +1811,7 @@ window.listeningPart1Questions = [
   },
   {
     title: "What do they decide to write about?",
+    transcriptTitle: "Historian",
     transcript: [
       "For their history project, Liam and his classmate needed to choose a topic to write about together.",
       "At first, they thought about writing about a famous battle, but they felt it would be too difficult and take too much time to research.",
@@ -1801,6 +1822,7 @@ window.listeningPart1Questions = [
   },
   {
     title: "A trainer talks to his student. What will the student write about?",
+    transcriptTitle: "Land",
     transcript: [
       "The students in our history class have started working on their final projects for this term.",
       "Each student can choose a different topic to research and write about.",
@@ -1812,6 +1834,7 @@ window.listeningPart1Questions = [
   },
   {
     title: "What does the teacher want the student to do?",
+    transcriptTitle: "Complete the assignment on time",
     transcript: [
       "I need to talk to some of you about your homework.",
       "Over the past few weeks, I have noticed that several assignments were handed in late, and this is starting to affect your progress in class.",
@@ -1823,6 +1846,7 @@ window.listeningPart1Questions = [
   },
   {
     title: "What do the students need to do every Tuesday?",
+    transcriptTitle: "Write a report",
     transcript: [
       "All students in the Science Club have an activity schedule for this month.",
       "On Mondays, they work together in small groups, and on Thursdays they have discussions with the teacher.",
@@ -1834,6 +1858,7 @@ window.listeningPart1Questions = [
   },
   {
     title: "Listen to a radio programme about a new restaurant. What does the man complain about?",
+    transcriptTitle: "The place was cold",
     transcript: [
       "Last night, my friends and I went to a new restaurant that recently opened near the city center.",
       "The food was actually very good, and the service was quite fast too.",
@@ -1909,8 +1934,9 @@ window.listeningPart1Questions = [
   },
   {
     title: "The man is talking about his key. Where did he find the key?",
+    transcriptTitle: "In the front door",
     transcript: [
-      "The other day, I went out and, when I returned, I couldn't find my house key.",
+      "Man: The other day, I went out and, when I returned, I couldn't find my house key.",
       "I searched my car but didn't see it anywhere. I thought I had left it in the bedroom.",
       "After standing outside for an hour, I suddenly spotted it under the mat at the front door. What a relief that was!",
     ],
@@ -1927,8 +1953,9 @@ window.listeningPart1Questions = [
   },
   {
     title: "A woman is talking about her usual Saturday routine. What does she usually do on Saturdays?",
+    transcriptTitle: "Seeing her family",
     transcript: [
-      "Normally, on Saturdays, I spend the day with my family.",
+      "Woman: Normally, on Saturdays, I spend the day with my family.",
       "We like to have brunch together and then do some fun activities, like playing board games or going for a walk.",
       "It's a nice way to relax and catch up.",
       "But this week, I have something different planned. I'm going to see a friend for her birthday and go shopping together instead.",
@@ -1939,6 +1966,7 @@ window.listeningPart1Questions = [
   },
   {
     title: "Two friends are talking with each other. What did they both buy?",
+    transcriptTitle: "Clothes",
     transcript: [
       "Man: I just got back from shopping. I found a great jacket and also picked up some tea.",
       "Woman: Nice! What kind of jacket did you get?",
@@ -1953,8 +1981,9 @@ window.listeningPart1Questions = [
   },
   {
     title: "What does this family do most weekends?",
+    transcriptTitle: "Go cycling",
     transcript: [
-      "Last year, I had an amazing trip.",
+      "Man: Last year, I had an amazing trip.",
       "One of the best things I enjoyed was going cycling in the countryside. The views were stunning and it felt great to be outdoors.",
       "I also went for a walk a few times, but cycling really allowed me to explore more areas.",
       "We even had a picnic one day, which was lovely too.",
@@ -1964,39 +1993,39 @@ window.listeningPart1Questions = [
   },
   {
     title: "What has he had problems with?",
+    transcriptTitle: "Using technology",
     transcript: [
-      "How is David getting on with his new job?",
-      "He's doing quite well, but he's had a few difficulties recently.",
-      "Has he had problems communicating with his colleagues?",
-      "Not really. Everyone at work is very friendly and helpful.",
-      "What about managing his time? Does he find it difficult?",
-      "No, that's not a problem. He mainly struggles with using technology because some of the software is new to him.",
+      "Lisa: How is David getting on with his new job?",
+      "Mark: He's doing quite well, but he's had a few difficulties recently.",
+      "Lisa: Has he had problems communicating with his colleagues?",
+      "Mark: Not really. Everyone at work is very friendly and helpful.",
+      "Lisa: What about managing his time? Does he find it difficult?",
+      "Mark: No, that's not a problem. He mainly struggles with using technology because some of the software is new to him.",
     ],
     options: ["Communicating with colleagues", "Managing his time", "Using technology"],
     answer: 2,
   },
   {
     title: "A mom is calling her son to remind him about picking up groceries. How much is an egg?",
+    transcriptTitle: "£1.50 (One pounds fifty)",
     transcript: [
-      "Hey sweetie, it's Mom. Can you please pick up three things on your way home?",
-      "I need a dozen eggs; they're 1 pound 50 each.",
-      "Also grab a loaf of bread and some milk, please. Thanks. Love you.",
+      "Hey sweetie, it's Mom! Can you please pick up three things on your way home? I need a dozen eggs, they're one pound fifty each. Also, grab a loaf of bread and some milk, please. Thanks, love you!",
     ],
-    options: ["£3.50 (Three pounds fifty)", "£1.50 (One pound fifty)", "£2.50 (Two pounds fifty)"],
+    options: ["£3.50 (Three pounds fifty)", "£1.50 (One pounds fifty)", "£2.50 (Two pounds fifty)"],
     answer: 1,
   },
   {
     title: "Jack is calling to invite a friend to his house. What color is Jack's house?",
+    transcriptTitle: "Red",
     transcript: [
-      "Hey, it's Jack. I just moved to a new house in this busy neighborhood, and it's really cool.",
-      "There are so many houses here in different colors, purple, blue, and white.",
-      "My house is big and red. I'd love for you to come over and check it out. Let me know when you're free.",
+      "Hey! It's Jack. I just moved to a new house in this busy neighborhood, and it's really cool! There are so many houses here in different colors-purple, blue, and white. My house is big and red! I'd love for you to come over and check it out. Let me know when you're free!",
     ],
-    options: ["Red", "Green", "Blue"],
+    options: ["red", "Green", "blue"],
     answer: 0,
   },
   {
-    title: "James is talking about his family members. In what way are his mother and aunt alike?",
+    title: "James is talking about his family members. In what way does his mother and his aunt alike?",
+    transcriptTitle: "They were both thin",
     transcript: [
       "This picture is of my aunt and my mom. Many people say they look alike.",
       "I find it funny, though, because when they were teenagers, my mom had long hair, while my aunt had short hair.",
@@ -2009,10 +2038,11 @@ window.listeningPart1Questions = [
   },
   {
     title: "A woman is chatting with a friend about her afternoon plans. What is she going to do this afternoon?",
+    transcriptTitle: "Go on a city tour",
     transcript: [
-      "I'm really looking forward to this afternoon!",
+      "Woman: I'm really looking forward to this afternoon!",
       "Normally, I just relax at home or maybe catch up on some shows, but today I want to do something different.",
-      "I've decided to go on a city tour to explore some of the local sites.",
+      "I've decided to go on a city tour to explore some of the local sights.",
       "I thought about going to the park or even visiting a museum, but the city tour sounds much more exciting!",
     ],
     options: ["Visiting a museum", "Relax at home", "Go on a city tour"],
@@ -2020,6 +2050,7 @@ window.listeningPart1Questions = [
   },
   {
     title: "Where is she taking the staff to?",
+    transcriptTitle: "To a different country",
     transcript: [
       "I'd like to tell you about our company trip next month.",
       "This year we are not visiting another city in our country like before.",
@@ -2030,15 +2061,25 @@ window.listeningPart1Questions = [
     options: ["To a different city", "To a different country", "To a village"],
     answer: 1,
   },
-].map((question, index) => ({
-  ...question,
-  audio: unavailableAudioQuestions.has(index + 1)
-    ? null
-    : index === 0
-      ? "assets/audio/listening-q1.wav?v=20261126-source-audio-1"
-      : `assets/audio/listening-q${index + 1}.wav${index >= 1 && index <= 149 ? sourceAudioCacheVersion : ""}`,
-  audioSource: unavailableAudioQuestions.has(index + 1)
-    ? "unavailable"
-    : recordedAudioQuestions.has(index + 1) ? "recorded" : "synthetic",
-  vocabulary: question.vocabulary || [],
-}));
+].map((question, index) => {
+  const questionNumber = index + 1;
+  const audioCacheVersion = questionNumber >= 184 && questionNumber <= 194 && recordedAudioQuestions.has(questionNumber)
+    ? finalSourceAudioCacheVersion
+    : questionNumber >= 158 && questionNumber <= 175
+      ? nextSourceAudioCacheVersion
+      : questionNumber >= 151 && questionNumber <= 157
+        ? recentSourceAudioCacheVersion
+        : questionNumber >= 2 && questionNumber <= 150 ? sourceAudioCacheVersion : "";
+  return {
+    ...question,
+    audio: unavailableAudioQuestions.has(questionNumber)
+      ? null
+      : questionNumber === 1
+        ? "assets/audio/listening-q1.wav?v=20261126-source-audio-1"
+        : `assets/audio/listening-q${questionNumber}.wav${audioCacheVersion}`,
+    audioSource: unavailableAudioQuestions.has(questionNumber)
+      ? "unavailable"
+      : recordedAudioQuestions.has(questionNumber) ? "recorded" : "synthetic",
+    vocabulary: question.vocabulary || [],
+  };
+});
