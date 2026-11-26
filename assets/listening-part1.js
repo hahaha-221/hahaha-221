@@ -1,4 +1,7 @@
 const recordedAudioQuestions = new Set([
+  1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+  21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
+  41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
   51, 52, 53, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 67, 68, 69, 70, 71, 72, 73,
   74, 75, 77, 78, 79, 80, 82, 83, 84, 85, 86, 87, 88, 90, 91, 92, 93, 94, 95, 96,
   97, 98, 99, 100,
@@ -9,6 +12,8 @@ const recordedAudioQuestions = new Set([
   151, 152, 153, 154, 155, 156, 157, 158, 159, 161, 162, 163, 164, 165, 166, 168,
   169, 171, 172, 173, 174, 175, 184, 186, 187, 188, 189, 190, 191, 192, 193, 194,
 ]);
+const unavailableAudioQuestions = new Set([54, 55, 66, 76, 81, 89, 125]);
+const sourceAudioCacheVersion = "?v=20261126-listening-q2-150-source-audio-1";
 
 window.listeningPart1Questions = [
   {
@@ -25,59 +30,47 @@ window.listeningPart1Questions = [
   },
   {
     title: "Talking about the park, what is going to be replaced?",
+    transcriptTitle: "wooden seats",
     transcript: [
-      "Have you heard about the changes they are planning to make to the park?",
-      "They are going to replace the wooden seats with new ones next month.",
-      "Are they also going to replace the old rubbish bins?",
-      "No, those are still in good condition. They are planning to repair the playground equipment instead.",
-      "That is great. The park will look much better after the improvements.",
+      "Lisa: Have you heard about the changes they're planning to make to the park?",
+      "Tom: Yes, they're going to replace the wooden seats with new ones next month.",
+      "Lisa: Are they also going to replace the old rubbish bins?",
+      "Tom: No, those are still in good condition. They're planning to repair the playground equipment instead.",
+      "Lisa: That's great! The park will look much better after the improvements.",
     ],
     options: ["The wooden seats", "The playground equipment", "The rubbish bins"],
     answer: 0,
-    reconstructed: true,
   },
   {
     title: "Anne is calling her daughter Sally. What does Anne need?",
+    transcriptTitle: "Eggs",
     transcript: [
-      "Hi Sally, it is Mum. How are you?",
-      "I just wanted to remind you about dinner tonight. We are having your favorite, spaghetti!",
-      "Do not forget to pick up your brother from school at four o'clock.",
-      "Oh, and can you stop by the store on your way home? We are out of eggs, and I need some to finish baking the cake.",
-      "Thanks, sweetie!",
+      "Hi Sally, it's Mom. How are you? I just wanted to remind you about dinner tonight. We're having your favorite, spaghetti! Don't forget to pick up your brother from school at 4 o'clock. Oh, and can you stop by the store on your way home? We're out of eggs, and I need some to finish baking the cake. Thanks, sweetie!",
     ],
     options: ["Milk", "Eggs", "Bread"],
     answer: 1,
   },
   {
     title: "What does the woman complain about?",
+    transcriptTitle: "Her yoga class was cancelled",
     transcript: [
-      "I went to the gym yesterday evening after a long day at work, mainly because I was looking forward to my usual yoga class.",
-      "When I got there, the place was actually quieter than normal, which was nice for a change.",
-      "But then I noticed a small notice on the studio door saying the yoga session had been cancelled because the instructor was sick.",
-      "Nobody had messaged us about it beforehand, so I ended up just walking on the treadmill for a bit before heading home.",
-      "I was a little annoyed, but these things happen sometimes.",
+      "I went to the gym yesterday evening after a long day at work, mainly because I was looking forward to my usual yoga class. When I got there, the place was actually quieter than normal, which was nice for a change. But then I noticed a small notice on the studio door saying the yoga session had been cancelled because the instructor was sick. Nobody had messaged us about it beforehand, so I ended up just walking on the treadmill for a bit before heading home. I was a little annoyed, but these things happen sometimes.",
     ],
     options: ["The gym was too crowded", "Her yoga class was cancelled", "The membership fee increased"],
     answer: 1,
   },
   {
     title: "Anna is calling her brother Max. What does Anna do later in the afternoon?",
-    transcript: [
-      "Hi Max, I wanted to check our plans for this afternoon.",
-      "I have a few things to finish at work, so I will need to stay late at the office.",
-      "Could you pick up the kids today? We can hang out with our friends another time.",
-    ],
+    transcriptTitle: "Stay late at the office",
+    transcript: [],
     options: ["Hang out with friends", "Pick up her kids", "Stay late at the office"],
     answer: 2,
-    reconstructed: true,
   },
   {
     title: "A woman is talking about her favorite film on the radio. What film did she recommend?",
+    transcriptTitle: "An action film",
     transcript: [
-      "Today I want to recommend an action film that really impressed me.",
-      "The lead actor, who is usually known for his romantic roles, delivered an outstanding performance.",
-      "Of course, if you are in the mood for something lighter, there are plenty of comedies to enjoy as well.",
-      "But if you are looking for excitement, this action film is definitely worth a watch!",
+      "Woman: Today, I want to recommend an action film that really impressed me. The lead actor, who is usually known for his romantic roles, delivered an outstanding performance. Of course, if you're in the mood for something lighter, there are plenty of comedies to enjoy as well. But if you're looking for excitement, this action film is definitely worth a watch!",
     ],
     options: ["An action film", "A comedy film", "A romantic film"],
     answer: 0,
@@ -85,94 +78,84 @@ window.listeningPart1Questions = [
   {
     title: "What time is she going home?",
     transcript: [
-      "What time will you be home tonight?",
-      "I finish work at eight, and it takes me about an hour to get back.",
-      "All right, I will see you at nine o'clock.",
+      "Tom: Do you know what time Sarah is going home today?",
+      "Anna: I think she is leaving work a little later than usual.",
+      "Tom: Is she going home at 8 p.m.?",
+      "Anna: No, she has to finish some important work first.",
+      "Tom: So, is she leaving at 10 p.m.?",
+      "Anna: No, she told me that she would finish everything and go home at 9 p.m.",
     ],
     options: ["10 o'clock", "8 o'clock", "9 o'clock"],
     answer: 2,
-    reconstructed: true,
   },
   {
     title: "Greg is talking about a working day in his life. How does he go to work?",
+    transcriptTitle: "By bus",
     transcript: [
-      "I used to take the bus to work, but the traffic made the journey too long.",
-      "Now I ride my bike. It takes about twenty minutes, and I enjoy getting some exercise before the day starts.",
+      "Hi, everyone! I'm Greg, and I want to tell you about a typical working day in my life. I usually wake up early, around 7 A.M. After a quick breakfast, I get ready for work. I like to wear smart clothes because I work in an office. I go by bus every day, which takes about 30 minutes. I enjoy looking out the window and listening to music on my way. When I arrive at the office, I start my day by checking emails and planning my tasks. I have meetings with my team, and we work together on projects.",
     ],
     options: ["By bus", "On foot", "By bike"],
     answer: 2,
-    reconstructed: true,
   },
   {
     title: "Listen to a nutrition expert. What time is the best for children to eat fruit?",
+    transcriptTitle: "In the morning",
     transcript: [
-      "Fruit is a healthy choice at any time, but children often benefit from having it in the morning.",
-      "It makes a useful part of breakfast and gives them energy for the school day.",
+      "Hello, everyone! I'm here to talk about nutrition and how important it is for our health. Eating fruits is very beneficial, especially for children. Fruits have vitamins and minerals that help kids grow strong and stay healthy. The best time for children to eat fruit is in the morning. This gives them energy for the day ahead. You can add fruit to breakfast, like in a smoothie or with yogurt. It's a delicious and healthy way to start the day! So, let's encourage our kids to eat more fruit in the morning! Thank you.",
     ],
     options: ["In the evening", "In the morning", "In the afternoon"],
     answer: 1,
-    reconstructed: true,
   },
   {
     title: "Listen to a woman explaining her morning routine to her friend. Why does she get up early?",
+    transcriptTitle: "Have some quiet time",
     transcript: [
-      "I used to rush around every morning, so now I get up a little earlier.",
-      "The children are still asleep, and I can enjoy some quiet time before the busy day begins.",
+      "I usually wake up early each day before anyone else. Some people get up early to get to work on time or to take care of their kids, but for me, it's all about enjoying that quiet time before the busy day begins. I enjoy this quiet time because it helps me start my day peacefully. It's nice to have a few moments to myself, sipping coffee and planning my day ahead.",
     ],
     options: ["Have some quiet time", "Take care of children", "Go to work early"],
     answer: 0,
-    reconstructed: true,
   },
   {
     title: "Why does he need to learn to drive a car?",
+    transcriptTitle: "He has to drive to work",
     transcript: [
-      "I have been thinking about taking driving lessons.",
-      "The bus does not go near my new workplace, and I will have to drive to work every day.",
+      "Man: Hey, Sarah. I've got some news-I'm moving to a new place. Woman: Oh really? That sounds exciting! Where's your new place? Man: It's actually pretty far from my workplace, and the public transport there isn't great. So, I've been thinking, I need to learn how to drive. Woman: Yeah, that makes sense. It's hard to rely on public transport if it's not reliable. Have you ever driven before? Man: Not really. I've always used buses and trains, but now it looks like I don't have a choice. I need to get a license. Woman: You'll get the hang of it. Driving will definitely make your commute easier. Are you planning to take lessons soon? Man: Yeah, I'm going to sign up for a driving school next week. Hopefully, I can get it done quickly.",
     ],
     options: ["He lost his driving license", "He bought a new car", "He has to drive to work"],
     answer: 2,
-    reconstructed: true,
   },
   {
     title: "A woman is talking to her coworker. When does the meeting start?",
+    transcriptTitle: "At 10h15",
     transcript: [
-      "Hey, just wanted to give you a quick heads-up.",
-      "I will not be able to join the meeting with the clients at 10:15 like we planned. I have got something that suddenly came up.",
-      "I know it is last minute, but could you go ahead and handle the presentation on your own?",
-      "You are familiar with everything, so I trust you have got this. Let me know how it goes afterward. Thanks, I really appreciate it!",
+      "Hey, just wanted to give you a quick heads-up. I won't be able to join the meeting with the clients at 10:15 like we planned-I've got something that suddenly came up. I know it's last minute, but could you go ahead and handle the presentation on your own? You're familiar with everything, so I trust you've got this. Let me know how it goes afterward. Thanks, I really appreciate it!",
     ],
     options: ["10:00", "10:15", "10:45"],
     answer: 1,
   },
   {
     title: "A man is describing his school. What color is the teacher's building?",
+    transcriptTitle: "white",
     transcript: [
-      "You know, I have been spending a lot of time at school lately. I really like our campus!",
-      "One thing that stands out is the teacher's building. It is really nice and has a bright, white color.",
-      "I love how it looks against the blue sky. It is kind of a central point of the school, and it feels welcoming.",
-      "I think it adds a lot to the overall atmosphere here.",
+      "Man: You know, I've been spending a lot of time at school lately. I really like our campus! One thing that stands out is the teacher's building. It's really nice and has a bright, white color. I love how it looks against the blue sky. It's kind of a central point of the school, and it feels welcoming. I think it adds a lot to the overall atmosphere here.",
     ],
     options: ["Blue", "White", "Green"],
     answer: 1,
   },
   {
     title: "Louis is calling his friend Standar. Where will Louis meet Standar?",
+    transcriptTitle: "Outside the station",
     transcript: [
-      "Hi Standar! I just got to the train station. Should we meet at the cafe inside?",
-      "No, wait, that might be crowded. How about the benches near the ticket counter?",
-      "No, that could be noisy. Let's keep it simple and just meet outside the station.",
-      "It will be much easier to find each other there!",
+      "Man: Hi Standar! I just got to the train station. Should we meet at the cafe inside? No, wait, that might be crowded. How about the benches near the ticket counter? No, that could be noisy. Let's keep it simple and just meet outside the station. It will be much easier to find each other there!",
     ],
     options: ["At the cafe", "Near the ticket counter", "Outside the station"],
     answer: 2,
   },
   {
     title: "A woman is talking about shopping places. Where is she going to go shopping?",
+    transcriptTitle: "shopping center",
     transcript: [
-      "I love shopping, and there are so many places to choose from.",
-      "If I need clothes, I usually go to the mall, but it can get very crowded on weekends.",
-      "There is also a little boutique near my house with some unique items, but it is a bit expensive.",
-      "This time, I am excited to check out the new shopping center that just opened. I have heard it has everything I need in one place.",
+      "I love shopping, and there are so many places to choose from in our city. The downtown market is great for fresh fruit and vegetables, and there are lots of small shops there too. If I need clothes, I usually go to the mall, but it can get very crowded on weekends. There's also a little boutique near my house with some unique items, but it's a bit expensive. This time, I'm excited to check out the new shopping center that just opened. I've heard it has everything I need in one place.",
     ],
     options: ["At the downtown market", "At the mall", "At the shopping center"],
     answer: 2,
@@ -219,12 +202,12 @@ window.listeningPart1Questions = [
       "It is quiet in the morning, and the fresh air helps me feel ready for work.",
       "I pass the college on my way there, but I do not walk around the campus.",
     ],
-    options: ["At the park", "At college", "At the gym"],
+    options: ["park", "college", "neighborhood"],
     answer: 0,
     reconstructed: true,
   },
   {
-    title: "A woman is discussing with her team. How many chairs does she need?",
+    title: "A woman is discussing with her team. How many chairs/seats does she need?",
     transcript: [
       "Hi everyone! As we get ready for the meeting, I need to confirm how many seats we need.",
       "I've counted 12 people on the list, so I was thinking of setting up 15 chairs.",
@@ -236,107 +219,99 @@ window.listeningPart1Questions = [
   },
   {
     title: "Listen to a girl calling the cafe. What did she forget, and where did she leave it?",
+    transcriptTitle: "in the corner",
     transcript: [
-      "Hi, I was at your cafe this afternoon, and I think I left my bag there.",
+      "Hi, I was at your cafe this afternoon, and I think I left something there.",
       "I remember having it when I sat at a small table in the corner.",
       "I checked the counter and near the door before I left, but I must have forgotten it in the corner after all.",
       "Could you please look there?",
     ],
-    options: ["Near the door", "On the counter", "In the corner"],
+    options: ["near the door", "on the counter", "in the corner"],
     answer: 2,
-    reconstructed: true,
   },
   {
     title: "Where did they meet?",
+    transcriptTitle: "The front entrance",
     transcript: [
-      "I waited at the parking lot for a while, but I did not see you there.",
-      "I was standing by the front entrance of the school. That is where we agreed to meet.",
+      "Hi May, it's John. I just wanted to remind you that we're meeting this afternoon to visit the art exhibition by Leonard Hughes at five o'clock. At first, I thought we could meet near the parking lot, or even wait by the school gate, but that area is usually very crowded at this time of day. So in the end, I think it's best if we meet at the front entrance of Building A, where the exhibition is being held. I'll be standing right next to the main doors at 4:45. If you're running late, just give me a call. See you soon!",
     ],
     options: ["The parking lot", "The front entrance", "The school gate"],
     answer: 1,
-    reconstructed: true,
   },
   {
     title: "A woman is going home after shopping. What did she buy?",
+    transcriptTitle: "a dress",
     transcript: [
-      "I went shopping after work and found a dress that I really liked.",
-      "I also looked at a blouse and a hat, but I decided to buy the dress.",
+      "Woman: I just went shopping because I'm getting ready for a trip. At first, I wanted to buy a hat, but then I realized I could borrow one from a friend. I was really torn between a dress and a blouse. I love the style of the blouse, but in the end, I chose the dress because it fits me better. I can't wait to wear it on my trip!",
     ],
-    options: ["A blouse", "A dress", "A hat"],
+    options: ["A blouse", "a dress", "a hat"],
     answer: 1,
-    reconstructed: true,
   },
   {
     title: "Listen to a teacher talking about meeting preparations. What is she preparing for the meeting now?",
+    transcriptTitle: "Order the food",
     transcript: [
-      "The chairs are already set up, and the food has been ordered.",
-      "I am organizing the documents now so everyone will have a copy when the meeting begins.",
+      "We have a big meeting coming up next week. There are a few things I still need to do to get ready, for example, I need to set up the chairs for everyone. Then, of course, I have to order the food so we can eat during the break. I'll also organize the documents that we'll need for the discussion. But, food is the priority right now.",
     ],
     options: ["Set up the chairs", "Organize the documents", "Order the food"],
-    answer: 1,
-    reconstructed: true,
+    answer: 2,
   },
   {
     title: "When will she need a computer?",
+    transcriptTitle: "On Friday",
     transcript: [
-      "I have a report to finish, but I will not need the computer right away.",
-      "I can work on it on Friday, so please keep it available for me then.",
+      "Hey James, it's Adam! I just wanted to give you a quick call. I know you need a computer for your project, so I'm happy to let you borrow mine on Tuesday. Just make sure to take good care of it! But I need it back by Friday because I have a group presentation on Saturday. I really appreciate it, and I'm sure you'll get a lot done with it. Let me know if that works for you. See you soon!",
     ],
-    options: ["Tuesday", "Friday", "Saturday"],
+    options: ["Tuesday", "On Friday", "Saturday"],
     answer: 1,
-    reconstructed: true,
   },
   {
     title: "What country will they study next semester?",
+    transcriptTitle: "France",
     transcript: [
-      "We studied France this semester, and Italy was the subject last year.",
-      "Next semester we are moving on to Germany, so please read the introduction before class.",
+      "Good morning, everyone. Before we finish today, I'd like to give you a quick overview of what we'll be studying next semester. Some of you may remember that last year we focused on Germany, and before that, we spent quite a lot of time discussing Italian history and culture. However, next term, our main topic will be France. We'll look at key historical events, social changes, and how the country influenced Europe as a whole. I believe this will be a particularly impressive subject, and I'm sure many of you will find it both challenging and enjoyable.",
     ],
     options: ["France", "Italy", "Germany"],
-    answer: 2,
-    reconstructed: true,
+    answer: 0,
   },
   {
-    title: "A woman is talking about her house. What is she going to change in the house?",
+    title: "A woman is talking about her house. What is she going to change in their house?",
+    transcriptTitle: "the window",
     transcript: [
-      "The car is working well, and I have just bought a new computer.",
-      "The bedroom is fine too, but the kitchen window is old and lets in a cold draft.",
-      "I am going to replace the window before winter.",
+      "Woman: I've always loved the ocean, that is why I initially wanted to install a big window that looks out to the river at my house. But now my husband and I realized it was too big and now too much sunshine got in. My car got heated and the computer next to the window always seemed like it would explode. I have no choice but to change it into another window that can close entirely.",
     ],
-    options: ["The car", "The computer", "The window"],
+    options: ["the car", "the computer", "the window"],
     answer: 2,
-    reconstructed: true,
   },
   {
     title: "Listen to an actor discussing his hobbies. What does the actor like to do in his free time?",
+    transcriptTitle: "Drawing",
     transcript: [
-      "People often expect me to play sports, but I prefer a quiet evening at home.",
-      "I like watching movies, especially old comedies, whenever I have free time.",
+      "I don't have much free time with my acting schedule, but when I do, I like to relax. Many people think I spend my free time watching movies, but that's not my favorite hobby. Actually, I love drawing. It helps me clear my mind and get creative. I sometimes play sports too, but drawing is what I enjoy most.",
     ],
-    options: ["Playing sports", "Watching movies", "Cooking"],
-    answer: 1,
-    reconstructed: true,
+    options: ["Playing sports", "Watching movies", "Drawing"],
+    answer: 2,
   },
   {
     title: "Listen to a principal talking about new school facilities. What new facility will the school have?",
+    transcriptTitle: "the performance space",
     transcript: [
-      "The school already has a library, and students can use the sports hall after class.",
-      "We are now building a performance space where students can put on plays and concerts.",
+      "Our school is getting some exciting new facilities. We already have a library and a sports field, but we're adding something different now. The school will have a new performance space for plays, concerts, and other events. It's going to be a great addition for the students. We're really looking forward to seeing it finished!",
     ],
-    options: ["A new library", "A performance space", "A sports center"],
+    options: ["a new library", "the performance space", "a sports field"],
     answer: 1,
-    reconstructed: true,
   },
   {
-    title: "Listen to a man talking about his business trip. What does he like in Dubai?",
+    title: "Listening to a man talking about his business trip. What does he like in Dubai?",
+    transcriptTitle: "Enjoy his job there",
     transcript: [
       "I've been living in Dubai for about two years now, and I really enjoy my work here.",
       "It's challenging, but that's what makes it exciting. The company I work for is great, and I get to meet people from all over the world.",
       "The food is also amazing, but the work itself is what keeps me happy.",
       "I can see myself staying here for a long time because I feel lucky to do what I love.",
     ],
-    options: ["Enjoy his job there", "Enjoy the food", "Meet people"],
-    answer: 0,
+    options: ["enjoy the food there", "enjoy the people there", "Enjoy his job there"],
+    answer: 2,
   },
   {
     title: "What should the teacher focus on this week?",
@@ -354,7 +329,7 @@ window.listeningPart1Questions = [
       "The orchestra will perform the opening pieces, and the city's favorite group will play later.",
       "To finish the evening, we have arranged a fireworks performance over the river.",
     ],
-    options: ["The city's favorite group", "A fireworks performance", "Singing from the orchestra"],
+    options: ["The city's favorite group", "Fireworks performance", "Singing from orchestra"],
     answer: 1,
     reconstructed: true,
   },
@@ -364,19 +339,18 @@ window.listeningPart1Questions = [
       "I usually start the morning with tea, but today I have already had some.",
       "I am meeting my sister at noon, so we are going to have lunch together.",
     ],
-    options: ["Drink tea", "Have lunch", "Go shopping"],
+    options: ["Drink tea", "Have lunch", "Have coffee"],
     answer: 1,
     reconstructed: true,
   },
   {
     title: "Listen to the announcement. When does the train leave?",
+    transcriptTitle: "At 9:15",
     transcript: [
-      "The 9:15 service has been delayed because of a signal problem.",
-      "The next train will leave at 9:30. Passengers should wait on platform two.",
+      "Woman: Good morning, everyone. This is an important announcement about a change in the train schedule. The train to London will now leave at 9:15, not 9:30 as planned. Please listen carefully to this information. If you are taking this train, please go to Platform 3 now. Thank you for your attention, and have a good day.",
     ],
     options: ["At 9:15", "At 9:45", "At 9:30"],
-    answer: 2,
-    reconstructed: true,
+    answer: 0,
   },
   {
     title: "What is he going to do to prepare for the event?",
@@ -396,63 +370,59 @@ window.listeningPart1Questions = [
       "Oh wait, I just remembered I have a meeting ending at half past seven.",
       "Let's make it quarter to eight instead so we have 15 minutes to travel. Does that work for you?",
     ],
-    options: ["Quarter past seven, 7:15", "Half past seven, 7:30", "Quarter to eight, 7:45"],
+    options: ["quarter past seven 7.15", "half past seven 7.30", "7.45 quarter to eight"],
     answer: 2,
   },
   {
     title: "Anna is calling her friend. Where will they meet?",
+    transcriptTitle: "At the marketplace",
     transcript: [
-      "Would you like to meet at the supermarket?",
-      "I need to buy a few things, but the marketplace is too far away.",
-      "Let's meet at the mall instead. There is a cafe by the main entrance.",
+      "Hi, Mia! It's Anna. I hope you're having a great day! I wanted to see if we are still meeting at the marketplace later. I'm really excited because I want to try that new ice cream shop we talked about. I heard they have some amazing flavors! I'll be there around 3 P.M. Let's also check out the fresh fruits and vegetables. It's always fun to shop together! See you soon!",
     ],
     options: ["At the marketplace", "At the supermarket", "At the mall"],
-    answer: 2,
-    reconstructed: true,
+    answer: 0,
   },
   {
     title: "Stephanie is looking for a job taking care of children. How old is she?",
+    transcriptTitle: "21",
     transcript: [
-      "I am applying for the childcare position and wanted to tell you a little about myself.",
-      "I am 21 years old and have already helped look after children in my neighborhood.",
+      "Hi, I am Stephanie. I am interested in applying for a job taking care of children. I have three years of experience working with children of different ages, and I am confident in my ability to create a safe and engaging environment for them. I am fluent in both English and French, which allows me to communicate easily with families who speak either language. This year, I am 21 years old, and I am enthusiastic about bringing my skills and energy to a new position.",
     ],
     options: ["21", "20", "22"],
     answer: 0,
-    reconstructed: true,
   },
   {
-    title: "A man is giving directions to a friend about how to get to the football club. The football club is near what?",
+    title: "A man is giving directions to a friend about how to get to the football club. The football club is near?",
     transcript: [
       "Walk straight past the bus station and turn left at the next street.",
       "You will see a grocery store on the corner. The football club is just beside it.",
     ],
-    options: ["A grocery store", "A bus station", "A school"],
+    options: ["A grocery store", "a park", "a library"],
     answer: 0,
     reconstructed: true,
   },
   {
     title: "A boy is talking about his cat. What does he feed the cat?",
+    transcriptTitle: "fish",
     transcript: [
-      "My cat likes chasing insects in the garden, but I do not feed those to him.",
-      "For dinner, I usually give him fish. He likes it much more than mice.",
+      "Hi, I'm Alex, and I want to tell you about my cat, Whiskers. He's really friendly and loves to play. Whiskers is a bit picky about food, though. He doesn't like eating mice or insects, which is funny for a cat! But he absolutely loves fish. Every time I give him some, he gets so excited! He also enjoys sleeping by the window and watching the birds outside. He's the best pet ever!",
     ],
-    options: ["Fish", "Mice", "Insects"],
+    options: ["fish", "Mice", "Insects"],
     answer: 0,
-    reconstructed: true,
   },
   {
     title: "Samia is going to meet her friends. What time are they going to meet?",
+    transcriptTitle: "At 10h",
     transcript: [
-      "Are we still meeting at eight thirty?",
-      "I will be late if I leave work then. Can we meet at 9:30 instead?",
-      "That is fine. I will see you at half past nine.",
+      "Woman: Hey! I was thinking about our meet-up. We plan to meet at 9:30, but I just realized I have a class that finishes at 9:00, so I might not make it in time.",
+      "How about we meet at 10:00 instead? That should give me enough time to get there. Does that work for you?",
     ],
-    options: ["At 8:30", "At 9:30", "At 10:00"],
-    answer: 1,
-    reconstructed: true,
+    options: ["9:00", "9:30", "10.00"],
+    answer: 2,
   },
   {
     title: "Jack is phoning his mom. What does Jack need to buy for his sister?",
+    transcriptTitle: "Chocolates",
     transcript: [
       "Hi, Mom! It's Jack. I hope you're doing well.",
       "I'm out shopping, and I need to buy some chocolates for my sister's birthday.",
@@ -460,174 +430,170 @@ window.listeningPart1Questions = [
       "By the way, do you need anything while I'm here? I can pick up some milk or fruit if you want.",
       "Let me know! I'll talk to you soon!",
     ],
-    options: ["Chocolates", "Fruit", "Milk"],
-    answer: 0,
+    options: ["Fruit", "Milk", "Chocolates"],
+    answer: 2,
   },
   {
     title: "Listen to a man talking about their train journey. What time did the train depart?",
+    transcriptTitle: "9.30",
     transcript: [
-      "This morning was rough at the station.",
-      "I thought the train would leave around 9:00, but I heard it would be delayed.",
-      "It finally departed at 9:30, so we arrived later than expected.",
+      "This morning was rough at the station. I thought the train would leave around 9:00, but I heard it would be delayed.",
+      "It finally departed at 9:30, though some people said it might be even later. Usually, if it's delayed, it could leave as late as 10:00. I'm glad it didn't take that long today!",
     ],
-    options: ["9:00", "9:45", "9:30"],
+    options: ["9:00", "9.45", "9.30"],
     answer: 2,
   },
   {
     title: "The driver trainer is calling a man. When is the new appointment date?",
+    transcriptTitle: "Friday",
     transcript: [
       "Hello, I'm calling about your driving lesson appointment. We need to change the original date.",
       "Oh, really? Wasn't it supposed to be on Wednesday?",
-      "Yes, but unfortunately the trainer is unavailable that day.",
+      "Yes, but unfortunately, the trainer is unavailable that day.",
       "No problem. Could we move it to Thursday instead?",
+      "I'm afraid Thursday is fully booked, but we have an available slot on Friday.",
       "Friday sounds perfect. What time should I come?",
       "Your appointment will be at 10 a.m. See you then!",
     ],
-    options: ["Wednesday", "Thursday", "Friday"],
-    answer: 2,
+    options: ["Wednesday", "Friday", "Thursday"],
+    answer: 1,
   },
   {
     title: "A man is calling his friend to meet for coffee. Where is the coffee shop located?",
+    transcriptTitle: "opposite the gift shop",
     transcript: [
-      "Hey, are you free for coffee later? I found a great new place in town.",
-      "You know the big gift shop on Main Street? The coffee shop is right across from it.",
-      "Just look for the gift shop, then cross the street. You'll see the coffee shop right there, opposite the gift shop.",
-      "They have amazing pastries too. Let's meet there at 3 p.m., okay?",
+      "Man: Hey, are you free for coffee later? I found a great new place in town. It's not hard to find at all. You know the big gift shop on Main Street? Well, the coffee shop is right across from it.",
+      "Just look for the gift shop, then cross the street. You'll see the coffee shop right there, opposite the gift shop. They have amazing pastries too. Let's meet there at 3 PM, okay?",
     ],
-    options: ["Opposite the gift shop", "Next to the gift shop", "Behind the gift shop"],
+    options: ["opposite the gift shop", "next to the gift shop", "behind the gift shop"],
     answer: 0,
   },
   {
     title: "Listen to a tour guide introducing the tour. Where will tea be served?",
+    transcriptTitle: "On the River Boat",
     transcript: [
-      "Welcome to our scenic tour! I'm excited to show you this beautiful area.",
-      "We'll start with a drive along the coast to enjoy the amazing ocean views.",
-      "Then we'll go up to the mountain looking for some breathtaking views.",
-      "After that, we'll head down to the harbor and take a relaxing riverboat cruise.",
-      "While on the boat, you can enjoy afternoon tea and see the charming riverside scenery.",
+      "Welcome to our scenic tour! I'm excited to show you this beautiful area. We'll start with a drive along the coast to enjoy the amazing ocean views.",
+      "Then, we'll go up to the mountain looking for some breathtaking views. After that, we'll head down to the harbor and take a relaxing riverboat cruise.",
+      "While on the boat, you can enjoy afternoon tea and see the charming riverside scenery. After the boat trip, we'll end the day with a walk on the beach. Don't forget your camera - there will be lots of chances for great photos!",
     ],
-    options: ["On the mountain boat", "On the beach boat", "On the river boat"],
+    options: ["On the Mountain Boat", "On the beach Boat", "On the River Boat"],
     answer: 2,
   },
   {
     title: "Listen to a saleswoman talking about a property. Which room is the largest?",
+    transcriptTitle: "Kitchen",
     transcript: [
-      "The bedroom is a good size, and the bathroom has recently been renovated.",
-      "The kitchen is the largest room in the house, with enough space for a dining table.",
+      "Let me tell you about this lovely property. It has two spacious bedrooms, both with big windows that let in lots of natural light.",
+      "The bathroom is modern, with a large shower and plenty of storage space. The living room is cozy, perfect for relaxing after a long day.",
+      "But the kitchen is the star of the house - it's the largest room, with lots of counter space for cooking, and it's great for hosting dinners. You'll love it here!",
     ],
     options: ["Bedroom", "Kitchen", "Bathroom"],
     answer: 1,
-    reconstructed: true,
   },
   {
     title: "Listen to a woman talking about what she has just bought. What is the dress she wears like?",
+    transcriptTitle: "long and red",
     transcript: [
-      "I found a dress at the shop yesterday and tried on a few different styles.",
-      "The long red one was lovely, and the long white one was simple.",
-      "I chose the black and white dress because it goes with my shoes.",
+      "I want to tell you about something special I just bought. It's a beautiful dress. The dress is long and red, just like a sunset! I feel so happy when I wear it.",
+      "The fabric is soft, and it flows nicely when I walk. I can wear it to a party or a nice dinner. I love my new dress!",
     ],
-    options: ["Black and white", "Long and red", "Long and white"],
-    answer: 0,
-    reconstructed: true,
+    options: ["black and white", "long and red", "long and white"],
+    answer: 1,
   },
   {
     title: "The doctor's office is calling about a change in the appointment. When is the new appointment?",
+    transcriptTitle: "On Thursday 13th",
     transcript: [
-      "Hello, this is the doctor's office calling about your appointment.",
-      "The original time is no longer available, so we have moved your appointment to Friday the 14th.",
-      "Please call us if that date does not work for you.",
+      "Hello! This is the doctor's office calling to change your appointment. I wanted to let you know that the new appointment is on Thursday the 13th.",
+      "I understand you might have been expecting it to be on Friday the 14th, but we're all off this day due to the national dentist holiday. Please let us know if that works for you!",
     ],
-    options: ["On Friday the 14th", "On Thursday the 30th", "On Monday the 13th"],
-    answer: 0,
-    reconstructed: true,
+    options: ["On Friday 14th", "On Thursday 30th", "On Thursday 13th"],
+    answer: 2,
   },
   {
     title: "A woman is talking about her weekends. What did she do last week?",
+    transcriptTitle: "Stayed at home",
     transcript: [
-      "I usually stay at home on weekends or go to a party with friends.",
-      "Last week, the weather was perfect, so I went hiking in the hills.",
-      "It was tiring, but I really enjoyed the fresh air.",
+      "My weekends are not always the same. This week has been busy, but I always look forward to my free time.",
+      "Last weekend, I stayed at home and enjoyed some quiet moments with a good book. I also watched a few movies and cooked a nice dinner for myself.",
+      "This weekend, I plan to go out with friends. We might visit a new cafe or go for a walk in the park. I love spending time with my friends and relaxing after a busy week!",
     ],
     options: ["Went hiking", "Stayed at home", "Attended a party"],
-    answer: 0,
-    reconstructed: true,
+    answer: 1,
   },
   {
     title: "Nate is on the phone with his friend. How long does Nate stay in India?",
+    transcriptTitle: "2 weeks",
     transcript: [
-      "Hey, it's Nate. I just finished a week in Thailand and now I've arrived in India.",
-      "I'll be here for two weeks in total. I plan to spend three days visiting the Taj Mahal because everyone says it's a must-see.",
-      "By the way, I know it's not too far from where you are. Maybe we could meet up while I'm here?",
-      "Let me know if you're ready."
+      "Man: Hey! It's Nate. I just finished a week in Thailand, and now I've arrived in India. I'll be here for two weeks in total. I plan to spend three days visiting the Taj Mahal because everyone says it's a must-see.",
+      "By the way, I know it's not too far from where you are. Maybe we could meet up while I'm here? Let me know if you're around!"
     ],
     options: ["3 days", "1 week", "2 weeks"],
     answer: 2,
   },
   {
     title: "Listen to a tour guide. Where is the office located?",
+    transcriptTitle: "Opposite the hotel",
     transcript: [
-      "Hello everyone, welcome to our tour. My name is Sam, and I'm your tour guide today.",
-      "I'm excited to show you around this beautiful city. We will visit many interesting places, including parks, museums, and local markets.",
-      "As we walk, I'll share fun facts and stories about each location. If you have any questions, feel free to ask.",
-      "Now before we start, I want to let you know that our office is opposite the hotel where you are staying. If you need any help or information during your stay, you can always come to us.",
-      "Let's begin our adventure and enjoy."
+      "Hello, everyone! Welcome to our tour! My name is Sam, and I'm your tour guide today. I'm excited to show you around this beautiful city. We will visit many interesting places, including parks, museums, and local markets.",
+      "As we walk, I'll share fun facts and stories about each location. If you have any questions, feel free to ask!",
+      "Now, before we start, I want to let you know that our office is opposite the hotel where you are staying. If you need any help or information during your stay, you can always come to us!",
+      "Let's begin our adventure and enjoy exploring together!"
     ],
     options: ["Opposite the hotel", "Next to the park", "Above a restaurant"],
     answer: 0,
   },
   {
-    title: "Listen to the tour guide. Where will the group meet to catch the bus?",
+    title: "Listening to a woman's announcement. Where will they wait for the bus?",
+    transcriptTitle: "By the hotel's main entrance",
     transcript: [
-      "Good morning, everyone. Let me walk you through today's schedule.",
-      "First, we'll start the day at 9 a.m. with a visit to the City Museum, where you'll have about two hours to explore the exhibits. After that, at 12:30 p.m., we'll head to the Central Park for a picnic lunch and a relaxing stroll.",
-      "Around 3 p.m., we'll make our way to the Old Town Market, where you can shop for souvenirs and enjoy some local treats. We'll wrap up our activities by 6 p.m., giving you a little free time back at the hotel.",
-      "Finally, at 8 p.m., we'll meet at the hotel's main entrance to catch the bus to the airport. Make sure to be on time, and we'll head to the airport."
+      "Good morning, everyone! Let me walk you through today's schedule. First, we'll start the day at 9:00 AM with a visit to the City Museum, where you'll have about two hours to explore the exhibits.",
+      "After that, at 12:30 PM, we'll head to Central Park for a picnic lunch and a relaxing stroll. Around 3:00 PM, we'll make our way to the Old Town Market, where you can shop for souvenirs and enjoy some local treats.",
+      "We'll wrap up our activities by 6:00 PM, giving you a little free time back at the hotel. Finally, at 8:00 PM, we'll meet at the hotel's main entrance to catch the bus to the airport. Make sure to be on time, and we'll head to the airport together!"
     ],
     options: ["Behind the hotel's main entrance", "By the hotel's side entrance", "By the hotel's main entrance"],
     answer: 2,
   },
   {
     title: "A man is talking about his family trip. What does the man's wife enjoy?",
+    transcriptTitle: "photography",
     transcript: [
       "My wife enjoys taking photographs whenever we go on a family trip.",
       "She likes capturing the scenery, although she also enjoys shopping and drawing at home.",
     ],
-    options: ["Photography", "Shopping", "Drawing"],
+    options: ["photography", "shopping", "drawing"],
     answer: 0,
     reconstructed: true,
   },
   {
     title: "When is the best time for her to get up?",
-    transcript: [
-      "I used to get up at six, but that was earlier than I needed.",
-      "Seven o'clock gives me enough time to get ready without feeling tired all day.",
-    ],
+    transcriptTitle: "At 7 o'clock",
+    transcript: [],
     options: ["At 6 o'clock", "At 8 o'clock", "At 7 o'clock"],
     answer: 2,
-    reconstructed: true,
   },
   {
-    title: "Listen to a writer talking about her job. What was her first job?",
+    title: "Listen to a writer talking about her job. What is her first job?",
     transcript: [
       "When I was younger, I didn't always dream of being a writer. My first job was actually as a teacher.",
       "I taught English to small children, and I loved helping them learn to read and write. It wasn't easy, though.",
       "I spent a lot of time grading papers and preparing lessons. But that job taught me how to use words well, and now I write stories for everyone to enjoy."
     ],
-    options: ["Teacher", "Engineer", "Doctor"],
+    options: ["teacher", "Engineer", "doctor"],
     answer: 0,
   },
   {
     title: "Max is calling his friend. How much can Max pay for the computer?",
     transcript: [
-      "Hi, it's me, Max. I'm calling about the computer you're selling.",
-      "My computer is old and slow, and I can't play games on it anymore, so I'd like to replace it. I can pay 250 pounds.",
-      "I'm busy this afternoon, but we can discuss it tomorrow morning. Is that okay?"
+      "Hi, it's me Max. I'm calling about the computer that you are selling. You see. My computer is old and slow. I can't play any games on it any more and would like to replace it with a new one.",
+      "How much do you offer? I can pay 250 pounds. This afternoon I am busy but we can discuss this tomorrow morning. Is that okay? Call me back soon."
     ],
+    transcriptTitle: "250 pounds",
     options: ["250 pounds", "150 pounds", "350 pounds"],
     answer: 0,
   },
   {
-    title: "Pierre and Emma are talking about the picnic on the weekend. What will they bring to the picnic?",
+    title: "Pierre and Emma are talking together about the picnic on the weekend. What will they bring to the picnic?",
     transcript: [
       "Emma, are you ready for the picnic this weekend? Definitely.",
       "I'm really looking forward to it. Do you know what everyone's bringing?",
@@ -639,28 +605,27 @@ window.listeningPart1Questions = [
       "That's a good idea. How about we prepare some chicken and french fries?",
       "Perfect! This picnic is going to be amazing!"
     ],
-    options: ["Fruit", "Food", "Water"],
+    options: ["fruit", "food", "water"],
     answer: 1,
   },
   {
     title: "Lily is talking about her daily routine. What does she do in the evening?",
+    transcriptTitle: "Goes for a walk",
     transcript: [
-      "Hi, I'm Lily, and I want to tell you about my daily routine. I wake up early around 6.30 a.m. and have breakfast before going to work.",
-      "I work in a small office, and my job keeps me busy until about 5 p.m. After dinner, I usually go for a walk to relax, but today I'm going to try something different.",
-      "I'll do some yoga at home. It sounds fun and peaceful.",
-      "After that, I'll probably watch a movie before going to bed."
+      "Hi, I'm Lily, and I want to tell you about my daily routine. I wake up early around 6:30 A.M. and have breakfast before going to work. I work in a small office, and my job keeps me busy until about 5 P.M.",
+      "After dinner, I usually go for a walk to relax, but today I'm going to try something different - I'll do some yoga at home. It sounds fun and peaceful. After that, I'll probably watch a movie before going to bed. It's a simple day, but I like it!"
     ],
-    options: ["Goes for a walk", "Does yoga at home", "Watches a movie"],
-    answer: 0,
+    options: ["Cooks dinner", "Goes for a walk", "Plays video games"],
+    answer: 1,
   },
   {
-    title: "Listen to Anna talk about her old manager, George. What did Anna say about George?",
+    title: "Listen to Anna talk about his old manager, George. What did Anna say about George?",
+    transcriptTitle: "He taught her a lot",
     transcript: [
-      "I want to talk about my old manager, George. He was very smart and taught me a lot about work.",
-      "When I joined the team, he showed me how to do my job well. He wasn't very strict, but he had high expectations.",
-      "I learned to be better because of him. I'm thankful for his guidance and support."
+      "Woman: You know, I want to talk about my old manager, George. He was a very smart man, and he taught me a lot about work. I remember the first time I joined the team; he showed me how to do my job well.",
+      "George was not very strict, but he had high expectations. I learned to be better because of him. Overall, I am thankful for his guidance and support during my early days."
     ],
-    options: ["He taught her a lot", "He didn't like her", "He was very strict"],
+    options: ["he taught her a lot", "he didn't like her", "he was very strict"],
     answer: 0,
   },
   {
@@ -674,143 +639,136 @@ window.listeningPart1Questions = [
     answer: 1,
   },
   {
-    title: "Lucy is calling her brother. What does her brother have to drink?",
+    title: "Lucy is calling her brother. What does the brother have to drink?",
+    transcriptTitle: "Water",
     transcript: [
-      "Hi, Jake. It's Lucy.",
-      "I just wanted to check in on you. How are you doing?",
-      "I know you've been busy with work and school lately. I'm worried that you're not drinking enough water.",
-      "Staying hydrated is really important, especially when you're working hard. Remember to keep a bottle with you.",
-      "Anyway, I hope you're taking care of yourself."
+      "Hi, Jake! It's Lucy. I just wanted to check in on you. How are you doing? I know you've been busy with work and school lately. I'm worried that you're not drinking enough water. Staying hydrated is really important, especially when you're working hard! Remember to keep a bottle with you. Anyway, I hope you're taking care of yourself. Let's catch up soon!"
     ],
-    options: ["Water", "Milk", "Medicine"],
+    options: ["water", "milk", "Medicine"],
     answer: 0,
   },
   {
     title: "A man and a woman are talking about their old school days. What was the man's favorite thing about school?",
+    transcriptTitle: "History classes",
     transcript: [
-      "What do you remember most about our school days? Honestly, I don't remember much.",
-      "I remember that I was terrible at math. It was my worst subject.",
-      "Also, I remember that you were really good at history. That's right.",
-      "I loved history. Actually, those classes were the ones I remember the most.",
-      "All those stories and events were so fascinating."
+      "Woman: What do you remember most about our school days?",
+      "Man: Honestly, I don't remember much.",
+      "Woman: I remember that I was terrible at math! It was my worst subject. Also, I remember that you were really good at history.",
+      "Man: That's right! I loved history. Actually, those classes were the ones I remember the most. All those stories and events were so fascinating!"
     ],
     options: ["Math classes", "History classes", "Geography classes"],
     answer: 1,
   },
   {
     title: "Linda is talking about her mother. What do mother and daughter have in common?",
+    transcriptTitle: "Similar interests",
     transcript: [
-      "My mom is an important person in my life. We both enjoy reading and gardening.",
-      "We like talking about our favorite books and planting flowers together. We have different tastes in fashion and music, but our shared hobbies bring us closer."
+      "My mom is such an important person in my life. We both enjoy many of the same activities, like reading and gardening. It's always nice to talk about our favorite books and spend time planting flowers together. While we might have some different tastes in fashion and music, our shared hobbies really bring us closer. I love how we can bond over these interests and have fun together."
     ],
     options: ["Similar appearance", "Similar interests", "Similar personalities"],
     answer: 1,
   },
   {
     title: "A man and a woman are going shopping. What does he buy in the store?",
+    transcriptTitle: "A suit for the office",
     transcript: [
-      "Hey, Sarah, let's check out this store. I need something for work.",
-      "How about this T-shirt? It looks nice.",
-      "I don't really need a T-shirt right now; I'm looking for something more formal. What about this hat?",
-      "Maybe, but I really need a suit for the office. This one seems perfect.",
-      "That's a good choice. It's smart and looks comfortable.",
-      "Great, I'll buy the suit."
+      "Man: Hey, Sarah! Let's check out this store. I need something for work.",
+      "Woman: Sure, John. How about this T-shirt? It looks nice.",
+      "Man: Hmm, it's cool, but I don't really need a T-shirt right now. I'm actually looking for something more formal.",
+      "Woman: Oh, okay. What about this hat? It would look great on you.",
+      "Man: Haha, maybe, but not today. I really need a suit for the office. Look, this one seems perfect.",
+      "Woman: That's a good choice! It's smart and looks comfortable.",
+      "Man: Great! I'll buy the suit. Let's keep looking for other things we might need."
     ],
-    options: ["A suit for the office", "A T-shirt", "A hat"],
+    options: ["A suit for the office", "A T-shirt", "A pair of shoes"],
     answer: 0,
   },
   {
     title: "What do these birds do in winter?",
-    transcript: [
-      "Some birds move to warmer places when winter arrives.",
-      "Others stay in groups for protection against the cold and predators.",
-    ],
-    options: ["Migrate", "Sleep", "Stay in groups for protection"],
+    transcript: [],
+    transcriptNote: "Chưa có mô tả",
+    options: ["immigrate", "sleep", "They stay in groups for protection"],
     answer: 2,
-    reconstructed: true,
   },
   {
     title: "Linda is talking about what she likes to eat. What does she have for lunch?",
+    transcriptTitle: "Tea",
     transcript: [
-      "When it comes to lunch, I have a simple pleasure. I really enjoy a warm cup of tea.",
-      "It's my favorite drink to have while I eat. I find it calming, and it makes my meal feel special.",
-      "Sometimes people ask me why I don't choose coffee or juice, but for me, tea is just perfect. It warms my heart and gives me a moment to eat."
+      "Woman: When it comes to lunch, I have a simple pleasure: I really enjoy a warm cup of tea. It's my favorite drink to have while I eat. I find it calming, and it makes my meal feel special. Sometimes people ask me why I don't choose coffee or juice, but for me, tea is just perfect. It warms my heart and gives me a moment to relax."
     ],
-    options: ["Juice", "Tea", "Coffee"],
+    options: ["Juice", "tea", "coffee"],
     answer: 1,
   },
   {
     title: "A tour guide is introducing a tourist destination. How many people live in the town?",
+    transcriptTitle: "10,000",
     transcript: [
-      "Welcome to our small town. The town square has local shops, cozy cafes, and a fountain where people gather.",
-      "It's the heart of the community and often hosts farmers' markets and live music. There are currently 10,000 people living in the town."
+      "Welcome, everyone! Today, I'm excited to introduce you to our charming small town. Right here in the town square, you'll find local shops, cozy cafes, and a beautiful fountain where people gather to relax.",
+      "This square is the heart of our community, often filled with cool events like farmers' markets and live music. Currently, there are 10,000 people living in this town.",
+      "As we explore, you'll see the unique blend of history and modern life that makes our town so special."
     ],
-    options: ["10,000", "8,000", "12,000"],
+    options: ["10,000", "8,000", "9,000"],
     answer: 0,
   },
   {
     title: "A student is talking about housing. Where does he live now?",
+    transcriptTitle: "In a town hall",
     transcript: [
-      "Hi, I'm Jack, and I want to talk about where I live. Right now, I'm staying in a town hall near my university.",
-      "It's a nice place, and I've met a lot of other students here. Before this, I used to live with my parents in a small village.",
-      "It was quiet, but I needed to be closer to school. Soon, I'll move to an apartment nearby with a few friends.",
-      "I think it'll be fun to share a place with them. I'm excited about this."
+      "Hi, I'm Jack, and I want to talk about where I live. Right now, I'm staying in a town hall near my university. It's a nice place, and I've met a lot of other students here. Before this, I used to live with my parents in a small village. It was quiet, but I needed to be closer to school. Soon, I'll move to an apartment nearby with a few friends. I think it'll be fun to share a place with them. I'm excited about the change!"
     ],
     options: ["In a small village", "In a town hall", "In an apartment"],
     answer: 1,
   },
   {
     title: "Listen to the instructions of a university. Where is the main office?",
+    transcriptTitle: "On the first floor",
     transcript: [
-      "Welcome to our university. When you enter the campus, you'll see the library on your left and the cafeteria on your right.",
-      "If you need help with anything, the main office is on the first floor of the center campus building. There you can ask about classes, schedules, or anything else.",
+      "Welcome to our university! When you enter the campus, you'll see the library on your left and the cafeteria on your right.",
+      "If you need help with anything, the main office is on the first floor of the center campus building. There, you can ask about classes, schedules, or anything else.",
       "Behind the main building, you'll find the gym and sports area. For quiet study, there are some nice spots in the garden near the science building.",
-      "Make sure to explore and enjoy your time here."
+      "Make sure to explore and enjoy your time here!"
     ],
-    options: ["On the first floor", "On the second floor", "In the garden"],
+    options: ["On the first floor", "On the third floor", "In the basement"],
     answer: 0,
   },
   {
     title: "Lalia is talking to her friend about her upcoming trip. How much does she think the bus fare will be?",
+    transcriptTitle: "£2.5",
     transcript: [
-      "I'm excited about my trip to the city tomorrow. Do you know the bus fare?",
-      "I think it's 2.5 pounds. If I take the subway, it'll be 4.5 pounds.",
-      "Public transport is affordable, and I'll need some change."
+      "Woman: Hey, I'm really excited about my trip to the city tomorrow! I was just thinking about how I'll get there. Do you know how much the bus fare is? I think I heard it's £2.5. That sounds pretty reasonable! If I take the subway, that'll be just £4.5. I love how affordable public transport can be. I'll definitely need to have some change ready. By the way, do you know what time the bus leaves? I want to make sure I don't miss it!"
     ],
-    options: ["2.5 pounds", "4.5 pounds", "5 pounds"],
-    answer: 0,
+    options: ["£3", "£2.5", "£4.5"],
+    answer: 1,
   },
   {
     title: "When do the students play football?",
-    transcript: [
-      "The students play football on Wednesday afternoon.",
-    ],
-    options: ["Wednesday afternoon", "Monday morning", "Wednesday morning"],
-    answer: 0,
-    reconstructed: true,
+    transcriptTitle: "Wednesday afternoon",
+    transcript: [],
+    options: ["Monday morning", "Wednesday Morning", "Wednesday afternoon"],
+    answer: 2,
   },
   {
     title: "A man is calling his wife. Where will they meet?",
+    transcriptTitle: "Outside the shop",
     transcript: [
-      "Hi, honey. It's me.",
-      "Just a reminder that the train leaves at 5, so you should arrive around 6 o'clock. I'll be there to pick you up at the train station.",
-      "Let's meet outside the shop opposite the station. I can't wait to have dinner together."
+      "Hi honey, it's me! Just a reminder that the train leaves at 5, so you should arrive around 6 o'clock. I'll be there to pick you up at the train station.",
+      "Let's meet outside the shop opposite the station. I can't wait to have dinner together! See you soon!",
     ],
     options: ["At home", "In the garden", "Outside the shop"],
     answer: 2,
   },
   {
-    title: "A man is talking about his eating habits. What time does he usually eat?",
+    title: "A man is talking about his eating habit. What time does he usually eat?",
+    transcriptTitle: "7 o'clock",
     transcript: [
-      "I usually have dinner every evening. It's become a habit for me to enjoy a meal at that time after a long day.",
-      "I find it's the perfect time to unwind and relax. Plus I love to spend time with my family during dinner.",
-      "It's our chance to catch up and enjoy some good food together. We usually have dinner at 7 o'clock and it is definitely my favorite meal of the day."
+      "I usually have dinner every evening. It's become a habit for me to enjoy a meal at that time after a long day. I find it's the perfect time to unwind and relax. Plus, I love to spend time with my family during dinner. It's our chance to catch up and enjoy some good food together. We usually have dinner at 7 o'clock and it is definitely my favorite meal of the day!"
     ],
-    options: ["At 6 o'clock", "At 7 o'clock", "At 8 o'clock"],
+    options: ["6 o'clock", "7 o'clock", "8 o'clock"],
     answer: 1,
   },
   {
     title: "A man is talking about his daily routine. What does he do after work?",
+    transcriptTitle: "Plays football",
     transcript: [
       "Every day, I wake up at 7 a.m. and have a quick breakfast before going to work. I usually take the bus and it takes about 30 minutes to get to the office.",
       "At work, I spend most of my time on the computer answering emails and working on projects. I have lunch at noon and get back to work until 5 p.m.",
@@ -820,38 +778,33 @@ window.listeningPart1Questions = [
     answer: 1,
   },
   {
-    title: "Two friends are discussing a movie they recently watched. What element of the film do they agree on?",
-    transcript: [
-      "We had different opinions about the song and the theme of the movie.",
-      "But we both agreed that the ending was excellent and made the story memorable.",
-    ],
-    options: ["The ending", "The song", "The theme"],
+    title: "Two friends are discussing a movie they recently watched. What elements of the film do they agree on?",
+    transcriptTitle: "The ending",
+    transcript: [],
+    options: ["The ending", "the song", "the theme"],
     answer: 0,
-    reconstructed: true,
   },
   {
     title: "A man is talking to a friend about his family. What is his main problem?",
+    transcriptTitle: "Persuading his family",
     transcript: [
-      "I've been having a tough time lately. I want to move abroad for a new job, but my family doesn't support the idea.",
-      "They're worried about me leaving and don't understand why I want to go so far away. I've tried to explain the benefits, but they don't seem to understand.",
-      "It's frustrating because I want their support."
+      "Man: I've been having a tough time lately. I really want to move abroad for a new job, but my family isn't on board with it. They're worried about me leaving and don't understand why I want to go so far away. I've tried to explain all the benefits, but they just don't seem to get it. It's really frustrating because I want their support, but it feels like I'm not getting through to them.",
     ],
     options: ["Persuading his family", "Finding a job abroad", "Saving money for the move"],
     answer: 0,
   },
   {
     title: "A man is reading the news about a housing development plan. How many new houses are going to be built?",
+    transcriptTitle: "2000",
     transcript: [
-      "I just heard the news that the local authority is planning to build 2,000 new houses. I remember they were initially saying it would only be 1,500.",
-      "But then I heard someone mention 2,500. That's quite a jump.",
-      "I wonder how this will affect the neighborhood. Will it bring in more families or just more traffic?",
-      "It'll be interesting to see."
+      "Man: I just heard the news that the local authority is planning to build 2000 new houses! I remember they were initially saying it would only be 1500. But then I heard someone mention 2500! That's quite a jump. I wonder how this will affect the neighborhood. Will it bring in more families or just more traffic? It'll be interesting to see how it all unfolds."
     ],
-    options: ["1,500", "2,000", "2,500"],
-    answer: 1,
+    options: ["1500", "2500", "2000"],
+    answer: 2,
   },
   {
     title: "Listen to Sarah leaving a message for her friend. When does she want to meet?",
+    transcriptTitle: "Three o'clock",
     transcript: [
       "Hi, John, this is Sarah calling.",
       "I'm leaving you a message about our meeting today. I know we said we'd meet at two, but something's come up.",
@@ -863,69 +816,73 @@ window.listeningPart1Questions = [
   },
   {
     title: "What time will the friends meet?",
+    transcriptTitle: "6.30",
     transcript: [
-      "Hey, Alex, it's me. Just a reminder about our plan tonight.",
-      "We're meeting at 6:30 p.m., so try not to be late. I know you usually finish work around 6, which should give you enough time.",
-      "Jake might join us later, around 7:30."
+      "Hey Alex, it's me. Just wanted to remind you about our plan for tonight. We're meeting at 6:30 PM, so try not to be late! I know you usually finish work around 6, so that should give you enough time to get there. If anything changes, just let me know. Oh, and by the way, Jake might join us a bit later, around 7:30 or so. Alright, see you soon!",
     ],
-    options: ["7:30", "6:30", "6:00"],
+    options: ["7.30", "6.30", "6.00"],
     answer: 1,
   },
   {
     title: "When is the best time for her to get up?",
-    transcript: [
-      "Getting up at 7:40 would leave me with too little time in the morning.",
-      "I think 7:15 is the best time. I can get ready calmly and still arrive on time.",
-    ],
-    options: ["7:40", "7:15", "At 7 o'clock"],
-    answer: 1,
-    reconstructed: true,
+    transcriptTitle: "At 7 o'clock",
+    transcript: [],
+    options: ["7.40", "7.15", "At 7 o'clock"],
+    answer: 2,
   },
   {
     title: "A man is talking to a shopping assistant. What color top is he going to buy?",
+    transcriptTitle: "black",
     transcript: [
-      "I'd like to buy a top. I like the green one.",
-      "Do you have it in blue? The blue one is only available in small, but the red and black ones are available in large.",
-      "Red isn't my cup of tea, so I'll choose the other option."
+      "Man: Hello, I would like to buy a top, please.",
+      "Woman: Sure, do you have anything particular in mind?",
+      "Man: I like the design of that green one over there. Do you have it in blue?",
+      "Woman: Maybe. What size are you?",
+      "Man: I am wearing large.",
+      "Woman: Let me see. Ohh. We have that one in blue but small. The red and black ones, however, are available in large.",
+      "Man: Red is not my cup of tea. Well, I will go with the other option then.",
     ],
-    options: ["Black", "Blue", "Green"],
+    options: ["black", "blue", "green"],
     answer: 0,
   },
   {
     title: "Julie is asking her professor about the assignment. When is the work due?",
+    transcriptTitle: "On Saturday morning",
     transcript: [
-      "Come in. Hi, Professor.",
-      "It is me, Julie. I wanted to ask about the assignment.",
-      "Is it possible to get an extension until Friday? What's the matter, Julie?",
-      "Do you have any difficulties? I have a lot of work lately, so I can't complete it by Thursday.",
-      "Actually, all assignments need to be submitted by Saturday morning, so you have two more days. Oh, that's great.",
-      "Thank you so much."
+      "Professor: Come in!",
+      "Julie: Hi, Professor! It is me, Julie! I wanted to ask about the assignment. Is it possible to get an extension until Friday?",
+      "Professor: What's the matter, Julie? Do you have any difficulties?",
+      "Julie: I have a lot of work lately, so I can't complete it by Thursday.",
+      "Professor: Actually, all assignments need to be submitted by Saturday morning, so you have two more days.",
+      "Julie: Oh, that's great! Thank you so much!",
+      "Professor: Of course. The conference is a great opportunity to share your findings with a wider audience. You would prepare a short presentation, around 10-15 minutes, and then answer some questions from the audience. It's a good way to get feedback and gain experience speaking publicly.",
     ],
-    options: ["On Thursday", "On Friday", "On Saturday morning"],
-    answer: 2,
+    options: ["On Saturday morning", "On Friday morning", "On Thursday morning"],
+    answer: 0,
   },
   {
     title: "A professor is talking to his student. What does the professor ask his student to do?",
+    transcriptTitle: "Speak at a conference",
     transcript: [
-      "Good morning, Alex. I've finished reading your thesis, and it's very well done.",
-      "Your research is thorough, and your arguments are clear. You should consider presenting it at the upcoming student conference.",
-      "You would give a 10- to 15-minute presentation and answer questions from the audience. It's a good way to get feedback and experience speaking publicly."
+      "Professor: Good morning, Alex. I've just finished reading your thesis, and I must say, it's very well done. You've put a lot of effort into it. Student: Thank you, Professor. I'm glad you liked it. I worked hard on it. Professor: It shows. Your research is thorough, and your arguments are clear. I actually think you should consider presenting it at the upcoming student conference. Student: Wow, really? That sounds exciting! But, I'm not sure how that works. Could you tell me more about it?",
     ],
-    options: ["Speak at a conference", "Write another thesis", "Attend a lecture"],
+    options: ["Speak at a conference", "Tutor another student", "Write another thesis"],
     answer: 0,
   },
   {
     title: "Listen to the woman talking about her holiday plans. Where is she going next?",
+    transcriptTitle: "The south",
     transcript: [
       "I can't wait for my next holiday. I'm heading south, where the mountains are.",
       "I've never been there before, but I've heard it's beautiful. I'm looking forward to hiking and seeing the snow-covered peaks.",
-      "It will be a nice change from the city."
+      "It's going to be a nice change from the city. Hopefully, the weather will be perfect!"
     ],
     options: ["The south", "The east", "The north"],
     answer: 0,
   },
   {
     title: "Listen to a radio man talking about a new popular song. Which is the most attractive part of the song?",
+    transcriptTitle: "The words",
     transcript: [
       "Good evening listeners. Today, I want to talk about a new song that's quickly becoming popular.",
       "You're My Everything. The tune is really catchy, and it makes you want to dance right away.",
@@ -933,256 +890,232 @@ window.listeningPart1Questions = [
       "The lyrics tell a beautiful story that everyone can relate to. It's no wonder so many people are loving this song.",
       "If you haven't heard it yet, make sure to give it a listen."
     ],
-    options: ["The instruments", "The words", "The melody"],
+    options: ["The instruments", "The words", "The cover art"],
     answer: 1,
   },
   {
     title: "A girl is talking about a film. What did she like best about the film?",
+    transcriptTitle: "The mountain scenes",
     transcript: [
-      "The Fall is one of my favorite films. I saw it last weekend, and it kept me on the edge of my seat.",
-      "I usually don't like action movies because the racing scenes and fights feel repetitive. The mountain scenes were unusual and the most captivating part for me.",
-      "The ending was a bit sad."
+      "\"The Fall\" is one of my favorite films, which I saw last weekend. The film was so terrific that it kept me on the edge of my seat all the time. I usually don't like watching action movies as they all feel the same and repetitive with those dull racing car scenes and meaningless fights that go on for hours. The mountain scenes were rather unusual. The sequencing high-ups are the most captivating parts for me. The ending, however, was a bit sad. Many people wish it was a happy ending.",
     ],
     options: ["Racing scenes", "The mountain scenes", "Fight scenes"],
     answer: 1,
   },
   {
     title: "A woman is talking about her job. What encouraged her to become a scientist?",
+    transcriptTitle: "A large stone",
     transcript: [
       "I've always loved science, but there was a moment that really encouraged me to become a scientist. I remember when I was a child, I found a large stone during a school trip.",
       "It sparked my curiosity about geology. My mother also inspired me to explore my interests in science.",
       "Of course, I use the computer a lot now for my research, but that stone was the beginning."
     ],
-    options: ["A large stone", "Her mother", "Using a computer"],
+    options: ["A large stone", "Her mother", "The computer"],
     answer: 0,
   },
   {
-    title: "What are they happy about on the business trip?",
-    transcript: [
-      "The hotel is comfortable, and we have some free time after our meetings.",
-      "What I enjoy most is learning about new areas and seeing how people live in different places.",
-    ],
-    options: ["Learning new areas", "Staying in a luxury hotel", "Having a lot of free time"],
-    answer: 0,
-    reconstructed: true,
+    title: "What are they happy about the business trip?",
+    transcriptTitle: "Learning new areas",
+    transcript: [],
+    options: ["stay in a luxury hotel.", "Learning new areas", "have a lot of free time"],
+    answer: 1,
   },
   {
     title: "Where is the French class?",
+    transcriptTitle: "On the second floor",
     transcript: [
       "Welcome to the Language Center. Today, all new students should check their classroom information carefully before lessons begin.",
-      "The French class will not be on the ground floor like last week because those rooms are being repaired instead. Students need to go to the second floor.",
-      "There will be signs in the building to help you find them."
+      "The French class will not be on the ground floor like last week because those rooms are being repaired. Instead, students need to go to the second floor.",
+      "There will be signs in the building to help you find the correct classroom more easily."
     ],
-    options: ["On the second floor", "On the third floor", "On the ground floor"],
-    answer: 0,
+    options: ["On the third floor", "On the ground floor", "On the second floor"],
+    answer: 2,
   },
   {
-    title: "Where will the practical chemistry class take place?",
+    title: "Where will the first computer science lesson take place?",
+    transcriptTitle: "Room 301",
     transcript: [
-      "Hello, everyone. This is your chemistry teacher with an update about our practical class this Friday.",
-      "We will still meet at 2 o'clock. The class was originally scheduled for Room 201, and some of you may have heard Room 302 mentioned as an alternative.",
-      "Due to a technical issue, the class will now take place in Room 301."
+      "Hello everyone, this is your chemistry teacher. I'm calling to give you a quick update about our practical class this Friday. We will still meet at two o'clock as planned. Originally, the session was scheduled to take place in Room 201, and some of you may also have heard about using Room 302 as an alternative. However, due to an unexpected technical issue, the class will now be held in Room 301 instead. See you then."
     ],
-    options: ["Room 301", "Room 302", "Room 201"],
-    answer: 0,
+    options: ["Room 302", "Room 301", "Room 201"],
+    answer: 1,
   },
   {
     title: "Jorge is calling his friend about their plan for the weekend. What time does the football match start?",
+    transcriptTitle: "1 p.m.",
     transcript: [
-      "I'm calling about our plans for the weekend. I'll be busy in the morning, so how about we meet at 11:30 for lunch?",
-      "The football match starts at 1 p.m. It takes about 30 minutes to drive there, so we'll have time to eat.",
-      "After the match, we can go back to my place and play video games."
+      "Hey, it's Jorge! I want to check in about our plans for the weekend. I'll be busy in the morning, but how about we meet at 11:30 for lunch? The football match starts at 1 p.m., and since it takes about 30 minutes to drive there, we'll have just enough time to grab something to eat. After the match, we can go back to my place and play video games."
     ],
     options: ["1 p.m.", "6 p.m.", "11 p.m."],
     answer: 0,
   },
   {
     title: "A man calls the teleshop. What is the teleshop number?",
+    transcriptTitle: "201030",
     transcript: [
-      "I need to call the teleshop because my phone isn't working. Can you remind me of the number?",
-      "I think it might be 10-20-30 or 30-10-20. No, I remember now: it's 20-10-30."
+      "Hello, I need to call the teleshop for some information. My phone is not working. Can you remind me of the number? I think it starts with 20 or 10 or 30 something. Is it 102030 or 301020? No, wait! I remember now - it's 201030! I really need to order that new gadget. Thanks for your help!"
     ],
-    options: ["10-20-30", "20-10-30", "30-10-20"],
+    options: ["102030", "201030", "301020"],
     answer: 1,
   },
   {
     title: "Listen to the director talking about sales of his company. How many copies of Freeze Frame magazine were sold?",
+    transcriptTitle: "Over 300,000 copies",
     transcript: [
-      "I am excited to share the latest sales figures for our company. This month we had a fantastic response to our magazine, Freeze Frame.",
-      "I am proud to announce that we sold over 300,000 copies. This is a big increase from last month.",
-      "Many people are buying our magazine and we are very happy. Thank you for your support.",
-      "We hope to sell even more in the future."
+      "I am excited to share the latest sales figures for our company. This month, we had a fantastic response to our magazine, Freeze Frame. I'm proud to announce that we sold over 300,000 copies! This is a big increase from last month. Many people are buying our magazine, and we are very happy. Thank you for your support! We hope to sell even more in the future."
     ],
-    options: ["Over 30,000 copies", "Over 300,000 copies", "Over 3,000,000 copies"],
-    answer: 1,
+    options: ["Over 30,000 copies", "Over 3,000 copies", "Over 300,000 copies"],
+    answer: 2,
   },
   {
-    title: "A man and a woman are discussing their plans for the evening. What do they decide to do?",
+    title: "A man and woman are discussing their plans for the evening. What do the man and woman decide to do in the evening?",
+    transcriptTitle: "Make plan later",
     transcript: [
-      "I'm thinking about what to do this evening. I could go to the movies, but I'm not sure if that's the best idea.",
-      "I might prefer to stay at home and relax. However, I want to discuss this with my friend first.",
-      "It might be better to plan when we can decide together. I believe keeping our options open is a good idea.",
-      "So for now, I'll wait and see what we want to do."
+      "I'm thinking about what to do this evening. I could go to the movies, but I'm not sure if that's the best idea. I might prefer to stay at home and relax. However, I want to discuss this with my friend first. It might be better to plan when we can decide together. I believe keeping our options open is a good idea. So for now, I'll wait and see what we want to do."
     ],
-    options: ["Make a plan later", "Stay at home", "Go to the movie"],
-    answer: 0,
+    options: ["Stay at home", "Go to the movie", "Make plan later"],
+    answer: 2,
   },
   {
     title: "A man is talking to a waiter. What drink does the man choose?",
+    transcriptTitle: "Iced tea",
     transcript: [
-      "So, what do you recommend? I usually go for hot tea, especially when it's chilly, but it's so warm today.",
-      "I'm in the mood for something refreshing. Maybe milk tea?",
-      "Actually, I think I'll just get iced tea instead. That sounds perfect for this kind of weather."
+      "Man: So, what do you recommend? I usually go for hot tea, especially when it's chilly, but it's so warm today. I'm in the mood for something refreshing. Maybe milk tea? Actually, I think I'll just get iced tea instead. That sounds perfect for this kind of weather!"
     ],
     options: ["Iced tea", "Milk tea", "Hot tea"],
     answer: 0,
   },
   {
     title: "Listen to the conversation. Who is she taking a photo of?",
+    transcriptTitle: "The girls' team",
     transcript: [
-      "I'm just about to take a photo of the girls' team now. They're all lined up and ready, smiling for the camera.",
-      "I've already taken pictures of the boys earlier, so it's their turn. The coaches will have their photo taken after this.",
-      "The girls are excited because this picture will be in the school magazine. All right, everyone."
+      "I'm just about to take a photo of the girls' team now. They're all lined up and ready, smiling for the camera. I've already taken pictures of the boys earlier, so it's their turn. The coaches will have their photo taken after this. The girls are excited because this picture will be in the school magazine. Alright, everyone, say \"cheese\"!"
     ],
     options: ["The boys' and the girls' team", "Sue and Lily", "The girls' team"],
     answer: 2,
   },
   {
-    title: "Where does the speaker like to go in India?",
+    title: "Where do they go when they travel to India?",
+    transcriptTitle: "Go to the park",
     transcript: [
-      "I've traveled to India several times. People often assume I spend most of my time visiting famous landmarks or eating out.",
-      "I enjoy Indian food and well-known places, but what I really like is going to the park. I enjoy walking in public parks, watching people relax, and experiencing everyday life.",
-      "That's where I spend most of my time."
+      "I've traveled to India several times, and people often assume that I spend most of my time visiting famous landmarks or going out to eat local food. Of course, I do enjoy trying Indian dishes, and I've seen some well-known places too. However, what I really like to do when I'm there is go to the park. I enjoy walking through public parks, watching people relax, and experiencing everyday life. That's usually where I spend most of my time when I travel to India."
     ],
     options: ["Go to the park", "Go to famous places", "Go out to eat"],
     answer: 0,
   },
   {
     title: "Two friends are talking about their trip. What will the weather be like?",
+    transcriptTitle: "Cold and wet",
     transcript: [
-      "Hey, Sarah, are you excited about our trip next week? Hi, Mike.",
-      "Yes, I can't wait. I've been looking forward to it for a long time.",
-      "Me too. But I heard the weather is going to be cold and wet.",
-      "We should prepare for that. Oh no, I hope it doesn't rain too much.",
-      "We need to pack our rain jackets and warm clothes. Definitely.",
-      "I'll also bring an umbrella just in case. Good idea.",
-      "Let's plan some fun indoor activities if the weather is bad. Yes, we can visit museums or try some local food.",
-      "It will still be a great place to go."
+      "Friend 1: Hey, Sarah! Are you excited about our trip next week? Friend 2: Hi, Mike! Yes, I can't wait! I've been looking forward to it for a long time. Friend 1: Me too! But I heard the weather is going to be cold and wet. We should prepare for that. Friend 2: Oh no! I hope it doesn't rain too much. We need to pack our rain jackets and warm clothes. Friend 1: Definitely! I'll also bring an umbrella just in case. Friend 2: Good idea! Let's plan some fun indoor activities if the weather is bad. Friend 1: Yes! We can visit museums or try some local food. It will still be a great trip."
     ],
     options: ["Warm and dry", "Cold and wet", "Hot and sunny"],
     answer: 1,
   },
   {
-    title: "Listen to Mary talking to Jane while waiting for James. What did they decide to do?",
+    title: "Listen to Marry talking to Jane while waiting for James. What did they decide to do?",
     transcript: [
       "Hi, James. It looks like James is running late again.",
       "Should we wait for him? I don't want to waste too much time.",
       "I think we should have the meeting without him. We have a lot to discuss and can update him later.",
       "It's better to move forward than keep waiting."
     ],
-    options: ["Have the meeting without him", "Continue waiting for him", "Cancel the meeting"],
+    options: ["Have the meeting without him", "Continue to waiting for him", "Cancel the meeting"],
     answer: 0,
   },
   {
-    title: "Which platform should passengers wait for the train?",
+    title: "Which platform to wait for the train?",
+    transcriptTitle: "Platform 2",
     transcript: [
-      "Attention, all passengers! The 10:30 train to Greenfield is now arriving at Platform 2. Please make sure you have your ticket ready before boarding.",
-      "This train will stop at River Station and Oakwood before reaching its final destination. Be careful when stepping onto the train, and mind the gap.",
-      "For your safety, please keep your belongings close and follow all instructions from the staff. Thank you for traveling with us today!"
+      "Attention, all passengers! The 10:30 train to Greenfield is now arriving at Platform 2. Please make sure you have your ticket ready before boarding. This train will stop at River Station and Oakwood before reaching its final destination. Be careful when stepping onto the train, and mind the gap. For your safety, please keep your belongings close and follow all instructions from the staff. Thank you for traveling with us today!"
     ],
-    options: ["Platform 1", "Platform 2", "Platform 3"],
+    options: ["Platform 5", "Platform 8", "Platform 2"],
+    answer: 2,
+  },
+  {
+    title: "Listen to a voice message. How does Even feel?",
+    transcriptTitle: "Sick",
+    transcript: [
+      "Hi, Evan! This is Mom. I just wanted to leave you a message to check on you. I heard you're not feeling well, and I'm really worried about you. Make sure you're resting and drinking plenty of fluids. Do you need anything? I can bring you some soup or your favorite snacks. Please take care of yourself! I love you and hope you feel better soon. Call me back when you can!"
+    ],
+    options: ["tired", "sick", "happy"],
     answer: 1,
   },
   {
-    title: "Listen to a voice message. How does Evan feel?",
+    title: "Listen to the conversation between Douglas and Kay. Why does Douglas call Kay?",
+    transcriptTitle: "say thank you",
     transcript: [
-      "Hi, Evan! This is Mom. I just wanted to leave you a message to check on you. I heard you're not feeling well, and I'm really worried about you.",
-      "Make sure you're resting and drinking plenty of fluids. Do you need anything? I can bring you some soup or your favorite snacks.",
-      "Please take care of yourself. I love you and hope you feel better soon. Call me back when you can!"
+      "Hi, Kay! It's Douglas. I hope you are doing well. I wanted to call you today to say thank you for all your help with the project. Your advice was really valuable, and it made a big difference. I also wanted to ask for a favor. If you have some time, I would love to meet and discuss a few ideas I have. Let me know when you are free!"
     ],
-    options: ["Tired", "Sick"],
-    answer: 1,
-  },
-  {
-    title: "Douglas calls Kay. Why does he call her?",
-    transcript: [
-      "Hi, Kay! It's Douglas. I hope you are doing well. I wanted to call you today to say thank you for all your help with the project.",
-      "Your advice was really valuable, and it made a big difference. I also wanted to ask for a favor. If you have some time, I would love to meet and discuss a few ideas I have.",
-      "Let me know when you are free!"
-    ],
-    options: ["To say thank you", "To ask for a favor"],
+    options: ["say thank you", "ask for a favor", "suggest a meeting"],
     answer: 0,
   },
   {
-    title: "Tom is calling his mom. Who is visiting him this weekend?",
+    title: "Tom is calling his mom. Who is visiting Tom this weekend?",
+    transcriptTitle: "His sister and her children",
     transcript: [
-      "Man: Hey, Mom! Are you coming over this weekend? I'd really love to see you!",
-      "What? You're busy? That's too bad. But at least my sister is visiting with her kids. I'm excited about that!",
-      "Is Uncle coming with her too? Oh, he's not? That's a shame. Hopefully, you can all get together next time!"
+      "Man: Hey, mom! Are you coming over this weekend? I'd really love to see you! What? You're busy? That's too bad. But at least my sister is visiting with her kids. I'm excited about that! Is Uncle coming with her too? Oh, he's not? That's a shame. Hopefully, you can all get together next time!"
     ],
     options: ["His mother and sister", "His mother and uncle", "His sister and her children"],
     answer: 2,
   },
   {
-    title: "Listen to the chief announcer. When will lunch be ready?",
+    title: "Listen to the chief announce to students. When is lunch ready?",
+    transcriptTitle: "2:00p.m",
     transcript: [
-      "Good afternoon, everyone. I have an important announcement regarding lunch today. Lunch will be ready at 2:00 p.m., not at 12:30 p.m. as some may have expected.",
-      "Please be patient as we prepare everything for you. If you have any questions, feel free to ask. Thank you for your understanding, and enjoy your day!"
+      "Good afternoon, everyone. I have an important announcement regarding lunch today. Lunch will be ready at 2:00 p.m., not at 12:30 p.m. as some may have expected. Please be patient as we prepare everything for you. If you have any questions, feel free to ask. Thank you for your understanding, and enjoy your day!"
     ],
-    options: ["2:00 p.m.", "12:30 p.m.", "1:15 p.m."],
+    options: ["2:00p.m", "12:30p.m", "1:15p.m"],
     answer: 0,
   },
   {
     title: "The woman is walking into a local store. How much are the cleaning products?",
+    transcriptTitle: "One pounds fifty (1.50 pounds)",
     transcript: [
-      "As I walk into the store, I notice that the cleaning products are on sale. They're usually a bit more expensive, but today they're only one pound fifty.",
-      "I was expecting to pay three pounds fifty, so it's a nice surprise. I grab a few items since I know I'll need them later.",
-      "It's a small store, but the deals are always good here. Time to check out!"
+      "As I walk into the store, I notice that the cleaning products are on sale. They're usually a bit more expensive, but today they're only one pound fifty. I was expecting to pay three pounds fifty, so it's a nice surprise. I grab a few items since I know I'll need them later. It's a small store, but the deals are always good here. Time to check out!"
     ],
-    options: ["1.50 pounds", "3.50 pounds", "2.50 pounds"],
-    answer: 0,
+    options: ["Three pounds fifty", "Two pounds fifty", "One pounds fifty (1.50 pounds)"],
+    answer: 2,
   },
   {
-    title: "A woman is talking about her holiday plans. Where is she going?",
+    title: "A woman is talking about her holiday plan. Where is she going on holidays?",
+    transcriptTitle: "The mountains",
     transcript: [
-      "I'm so excited about my upcoming holiday! I've been thinking about where to go for a long time. Some of my friends suggested going to a nice beach.",
-      "Others talked about exploring interesting caves. But I've made up my mind: I'm going to the mountains!",
-      "The mountains are so beautiful with their green forests. I can't wait to breathe the fresh air up there. They are perfect for relaxing and enjoying nature."
+      "Woman: I'm so excited about my upcoming holiday! I've been thinking about where to go for a long time. Some of my friends suggested going to a nice beach. Others talked about exploring interesting caves. But I've made up my mind - I'm going to the mountains! The mountains are so beautiful with their green forests. I can't wait to breathe the fresh air up there. They are perfect for relaxing and enjoying nature."
     ],
-    options: ["The cave", "The beach", "The mountains"],
+    options: ["The cave", "the beach", "the mountains"],
     answer: 2,
   },
   {
     title: "A man is talking about his trip. What did he enjoy last year?",
+    transcriptTitle: "go cycling",
     transcript: [
-      "Last year, I had an amazing trip! One of the best things I enjoyed was going cycling in the countryside.",
-      "The views were stunning, and it felt great to be outdoors. I also went for a walk a few times, but cycling really allowed me to explore more areas.",
-      "We even had a picnic one day, which was lovely too!"
+      "Man: Last year, I had an amazing trip! One of the best things I enjoyed was going cycling in the countryside. The views were stunning, and it felt great to be outdoors. I also went for a walk a few times, but cycling really allowed me to explore more areas. We even had a picnic one day, which was lovely too!"
     ],
-    options: ["Go cycling", "Go for a walk", "Have a picnic"],
+    options: ["go cycling", "go picnic", "go for a walk"],
     answer: 0,
   },
   {
-    title: "Listen to David talking about the conference. How long did he speak?",
+    title: "Listen to David talking about the conference. How long did he talk in the speech?",
+    transcriptTitle: "15 minutes",
     transcript: [
-      "Hello, everyone. Today, I want to tell you about the conference that took place last week. It was very interesting, and many people attended.",
-      "I spoke about new ideas in business. My presentation wasn't very long, but I had a lot to say. The other speakers talked about technology and education.",
-      "After the talks, there were some questions from the audience. My speech lasted about 15 minutes, shorter than expected. However, the audience was very attentive, and I was happy to see that."
+      "Hello everyone. Today, I want to tell you about the conference that took place last week. It was very interesting, and many people attended. I spoke about new ideas in business. My presentation wasn't very long, but I had a lot to say. The other speakers talked about technology and education. After the talks, there were some questions from the audience. My speech lasted about 15 minutes, shorter than expected. However, the audience was very attentive, and I was happy to see that."
     ],
-    options: ["45 minutes", "15 minutes"],
+    options: ["45 minutes", "15 minutes", "30 minutes"],
     answer: 1,
   },
   {
-    title: "A woman is talking about her vacation. What is her relationship with Lisa?",
+    title: "A woman is talking about her vacation. What is the relationship between the speaker and Lisa?",
+    transcriptTitle: "Best friends",
     transcript: [
-      "I just got back from an amazing vacation with Lisa! We've been friends for years, and this trip really brought us closer.",
-      "I can't imagine going with anyone else. Some people think we look like mother and daughter because we care for each other so much, but it's really just best friends hanging out!"
+      "Woman: I just got back from an amazing vacation with Lisa! We've been friends for years, and this trip really brought us closer. I can't imagine going with anyone else. Some people think we look like mother and daughter because we care for each other so much, but it's really just best friends hanging out!"
     ],
     options: ["Best friends", "Mother and daughter", "Teacher and students"],
     answer: 0,
   },
   {
     title: "A woman shares her job with a friend. Why does she want to become a writer?",
+    transcriptTitle: "To help people",
     transcript: [
       "I have been thinking a lot about my job, and I really want to become a writer. It's not just about earning a lot of money or becoming famous for me.",
       "My main reason is to help people improve themselves. I believe stories can inspire and support others during hard times.",
@@ -1192,18 +1125,20 @@ window.listeningPart1Questions = [
     answer: 1,
   },
   {
-    title: "Why has the air travel been cancelled?",
+    title: "Listen to the announcement from a travel agent representative. Why is the air travel cancelled?",
+    transcriptTitle: "Poor weather conditions",
     transcript: [
       "Good afternoon, everyone. I'd like to start by saying that we're doing everything we can to assist you with your travel plans today.",
       "Unfortunately, due to poor weather conditions, our flight has been cancelled. I know this isn't the news you were hoping for, but your safety comes first.",
       "That said, we do have alternatives available. The train services are still running, and buses are also operating, so you have options to continue your journey.",
       "If you'd like to explore these alternatives, please come see us, and we'll help with the arrangements. Thank you for your patience and understanding."
     ],
-    options: ["Poor weather conditions", "A technical problem", "A delay at the transit stop"],
-    answer: 0,
+    options: ["Delay at transit spot", "Engine failure", "Poor weather conditions"],
+    answer: 2,
   },
   {
     title: "A woman is talking to a police officer. What did she lose?",
+    transcriptTitle: "Phone",
     transcript: [
       "Woman: Excuse me, officer. I need help, please.",
       "Police Officer: Of course. What happened?",
@@ -1213,78 +1148,86 @@ window.listeningPart1Questions = [
       "Police Officer: Okay, we'll check the area. Please stay here for a moment, and we'll try to find it for you.",
       "Woman: Thank you so much, officer!"
     ],
-    options: ["Her phone", "Her wallet", "Her bag"],
+    options: ["Phone", "Wallet", "Car"],
     answer: 0,
   },
   {
-    title: "Listen to an auctioneer talking about a cabinet. Which part is original?",
+    title: "Listen to an auctionman talking about a cabinet. Which part of the cabinet is original?",
+    transcriptTitle: "The drawer",
     transcript: [
       "Ladies and gentlemen, welcome to today's auction. I have a beautiful cabinet here that I want to show you.",
       "This cabinet is made of high-quality wood, and it has a lovely design that will fit in any room. What makes it special is that the drawer is kept original, which adds to its charm and value.",
       "You can store your favorite items or use it as a display for your beautiful decorations. Don't miss this chance to own a unique piece of furniture. Let's start the bidding."
     ],
-    options: ["The drawer", "The handles", "The legs"],
+    options: ["The drawer", "The handles", "The doors"],
     answer: 0,
   },
   {
-    title: "Vincent is calling James. Why does Vincent call him?",
+    title: "Vincent is calling James. Why does Vincent call James?",
+    transcriptTitle: "To suggest a drink",
     transcript: [
-      "Hi, James, it's Vincent. I just wanted to check in and see how you're doing. It's been a while since we last caught up!",
+      "Hi James, it's Vincent. I just want to check in and see how you're doing. It's been a while since we last caught up!",
       "How about we grab a drink later? I know a great new place that has very nice tea. You should definitely try it next time you visit me. Text me back!"
     ],
-    options: ["To say hello", "To suggest a drink", "To arrange a meeting"],
+    options: ["To say hello", "To suggest a drink", "To arrange meeting"],
     answer: 1,
   },
   {
-    title: "A person calls a friend about his new car. How much did the small car cost?",
+    title: "A person calls a friend about his new car. How much does the small car cost him?",
+    transcriptTitle: "3250 pounds",
     transcript: [
       "Hey, I just wanted to tell you about my new car! It's a small one, perfect for my needs. I got it for a great price, only 3,250 pounds! Can you believe it?",
       "I was looking at bigger models too, but they were way more expensive, around 3,550 pounds or even 4,250 pounds. I'm really happy with my choice!"
     ],
-    options: ["3,550 pounds", "3,250 pounds", "4,250 pounds"],
+    options: ["3550 pounds", "3250 pounds", "4250 pounds"],
     answer: 1,
   },
   {
-    title: "A receptionist is checking a clinic's client list. How many clients are American?",
+    title: "A receptionist is checking the client list of a clinic. How many clients are Americans?",
+    transcriptTitle: "One",
     transcript: [
-      "All right, let me go over the list of clients for today. We've got Carl, Harry, and Matthew, all from the UK.",
+      "Receptionist: Alright, let me go over the list of clients for today. We've got Carl, Harry, and Matthew, all from the UK.",
       "Leslie, who's from the US, is also scheduled for an appointment. Then we have two more clients coming in from France.",
       "So that gives us one American, a few from the UK, and the rest from France. It looks like everything's in order!"
     ],
-    options: ["Two", "Three", "One"],
+    options: ["Two", "three", "one"],
     answer: 2,
   },
   {
-    title: "Soobin is talking about his favorite room. What is it?",
+    title: "Soobin is talking about his favorite room. What is Soobin's favorite room?",
+    transcriptTitle: "Bathroom",
     transcript: [
-      "You know, when I think about my favorite room in the house, it's kind of hard to choose. I mean, I really enjoy the kitchen since I love cooking, and the living room is great for hanging out with friends.",
+      "Man: You know, when I think about my favorite room in the house, it's kind of hard to choose. I mean, I really enjoy the kitchen since I love cooking, and the living room is great for hanging out with friends.",
       "But honestly, I have to say the bathroom is my favorite! It might sound strange, but it's the one place where I can truly relax."
     ],
-    options: ["Kitchen", "Living room", "Bathroom"],
+    options: ["kitchen", "living room", "bathroom"],
     answer: 2,
   },
   {
-    title: "A woman is talking about her family's holidays. What did they do last year?",
+    title: "A woman is talking about her family's holidays. What did the family do last year?",
+    transcriptTitle: "Camping",
     transcript: [
       "This year, my family and I are going to the beach for our holiday. I'm really excited because I love swimming and relaxing by the sea.",
       "Last year, we went camping on the mountain, which was fun, but this time we wanted to do something different.",
       "We're staying in a small house near the beach, and I can't wait to watch the sunset every evening. My kids are excited too; they want to build sandcastles and play in the water. I think it's going to be a great holiday!"
     ],
-    options: ["Camping", "Going to the beach", "Staying in a hotel"],
+    options: ["Camping", "Traveled abroad", "Went to the beach"],
     answer: 0,
   },
   {
     title: "A mom is talking to her son. What does he like to study?",
+    transcriptTitle: "Art",
     transcript: [
       "Hey, sweetheart, I'm so proud of you! Your art project looks amazing; you're really talented. I love how you used all those bright colors.",
       "You always do such a great job with your drawings. But remember, you also need to spend some time on your other subjects too, like math and science.",
       "I know you can do well in those if you try hard, just like you do with art. Let's work on it together, okay?"
     ],
-    options: ["History", "Art", "Science"],
+    options: ["History", "art", "Science"],
     answer: 1,
   },
   {
-    title: "Two friends are talking about their favorite activities. What is the woman's favorite entertainment?",
+    title: "Two friends are talking about their favorite activities. What is the woman's favorite form of entertainment?",
+    transcriptTitle: "Going to the theatre",
     transcript: [
       "Man: Hey, what's your favorite activity?",
       "Woman: I'd probably say watching films. It's so much fun!",
@@ -1299,17 +1242,19 @@ window.listeningPart1Questions = [
     answer: 1,
   },
   {
-    title: "Mary is talking to her friend about her new home. What does she ask about?",
+    title: "Mary is talking to her friend about her new home. What does she ask her friend about?",
+    transcriptTitle: "Where to buy a new table",
     transcript: [
-      "Hi, Ivan. It's Mary. I just moved into my new house. I want something nice for the dining area.",
+      "Mary: Hi Ivan. It's Mary. I just moved into my new house. I want something nice for the dining area.",
       "I also saw a cute coffee shop nearby, and I'm thinking about getting a mirror for the living room.",
       "I need to get some furniture, especially a coffee table. Do you know where to buy one?"
     ],
-    options: ["Where to buy a new table", "Which coffee shop to visit", "Where to buy a mirror"],
+    options: ["Where to buy a new table", "The furniture", "Mirror"],
     answer: 0,
   },
   {
     title: "A man is talking about how he goes to work. Why does he prefer traveling by train?",
+    transcriptTitle: "It's practical",
     transcript: [
       "I've been thinking about how to get to work every day. At first, I considered driving, but the traffic is always really bad in the morning.",
       "Then I thought about riding my bike, but it's too far, and I'd be tired before I even start my day. The bus is another option, but it's often late.",
@@ -1319,19 +1264,21 @@ window.listeningPart1Questions = [
     answer: 1,
   },
   {
-    title: "What is not original in the house?",
+    title: "What is not original?",
+    transcriptTitle: "Furniture",
     transcript: [
       "Welcome! I'm so glad you're interested in this beautiful property. This house was built in the 1920s and has maintained much of its original charm.",
       "The hardwood floors you see here are completely original, and they've been carefully preserved over the years. The same goes for the architecture; those high ceilings and detailed moldings are a testament to the craftsmanship of that era.",
       "However, the furniture you see isn't original. It was replaced a few years ago to give the home a more modern, functional feel. The updates blend well with the classic features, giving you the best of both worlds: historic charm with modern comfort."
     ],
-    options: ["The wall", "The furniture", "The floor"],
-    answer: 1,
+    options: ["wall", "shelf", "furniture"],
+    answer: 2,
   },
   {
     title: "Which button should the man press to buy a new computer?",
-    transcript: ["To buy a new computer, press button three."],
-    options: ["Three", "Six", "Four"],
+    transcriptTitle: "Three",
+    transcript: [],
+    options: ["three", "six", "four"],
     answer: 0,
     reconstructed: true,
   },
@@ -1345,11 +1292,12 @@ window.listeningPart1Questions = [
       "Anna: So, which ones did you finally choose?",
       "Tom: I decided to buy the blue ones because they match most of my clothes."
     ],
-    options: ["Blue", "Black", "Brown"],
+    options: ["blue", "black", "brown"],
     answer: 0,
   },
   {
     title: "A teacher and a student are talking about transportation. How does the teacher go to school?",
+    transcriptTitle: "He walks",
     transcript: [
       "Teacher: Good morning, Sarah! You are early today. How do you get to school every day?",
       "Student: Hi, Mr. Smith! I usually take the bus. It's not far from my house, but sometimes I have to wait a long time for it.",
@@ -1362,26 +1310,29 @@ window.listeningPart1Questions = [
     answer: 0,
   },
   {
-    title: "What time is the meeting?",
+    title: "This is a reminder of Mr. Thompson's schedule. When is the meeting?",
+    transcriptTitle: "2 p.m",
     transcript: [
-      "Mr. Thompson will leave for the airport at 10 a.m., and at 11 a.m. he is scheduled to complete the check-in process for his flight to Ho Chi Minh City.",
+      "This is a reminder of Mr. Thompson's schedule. Today, he will leave for the airport at 10 a.m., and at 11 a.m. he is scheduled to complete the check-in process for his flight to Ho Chi Minh City.",
       "Please note that tomorrow afternoon at 2 p.m. he has an important meeting with a business partner. All necessary documents should be prepared in advance."
     ],
-    options: ["2 p.m.", "10 a.m.", "11 a.m."],
+    options: ["2 p.m", "10 a.m", "11 a.m"],
     answer: 0,
   },
   {
-    title: "A woman is talking about her family's weekend. What do they do most weekends?",
+    title: "A woman is talking about her family's weekend. What does the family do most weekends?",
+    transcriptTitle: "Goes for a walk",
     transcript: [
       "Hello, everyone! I want to share what my family usually does on weekends. We love spending time together and often go for a walk in the park.",
       "It's a nice way to relax and enjoy nature. We like to see the flowers and sometimes have a picnic.",
-      "However, this weekend is different! My sister is visiting us, and we have planned a small family gathering at home. We will cook a big meal together and play some games. It will be fun to catch up and spend quality time as a family."
+      "However, this weekend is different! My sister is visiting us, and we have planned a small family gathering at home. We will cook a big meal together and play some games. It will be fun to catch up and spend quality time as a family. I'm really looking forward to it!"
     ],
-    options: ["Go on a picnic", "Go for a walk", "Go to the beach"],
+    options: ["Goes picnic", "Goes for a walk", "Goes to the beach"],
     answer: 1,
   },
   {
-    title: "Two colleagues are talking about a meeting. When do they want to meet?",
+    title: "Two colleagues talk about meeting. When do they want to meet?",
+    transcriptTitle: "Tuesday",
     transcript: [
       "Hey there! I've been thinking we should get together soon to discuss our upcoming project. I know weekends are usually good for meetings, but this time they're a bit tricky.",
       "Saturday is out because I've got a family event all day. And Sunday? I usually use that day to catch up on rest and prepare for the week ahead.",
@@ -1391,18 +1342,20 @@ window.listeningPart1Questions = [
     answer: 1,
   },
   {
-    title: "A man is seeking advice on his future career. What is he going to do?",
+    title: "A man is seeking advice on future career. What is he going to do?",
+    transcriptTitle: "To work in business",
     transcript: [
       "Woman: Welcome, how may I help you?",
-      "Man: Yes, I would like to have some advice for my future job. I majored in mathematics. Is there anything that I could do?",
-      "Woman: Well, there are a variety of career paths you can take, such as becoming a teacher, a businessman, or continuing to study to become a researcher.",
-      "Man: I have a friend who also majored in mathematics, and he is now a businessman with his own company. I guess that would be my choice then. I am not suitable to become a teacher since I think I am a bit impatient."
+      "Man: Yes, I would like to have some advice for my future job. I majored in Mathematics. Is there anything that I could do?",
+      "Woman: Well there are a variety of career paths you can take, let say becoming a teacher, a businessman, or continue to study higher to become a researcher.",
+      "Man: I have a friend who also majors in Mathematics and he is now a businessman with his own company. I guess that would be my choice then. I am not suitable to become a teacher since I think I am a bit impatient."
     ],
-    options: ["Become a teacher", "Work in business", "Become a researcher"],
-    answer: 1,
+    options: ["To work in business", "to work in technology", "to work in computer"],
+    answer: 0,
   },
   {
-    title: "What course is the student going to take this year?",
+    title: "Listen to a student talking about his study. What course is the student going to take this year?",
+    transcriptTitle: "Computers",
     transcript: [
       "Hi, I'm Ben, and I want to share a bit about my studies. Last term, I took English, math, and science.",
       "They were all interesting, but math was a bit tough for me. I worked hard, though, and got good results in the end.",
@@ -1412,30 +1365,33 @@ window.listeningPart1Questions = [
     answer: 0,
   },
   {
-    title: "An artist is talking about her job. What is unusual about it?",
+    title: "An artist is talking about her jobs. What is the difference in her job?",
+    transcriptTitle: "Work irregular hours",
     transcript: [
       "Hello, my name is Sarah, and I'm an artist. I paint pictures of nature, like trees, rivers, and animals. I love using bright colors to make my art happy and full of life.",
       "My job is very fun, but I work irregular hours, sometimes late at night or on weekends. When I have inspiration, I paint for many hours without a break.",
       "I sell my paintings in galleries and online, and it makes me really happy when people like my work. Creating art is the best job for me!"
     ],
-    options: ["She works from 9 to 5", "She works irregular hours", "She doesn't work on weekends"],
+    options: ["She works from 9 to 5", "Work irregular hours", "She doesn't work on weekends"],
     answer: 1,
   },
   {
-    title: "A man is talking about the countryside. What is the main cause of poor air quality?",
+    title: "A man is talking about the environment of the countryside. What is the main cause of poor air quality?",
+    transcriptTitle: "Fires in the countryside",
     transcript: [
       "I really like living in the countryside. There are many green fields, tall trees, and small rivers. The air usually smells fresh and clean, but sometimes it becomes dirty and hard to breathe.",
       "Many people think cars on the roads make the air bad. Others say the smoke from big factories is the problem. These things can make the air dirty, but in the countryside there's a bigger issue.",
       "Farmers often start fires to clean their fields. They burn old plants and grass. These fires make a lot of smoke that goes into the air. It's sad because the smoke can hurt animals and make people sick.",
       "We need to find better ways to clean fields without using fire."
     ],
-    options: ["Fires in the countryside", "Smoke from factories", "Vehicles on the roads"],
+    options: ["Fires in the countryside", "Smokes from factories", "Vehicles on the roads"],
     answer: 0,
   },
   {
-    title: "A man is calling his teacher about an assignment. When is the meeting?",
+    title: "A man is calling his teacher to meet for the assignment. When is the meeting?",
+    transcriptTitle: "On Thursday morning",
     transcript: [
-      "Hi, Professor Smith, this is John calling about our meeting for the assignment. I wanted to confirm our appointment time. I know we discussed a few options earlier.",
+      "Man: Hi Professor Smith, this is John calling about our meeting for the assignment. I wanted to confirm our appointment time. I know we discussed a few options earlier.",
       "At first, I thought we agreed on Tuesday morning, but then I remembered that doesn't work with your schedule. Then I considered Thursday afternoon, but I have another class then.",
       "So I'm pretty sure we settled on Thursday morning at 10 a.m. in your office. That's what I have written down. I'll bring my draft and notes for the project.",
       "If I've got the day or time wrong, or if you need me to bring anything else, please let me know. Looking forward to discussing the assignment with you. Have a great day!"
@@ -1444,13 +1400,14 @@ window.listeningPart1Questions = [
     answer: 2,
   },
   {
-    title: "Listen to a tour guide talking about Rock City. How old is the city?",
+    title: "Listening to a tour guide talking about Rock City. How old is the city?",
+    transcriptTitle: "1500 years",
     transcript: [
       "Welcome to Rock City, everyone! I'm excited to show you around this amazing place. Rock City has a very long and interesting history.",
       "People first started living here about 1,500 years ago. Can you believe how old that is? It's older than many famous cities in the world!",
       "The city got its name because of all the big rocks you can see around us. Over time, people built houses and roads between these rocks. Today, we can still see many old buildings from long ago."
     ],
-    options: ["2,500 years", "1,500 years", "3,500 years"],
+    options: ["2500 years", "1500 years", "3500 years"],
     answer: 1,
   },
   {
@@ -1463,33 +1420,36 @@ window.listeningPart1Questions = [
       "Lisa: What about geography? You seemed to enjoy it last year.",
       "Tom: It's interesting, but I think I'll choose science because I really enjoy doing experiments."
     ],
-    options: ["History", "Geography", "Science"],
+    options: ["History.", "Geography.", "Science."],
     answer: 2,
   },
   {
     title: "Jana is talking to her friend. What does Jana's sister look like?",
+    transcriptTitle: "Short",
     transcript: [
       "Jana: Hey, could you do me a favor? My sister is waiting outside, and I need you to give her my book.",
       "She's the one who is short and has straight hair, so you can't miss her. I also think she's wearing a blue jacket today.",
       "If you see her, just hand it to her, and I'll be so grateful. Thanks for helping me out!"
     ],
-    options: ["Short", "Curly hair", "Thin"],
+    options: ["short", "curly hair", "thin"],
     answer: 0,
   },
   {
-    title: "A man is talking about his routine after work. What will he do?",
+    title: "A man is talking about his routine after work. What is the man going to do after work?",
+    transcriptTitle: "Goes Running",
     transcript: [
       "I'm usually exhausted because my job can be really tough. I always look forward to 5 o'clock, so I can finally check out and head home.",
       "Luckily, I live close by, which makes my evening routine a bit easier. I like to go for a run after work to clear my mind and shake off the stress.",
       "It helps me feel refreshed and ready for the next day."
     ],
-    options: ["Meet his client", "Go running", "Cycle home"],
+    options: ["Meets his client", "Goes Running", "Cycles home"],
     answer: 1,
   },
   {
-    title: "The woman is discussing her new exercise routine. How long does she spend cycling?",
+    title: "The woman is discussing her new exercise routine. How much time does she spend cycling?",
+    transcriptTitle: "35 minutes",
     transcript: [
-      "Lately, I've started a new routine that I'm really enjoying. I decided to involve more exercise into my life.",
+      "Woman: Lately, I've started a new routine that I'm really enjoying. I decided to involve more exercise into my life.",
       "I began by walking for about 15 minutes every day, just to get moving. After that, I hop on my bike and cycle for 35 minutes.",
       "It's been refreshing. I love how it helps me clear my mind after a busy day. I'm thinking of sticking with this habit."
     ],
@@ -1497,38 +1457,42 @@ window.listeningPart1Questions = [
     answer: 2,
   },
   {
-    title: "What will the father do to help his son?",
+    title: "Listen to a conversation between the teacher and a parent. What will the father do?",
+    transcriptTitle: "Arrange private class",
     transcript: [
       "Teacher: Hello, Mr. Johnson. Thank you for coming in today. I wanted to talk about your son Jake.",
       "Father: Hi, Mrs. Lee. Yes, I've noticed he's been struggling a bit lately.",
-      "Teacher: His performance is not so good in math and reading. He seems to have some difficulties understanding the lessons.",
+      "Teacher: Yes, his performance is not so good in math and reading. He seems to have some difficulties understanding the lessons.",
       "Father: I'm worried about that. What can we do to help him?",
       "Teacher: I know a private tutor who works well with children. She can provide extra help and support.",
       "Father: That sounds like a good idea! Can you give me her contact information?",
       "Teacher: Of course! I will write it down for you. I think Jake will really benefit from it."
     ],
-    options: ["Arrange a private tutor", "Enroll him in summer school", "Talk to the principal"],
+    options: ["Arrange private class", "Enroll him in summer school", "Talk to the principal"],
     answer: 0,
   },
   {
     title: "Listen to Sarah talking about her hobby. What does she do in her free time?",
+    transcriptTitle: "Going to the theater and play sports",
     transcript: [
       "Woman: In my free time, I love to go to the theatre. There is something magical about watching a live performance.",
       "It makes me feel alive and happy. I also enjoy playing sports with my friends. We have so much fun together, whether it's soccer or basketball.",
       "These activities help me relax and make my days brighter."
     ],
-    options: ["Go to the theatre and play sports", "Watch movies and go shopping", "Read books and paint"],
+    options: ["Going to the theater and play sports", "Watch movies and go shopping", "Read books and paint"],
     answer: 0,
   },
   {
     title: "Two friends are talking about their school days. What was the woman good at?",
+    transcriptTitle: "Plays football",
     transcript: [
-      "Hey, do you remember our old school days? You were on the football team, right?",
-      "Yeah, I played for the school team. Those were some of my best memories. We even won a few medals. What about you? Were you into football?",
-      "Not really. I wasn't great at football, but I was pretty good at swimming. I actually won a medal in a competition once.",
-      "That's right, I remember. Swimming was totally your strength, just like football was mine. My team also brought home some medals. It was such a good feeling!"
+      "Man: Hey, do you remember our old school days? You were on the football team, right?",
+      "Woman: Yeah, I played for the school team. Those were some of my best memories! We even won a few medals. What about you? Were you into football?",
+      "Man: Not really. I wasn't great at football, but I was pretty good at swimming. I actually won a medal in a competition once.",
+      "Woman: That's right. I remember! Swimming was totally your strength, just like football was mine. My team also brought home some medals. It was such a good feeling!",
+      "Man: Yeah, those were good times. We really had our own things going on back then!"
     ],
-    options: ["Volleyball", "Swimming", "Basketball"],
+    options: ["volleyball", "plays football", "basketball"],
     answer: 1,
   },
   {
@@ -1541,22 +1505,24 @@ window.listeningPart1Questions = [
       "Emma: So how many bedrooms did they finally get?",
       "Jack: They decided to buy the one with four bedrooms, which is perfect for their family."
     ],
-    options: ["Four bedrooms", "Three bedrooms", "Five bedrooms"],
+    options: ["four bedrooms", "Three bedrooms.", "Five bedrooms."],
     answer: 0,
   },
   {
     title: "An author is talking about her daily routine. When does she usually write?",
+    transcriptTitle: "In the afternoons",
     transcript: [
       "Every morning, I start my day by going for a run. It helps me clear my mind and gives me energy.",
       "After lunch, at around 2 o'clock, I sit down at my working table, ready to write. My husband is my best critic, so I try to produce something before he gets home in the afternoon.",
       "I want to show him what I've been working on. At night, I seek motivation by watching movies or reading books. This helps me find new ideas for my stories.",
       "Writing is a journey, and each day brings something new."
     ],
-    options: ["In the afternoons", "In the evening", "In the morning"],
+    options: ["In the afternoons", "in the evening", "in the morning"],
     answer: 0,
   },
   {
-    title: "An expert is talking about job satisfaction. What should people do?",
+    title: "An expert is talking about lack of satisfaction at work. What should be the solution?",
+    transcriptTitle: "Request a transfer",
     transcript: [
       "Many people feel unhappy at work, and often they think a higher salary or less work will fix it. But that's not always the solution.",
       "Sometimes, the problem is the work environment. A change of place can help improve how we feel at work. However, looking for a new job can be stressful and take time.",
@@ -1567,18 +1533,20 @@ window.listeningPart1Questions = [
   },
   {
     title: "Lucy is calling her friend. What is her sister like?",
+    transcriptTitle: "They have similar characters",
     transcript: [
       "Hi, Emma, it's Lucy. I hope you're doing well. I need a small favor from you today.",
       "Could you pick up my sister after school? She'll be standing at the school gate at 3 p.m. She looks just like me, so you'll recognize her easily.",
       "I have a meeting, and I won't make it in time. Thank you so much! Let me know if that's okay with you."
     ],
-    options: ["She is young", "She will be wearing a red coat", "They have similar characters"],
+    options: ["She is young", "She will be wearing red coat", "They have similar characters"],
     answer: 2,
   },
   {
-    title: "A man is talking to his friend. Why does he want to be a doctor?",
+    title: "A man is talking to his friend. Why does he choose to be a doctor?",
+    transcriptTitle: "To help people",
     transcript: [
-      "I've always wanted to be a doctor. It's fulfilling to know that I can make a difference in someone's life.",
+      "Man: I've always wanted to be a doctor. It's fulfilling to know that I can make a difference in someone's life.",
       "My family is also proud of this career choice, and they have encouraged me along the way.",
       "Some friends say doctors earn a lot of money, which is a nice bonus, but my main goal remains to save lives and provide care to those who need it most."
     ],
@@ -1586,7 +1554,8 @@ window.listeningPart1Questions = [
     answer: 0,
   },
   {
-    title: "A woman is talking about her holiday plans. What will she do during the holiday?",
+    title: "A woman is talking about her plan for the holiday. What will she do during the holiday?",
+    transcriptTitle: "Go for a walk",
     transcript: [
       "I'm really excited about the holiday! I think I'll go for a walk every day to enjoy the fresh air.",
       "I also considered going for a run, but walking sounds more relaxing. Maybe I'll even try to go for a bike ride later.",
@@ -1596,7 +1565,8 @@ window.listeningPart1Questions = [
     answer: 0,
   },
   {
-    title: "A woman is calling her son. What time will the mother meet him?",
+    title: "A woman is calling her son. What time will the mother meet the son?",
+    transcriptTitle: "3 o'clock",
     transcript: [
       "Woman: Hi, sweetheart! I just wanted to tell you that we'll meet at 3 o'clock when you finish school.",
       "After that, I can take you to your soccer club at 4 o'clock. If you need anything, just let me know, and I can pick it up for you.",
@@ -2062,7 +2032,13 @@ window.listeningPart1Questions = [
   },
 ].map((question, index) => ({
   ...question,
-  audio: `assets/audio/listening-q${index + 1}.wav`,
-  audioSource: recordedAudioQuestions.has(index + 1) ? "recorded" : "synthetic",
+  audio: unavailableAudioQuestions.has(index + 1)
+    ? null
+    : index === 0
+      ? "assets/audio/listening-q1.wav?v=20261126-source-audio-1"
+      : `assets/audio/listening-q${index + 1}.wav${index >= 1 && index <= 149 ? sourceAudioCacheVersion : ""}`,
+  audioSource: unavailableAudioQuestions.has(index + 1)
+    ? "unavailable"
+    : recordedAudioQuestions.has(index + 1) ? "recorded" : "synthetic",
   vocabulary: question.vocabulary || [],
 }));

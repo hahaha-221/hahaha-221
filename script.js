@@ -2227,6 +2227,7 @@ const listenQuestionTitle = document.getElementById("listenQuestionTitle");
 const listenDetailPartLabel = document.getElementById("listenDetailPartLabel");
 const listenProgress = document.getElementById("listenProgress");
 const listenPromptText = document.getElementById("listenPromptText");
+const listenIcon = listeningDetailPanel.querySelector(".listen-icon");
 const listenAudio = document.getElementById("listenAudio");
 const transcriptToggle = document.getElementById("transcriptToggle");
 const transcriptLabel = document.getElementById("transcriptLabel");
@@ -4395,6 +4396,7 @@ const renderQuestionList = () => {
             ? `${question.questions.length} câu hỏi · ${question.audio ? "audio theo nguồn video" : "không có audio trong dự án"}`
         : `1 câu hỏi · ${question.videoDescriptionAudio
         ? "Audio tổng hợp đọc mô tả từ video"
+            : question.audioSource === "unavailable" ? "không có audio"
         : question.audioSource === "recorded" ? "Audio ghi âm từ video" : "Audio tổng hợp"}`}</p>
       <button class="primary-button" type="button" data-question="${index}">Bắt đầu luyện <span aria-hidden="true">→</span></button>
     </article>
@@ -4425,24 +4427,44 @@ const renderListeningQuestion = () => {
   listenPart4Footer.classList.add("is-hidden");
   listenQuestionTitle.textContent = question.title;
   listenPromptText.textContent = question.title;
-  listenAudioSource.textContent = question.videoDescriptionAudio
-    ? "Audio tổng hợp đọc mô tả từ video"
-    : question.audioSource === "recorded" ? "Audio ghi âm trích từ video" : "Audio tổng hợp";
+  listenAudioSource.textContent = question.audioSource === "unavailable"
+    ? "No audio available"
+    : question.videoDescriptionAudio
+      ? "Audio tổng hợp đọc mô tả từ video"
+      : question.audioSource === "recorded" ? "Audio ghi âm trích từ video" : "Audio tổng hợp";
+  listenAudioSource.hidden = question.audioSource === "recorded";
   listenProgress.textContent = `Câu ${activeListeningQuestion + 1}/${listeningQuestions.length}`;
   listenAudio.pause();
-  listenAudio.src = question.audio;
+  listenAudio.hidden = !question.audio;
+  listenIcon.classList.toggle("is-hidden", !question.audio);
+  if (question.audio) {
+    listenAudio.src = question.audio;
+  } else {
+    listenAudio.removeAttribute("src");
+  }
   listenAudio.load();
-  const transcriptParagraphs = question.transcript.map((line) => {
+  const transcriptParagraphs = [];
+  if (question.transcriptTitle) {
+    const heading = document.createElement("p");
+    const title = document.createElement("strong");
+    title.textContent = question.transcriptTitle;
+    heading.append(title);
+    transcriptParagraphs.push(heading);
+  }
+  transcriptParagraphs.push(...question.transcript.map((line) => {
     const paragraph = document.createElement("p");
     paragraph.textContent = line;
     return paragraph;
-  });
-  if (question.reconstructed && !question.videoDescriptionAudio) {
+  }));
+  if (question.transcriptNote || !transcriptParagraphs.length) {
     const note = document.createElement("p");
     note.className = "transcript-note";
-    note.textContent = question.videoDescriptionAudio
-      ? "Video gốc không có audio; phần mô tả bên dưới được chép nguyên văn từ video."
-      : "Lời thoại mô phỏng được biên soạn từ câu hỏi và lựa chọn trong video.";
+    note.textContent = question.transcriptNote || "Transcript not available for this recording.";
+    transcriptParagraphs.push(note);
+  } else if (question.reconstructed && !question.videoDescriptionAudio) {
+    const note = document.createElement("p");
+    note.className = "transcript-note";
+    note.textContent = "Lời thoại mô phỏng được biên soạn từ câu hỏi và lựa chọn trong video.";
     transcriptParagraphs.unshift(note);
   }
   transcriptContent.replaceChildren(...transcriptParagraphs);

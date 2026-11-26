@@ -1,6 +1,6 @@
 # AptisPractice — Project Context
 
-**Last checked:** 2026-11-24
+**Last checked:** 2026-11-26
 **Project root:** `C:\Users\ADMIN\.gemini\antigravity\scratch\fraud_detection_project`  
 **Purpose of this file:** handoff notes for continuing this local project with another Copilot account. This is a source-of-truth snapshot, not a feature plan.
 
@@ -51,9 +51,18 @@ There is no `package.json`, dependency manifest, README, test suite, or build co
 
 ### Listening Part 1 — implemented, 194 questions
 
-- Browser runtime loads 194 records and 194 WAVs.
-- Runtime data marks **125 recordings as audio from the source videos** and **69 as synthesized audio**.
-- 53 records have `reconstructed`; 12 have `videoDescriptionAudio`. These are different metadata flags, not proof that every transcript was independently verified against original audio.
+- Browser runtime loads 194 records: 175 source-video recordings, 12 synthesized clips, and Q54/Q55/Q66/Q76/Q81/Q89/Q125 without audio.
+- Listening Part 1 Q1's source recording was extracted from `2026-11-26 13-47-00.mp4`; Q2-Q15 from `2026-11-26 13-53-57.mp4`; Q16-Q20 from `2026-11-26 14-18-01.mp4`; Q21-Q30 from `2026-11-26 14-29-01.mp4`; Q31-Q40 from `2026-11-26 14-36-00.mp4`; Q41-Q50 from `2026-11-26 14-46-47.mp4`; Q51-Q53 plus Q56-Q61 from `2026-11-26 14-53-17.mp4`; Q62-Q71 from `2026-11-26 15-12-26.mp4`; Q72-Q90 from `2026-11-26 15-28-59.mp4`; Q91-Q110 from `2026-11-26 15-52-50.mp4`; Q111-Q124 plus Q126-Q131 from `2026-11-26 16-09-45.mp4`; and Q132-Q150 from `2026-11-26 16-25-54.mp4`. The source clips are individual mono WAVs with cache-busted URLs. Q54, Q55, Q66, Q76, Q81, Q89, and Q125 have no source audio and are marked unavailable; Q55's only visible description is "At 7 o'clock".
+- Q2-Q4 and Q6-Q15 descriptions match the supplied video/screenshots. Q5's screenshot shows only the lead "Stay late at the office"; the rest of its description is unavailable and no placeholder warning is shown. Q16, Q17, Q18, and Q20 were marked correct in the supplied video; Q19's answer is "park", supported by its transcript.
+- Q21-Q30 prompts, options, transcripts, and answer keys now match the supplied video. Q24, Q26, and Q28 had their answers corrected to "Order the food", "France", and "Drawing"; Q30's options were reordered to match the video. The video marked Q21, Q23-Q25, Q27-Q28, and Q30 correct; Q22 and Q29 answers are supported by their displayed transcripts.
+- Q31-Q50 now use source audio. Q34's answer is 9:15 and Q37's answer is the marketplace. For Q41-Q50, prompts, options, transcripts, and answer keys match the supplied video: Q41 is 10:00, Q42 chocolates, Q43 9.30, Q44 Friday, Q45 opposite the gift shop, Q46 on the river boat, Q47 kitchen, Q48 long and red, Q49 Thursday 13th, and Q50 stayed at home. The video marked Q41-Q42 and Q44-Q48 and Q50 correct; Q43 and Q49 showed incorrect initial selections and the correct answers in feedback.
+- Q51-Q53 and Q56-Q61 use source audio from the latest recording. Q53's prompt and transcript were aligned to the displayed announcement; Q59's choices now match the video and the answer is "Goes for a walk"; Q60's prompt and transcript were aligned to the displayed text. The video marked Q51-Q53, Q57, and Q60 correct. Q54 and Q55 have no audio in the source; Q55's only visible description is "At 7 o'clock".
+- Q62-Q65 and Q67-Q71 use source audio from `2026-11-26 15-12-26.mp4`; Q66 has no source audio or description and is marked unavailable. Q62-Q68 and Q70 were marked correct in the video; Q69's feedback shows "In a town hall"; Q71's transcript supports £2.5. Q62-Q65 and Q67-Q71 prompts, visible descriptions, and answer choices now match the recording.
+- Q72-Q90 prompts, description titles, options, answers, and source audio now match `2026-11-26 15-28-59.mp4`; Q76, Q81, and Q89 have no source audio and are marked unavailable.
+- Q91-Q110 prompts, description titles, options, answers, and source audio now match `2026-11-26 15-52-50.mp4`.
+- Q111-Q124 and Q126-Q131 now match `2026-11-26 16-09-45.mp4`; Q112, Q113, Q114, Q119, Q122, Q124, and Q131 options/answers were aligned to the source. Q125 is shown as missing audio with the visible answer "Three" and is marked unavailable.
+- Q132-Q150 now use audio clips and updated prompts, description titles, options, and answer keys from `2026-11-26 16-25-54.mp4`. Q143's correct answer is "plays football".
+- 22 records have `reconstructed`; 12 have `videoDescriptionAudio`. These are different metadata flags, not proof that every transcript was independently verified against original audio.
 - A question has a title, transcript lines, answer choices, answer index, audio path, and optional reconstruction/vocabulary metadata. The UI provides a native audio player, transcript toggle, multiple-choice answer check, correct/incorrect feedback, retry, previous/next navigation, question list, and vocabulary panel.
 - For the 12 records flagged `videoDescriptionAudio`, the generated audio reads the short description shown in the source video. The extra “missing source audio / simulated dialogue” note is intentionally not shown for this group, per the user's request. Other reconstructed records may still show an explanation that their dialogue is simulated.
 - Some early material was reconstructed from on-screen content because the first 50-question video had no audio track. Accuracy is not uniform across all 194 records; use source evidence before changing any of it.
@@ -191,7 +200,7 @@ The videos are not in `assets/`; do not assume another machine/account can acces
 
 ### Current caveats / not verified as complete
 
-- Part 1 has 69 synthesized WAVs and 53 records marked reconstructed. Do not assume every transcript or answer is a verbatim source transcript; verify the specific question against source evidence before editing or claiming exactness.
+- Part 1 has 18 synthesized WAVs and 28 records marked reconstructed. Do not assume every transcript or answer is a verbatim source transcript; verify the specific question against source evidence before editing or claiming exactness.
 - Part 2 audio timing was inferred from on-screen player timers. The project has not established that every one of the 64 clips has been listened through and boundary-checked.
 - Part 3 has only 9 audio clips, and the no-audio items still have no invented audio or transcripts. The current count of 29 unverified statements is expected; do not fill unknown answer keys by guessing.
 - Part 4's 30-set flow, 60 questions, and 29 available clips are implemented. Q19's screenshot shows a 0:06 player, but its local WAV is missing; multiple other clips are only six seconds. Q1–Q30 now reflect the supplied screenshots, but the full source/OCR data still needs a set-by-set comparison with the video before claiming full accuracy.
