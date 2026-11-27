@@ -11,12 +11,12 @@
     <title>AptisPractice — Luyện thi Aptis mỗi ngày</title>
     <link rel="stylesheet" href="styles.css?v=20261126-vocabulary-notebook-1" />
     <script src="assets/listening-part1.js?v=20261126-listening-q184-194-update-1" defer></script>
-    <script src="assets/listening-part2.js" defer></script>
+    <script src="assets/listening-part2.js?v=20261127-q07-q16-full-audio-1" defer></script>
     <script src="assets/listening-part3.js?v=20261123-listening-p3-answers-5" defer></script>
     <script src="assets/listening-part4.js" defer></script>
     <script src="assets/speaking-exams.js?v=20261118-speaking-sets1-20-1" defer></script>
     <script src="assets/guides.js?v=20261119-guide-15" defer></script>
-    <script src="script.js?v=20261126-vocabulary-notebook-1" defer></script>
+    <script src="script.js?v=20261127-listening-picker-parts-2" defer></script>
   </head>
   <body>
     <header class="topbar">
@@ -552,7 +552,7 @@
           </nav>
           <section class="question-picker is-hidden" id="questionPicker" aria-label="Danh sách câu hỏi">
             <div class="question-picker-heading">
-              <h3>Danh sách câu hỏi</h3>
+              <h3 id="questionPickerTitle">Danh sách câu hỏi</h3>
               <button class="icon-button" type="button" id="closeQuestionPicker" aria-label="Đóng danh sách câu hỏi">×</button>
             </div>
             <label class="question-picker-search">
@@ -573,7 +573,7 @@
 
           <nav class="listening-footer is-hidden" id="listenPart2Footer" aria-label="Điều hướng bài tập Listening Part 2">
             <div class="footer-tools">
-              <button class="footer-button" type="button" id="part2QuestionListButton">☷ &nbsp; Danh sách bài</button>
+              <button class="footer-button" type="button" id="part2QuestionListButton" aria-expanded="false" aria-controls="questionPicker">☷ &nbsp; Danh sách bài</button>
             </div>
             <div class="footer-question-nav">
               <button class="footer-button" type="button" id="part2PreviousQuestion">← &nbsp; Bài trước</button>
@@ -603,7 +603,7 @@
 
           <nav class="listening-footer is-hidden" id="listenPart3Footer" aria-label="Điều hướng bài tập Listening Part 3">
             <div class="footer-tools">
-              <button class="footer-button" type="button" id="part3QuestionListButton">☷ &nbsp; Danh sách bài</button>
+              <button class="footer-button" type="button" id="part3QuestionListButton" aria-expanded="false" aria-controls="questionPicker">☷ &nbsp; Danh sách bài</button>
             </div>
             <div class="footer-question-nav">
               <button class="footer-button" type="button" id="part3PreviousQuestion">← &nbsp; Bài trước</button>
@@ -632,7 +632,7 @@
 
           <nav class="listening-footer is-hidden" id="listenPart4Footer" aria-label="Điều hướng bài tập Listening Part 4">
             <div class="footer-tools">
-              <button class="footer-button" type="button" id="part4QuestionListButton">☷ &nbsp; Danh sách bài</button>
+              <button class="footer-button" type="button" id="part4QuestionListButton" aria-expanded="false" aria-controls="questionPicker">☷ &nbsp; Danh sách bài</button>
             </div>
             <div class="footer-question-nav">
               <button class="footer-button" type="button" id="part4PreviousQuestion">← &nbsp; Bài trước</button>

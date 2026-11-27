@@ -2213,9 +2213,16 @@ const vocabularyDialogMeaning = document.getElementById("vocabularyDialogMeaning
 const vocabularyDialogStatus = document.getElementById("vocabularyDialogStatus");
 const vocabularyCurrentEntries = document.getElementById("vocabularyCurrentEntries");
 const questionPicker = document.getElementById("questionPicker");
+const questionPickerTitle = document.getElementById("questionPickerTitle");
 const questionPickerSearch = document.getElementById("questionPickerSearch");
 const questionPickerList = document.getElementById("questionPickerList");
 const questionListButton = document.getElementById("questionListButton");
+const questionPickerButtons = [
+  questionListButton,
+  document.getElementById("part2QuestionListButton"),
+  document.getElementById("part3QuestionListButton"),
+  document.getElementById("part4QuestionListButton"),
+].filter(Boolean);
 const guideView = document.getElementById("guideView");
 const guideListView = document.getElementById("guideListView");
 const guideArticleView = document.getElementById("guideArticleView");
@@ -2331,6 +2338,7 @@ let timerInterval = null;
 let savedVocabulary = [];
 let vocabularyStorageError = "";
 let questionPickerQuery = "";
+let questionPickerPart = null;
 let selectedTranscriptText = "";
 let responseInterval = null;
 let activeResponseControl = null;
@@ -4512,24 +4520,65 @@ const saveVocabularyEntry = (termValue, meaningValue) => {
   return persistVocabulary(nextEntries);
 };
 
+const getQuestionPickerItems = () => {
+  const questions = activeListeningPart === 2
+    ? listeningPart2Questions
+    : activeListeningPart === 3
+      ? listeningPart3Questions
+      : activeListeningPart === 4
+        ? listeningPart4Questions
+        : listeningQuestions;
+
+  return questions.map((question, index) => {
+    const searchableFields = [
+      question.title,
+      question.prompt,
+      question.transcriptTitle,
+      question.transcriptNote,
+      question.description,
+      question.topic,
+      question.translation,
+      question.tip,
+      question.options || [],
+      question.transcript || [],
+      (question.speakers || []).flatMap((speaker) => [
+        speaker.answer,
+        speaker.description,
+        speaker.transcriptLead,
+        speaker.transcript,
+      ]),
+      (question.statements || []).flatMap((statement) => [
+        statement.text,
+        statement.answer,
+      ]),
+      (question.questions || []).flatMap((item) => [
+        item.prompt,
+        item.options || [],
+      ]),
+    ].flat(Infinity).filter((value) => typeof value === "string");
+
+    return {
+      question,
+      index,
+      searchText: normalizeVocabularyText(searchableFields.join(" ")),
+    };
+  });
+};
+
 const renderQuestionPicker = () => {
   const query = normalizeVocabularyText(questionPickerQuery);
-  const matches = listeningQuestions
-    .map((question, index) => ({ question, index }))
-    .filter(({ question }) => !query || normalizeVocabularyText([
-      question.title,
-      question.transcriptTitle || "",
-      question.transcriptNote || "",
-      question.description || "",
-      ...(question.options || []),
-      ...(question.transcript || []),
-    ].join(" ")).includes(query));
+  const isQuestionList = activeListeningPart === 1;
+  const itemLabel = isQuestionList ? "câu hỏi" : "bài";
+  const matches = getQuestionPickerItems()
+    .filter(({ searchText }) => !query || searchText.includes(query));
 
+  questionPickerTitle.textContent = isQuestionList ? "Danh sách câu hỏi" : "Danh sách bài";
+  questionPicker.setAttribute("aria-label", questionPickerTitle.textContent);
   questionPickerList.replaceChildren();
   if (!matches.length) {
     const emptyState = document.createElement("p");
     emptyState.className = "question-picker-empty";
-    emptyState.textContent = "Không tìm thấy câu hỏi phù hợp.";
+    emptyState.textContent = `Không tìm thấy ${itemLabel} phù hợp.`;
     questionPickerList.append(emptyState);
     return;
   }
@@ -4552,9 +4601,42 @@ const renderQuestionPicker = () => {
   });
 };
 
+const selectQuestionFromPicker = (index) => {
+  if (activeListeningPart === 2) {
+    openListeningPart2Question(index);
+  } else if (activeListeningPart === 3) {
+    openListeningPart3Question(index);
+  } else if (activeListeningPart === 4) {
+    openListeningPart4Question(index);
+  } else {
+    openListeningQuestion(index);
+  }
+};
+
+const openQuestionPicker = () => {
+  if (!questionPicker.classList.contains("is-hidden")) {
+    closeQuestionPicker();
+    return;
+  }
+  if (questionPickerPart !== activeListeningPart) {
+    questionPickerPart = activeListeningPart;
+    questionPickerSearch.value = "";
+  }
+  questionPickerQuery = questionPickerSearch.value;
+  renderQuestionPicker();
+  questionPicker.classList.remove("is-hidden");
+  const activeButton = questionPickerButtons.find((button) => (
+    button.id === (activeListeningPart === 1
+      ? "questionListButton"
+      : `part${activeListeningPart}QuestionListButton`)
+  ));
+  activeButton?.setAttribute("aria-expanded", "true");
+  questionPickerSearch.focus();
+};
+
 const closeQuestionPicker = () => {
   questionPicker.classList.add("is-hidden");
-  questionListButton.setAttribute("aria-expanded", "false");
+  questionPickerButtons.forEach((button) => button.setAttribute("aria-expanded", "false"));
 };
 
 const openVocabularyDialog = () => {
@@ -5160,6 +5242,7 @@ const openListeningPart2Question = (index) => {
   activeListeningPart = 2;
   pausePart4Audio();
   activeListeningQuestion = index;
+  closeQuestionPicker();
   listeningListPanel.classList.add("is-hidden");
   listeningDetailPanel.classList.remove("is-hidden");
   renderListeningPart2Question();
@@ -5170,6 +5253,7 @@ const openListeningPart3Question = (index) => {
   activeListeningPart = 3;
   pausePart4Audio();
   activeListeningQuestion = index;
+  closeQuestionPicker();
   listeningListPanel.classList.add("is-hidden");
   listeningDetailPanel.classList.remove("is-hidden");
   renderListeningPart3Question();
@@ -5179,6 +5263,7 @@ const openListeningPart3Question = (index) => {
 const openListeningPart4Question = (index) => {
   activeListeningPart = 4;
   activeListeningQuestion = index;
+  closeQuestionPicker();
   listeningListPanel.classList.add("is-hidden");
   listeningDetailPanel.classList.remove("is-hidden");
   renderListeningPart4Question();
@@ -5636,11 +5721,8 @@ nextQuestionButton.addEventListener("click", () => {
   showToast(`Bạn đã hoàn thành ${listeningQuestions.length} câu Listening!`);
 });
 
-document.getElementById("part2QuestionListButton").addEventListener("click", showListeningList);
 part2CheckAnswerButton.addEventListener("click", checkListeningPart2Answer);
-document.getElementById("part3QuestionListButton").addEventListener("click", showListeningList);
 part3CheckAnswerButton.addEventListener("click", checkListeningPart3Answer);
-document.getElementById("part4QuestionListButton").addEventListener("click", showListeningList);
 part4CheckAnswerButton.addEventListener("click", checkListeningPart4Answer);
 
 part2PreviousQuestionButton.addEventListener("click", () => {
@@ -5704,18 +5786,7 @@ part4NextQuestionButton.addEventListener("click", () => {
 
 document.getElementById("part4RetryQuestion").addEventListener("click", renderListeningPart4Question);
 
-questionListButton.addEventListener("click", () => {
-  const isOpening = questionPicker.classList.contains("is-hidden");
-  if (!isOpening) {
-    closeQuestionPicker();
-    return;
-  }
-  questionPickerQuery = questionPickerSearch.value;
-  renderQuestionPicker();
-  questionPicker.classList.remove("is-hidden");
-  questionListButton.setAttribute("aria-expanded", "true");
-  questionPickerSearch.focus();
-});
+questionPickerButtons.forEach((button) => button.addEventListener("click", openQuestionPicker));
 
 document.getElementById("closeQuestionPicker").addEventListener("click", closeQuestionPicker);
 questionPickerSearch.addEventListener("input", () => {
@@ -5725,13 +5796,13 @@ questionPickerSearch.addEventListener("input", () => {
 questionPickerList.addEventListener("click", (event) => {
   const button = event.target.closest("[data-question-picker-index]");
   if (button) {
-    openListeningQuestion(Number(button.dataset.questionPickerIndex));
+    selectQuestionFromPicker(Number(button.dataset.questionPickerIndex));
   }
 });
 document.addEventListener("pointerdown", (event) => {
   if (!questionPicker.classList.contains("is-hidden")
       && !questionPicker.contains(event.target)
-      && !questionListButton.contains(event.target)) {
+      && !questionPickerButtons.some((button) => button.contains(event.target))) {
     closeQuestionPicker();
   }
 });

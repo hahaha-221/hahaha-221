@@ -557,6 +557,6 @@ window.listeningPart2Questions = [
     ...speaker,
     name: `Speaker ${String.fromCharCode(65 + speakerIndex)}`,
     answerIndex: question.options.indexOf(speaker.answer),
-    audio: `assets/audio/listening-part2-q${String(questionIndex + 1).padStart(2, "0")}-speaker-${String.fromCharCode(97 + speakerIndex)}.wav`,
+    audio: `assets/audio/listening-part2-q${String(questionIndex + 1).padStart(2, "0")}-speaker-${String.fromCharCode(97 + speakerIndex)}.wav${questionIndex === 6 ? "?v=20261127-q07-full-audio-1" : questionIndex === 15 ? "?v=20261127-q16-full-audio-1" : ""}`,
   })),
 }));
