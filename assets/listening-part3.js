@@ -101,7 +101,7 @@ window.listeningPart3Questions = [
     ],
   },
   {
-    title: "Art - Sáng tác nghệ thuật Wào Mới Bình Minh",
+    title: "Art - Sáng tác nghệ thuật Wào Mỗi Bình Minh",
     prompt: "Listen to two parents discussing Art. Read the opinions below and decide whose opinion matches the statements: the man, the woman, or both the man and the woman. You can listen to the discussion twice.",
     audio: null,
     audioNote: "No audio available",
