@@ -33,7 +33,7 @@ window.listeningPart3Questions = [
       { number: 1, text: "People share similar ideas about beauty.", answer: "Woman" },
       { number: 2, text: "Ideas about beauty change over time.", answer: "Man" },
       { number: 3, text: "Beauty can be found in unlikely places.", answer: "Both" },
-      { number: 4, text: "Traditional ideas about beauty are going to change.", answer: "Woman" },
+      { number: 4, text: "Traditional ideas about beauty are going to change.", answer: "Man" },
     ],
   },
   {
@@ -71,7 +71,7 @@ window.listeningPart3Questions = [
     ],
     statements: [
       { number: 1, text: "Future generations fail to cope with technology information.", answer: "Man" },
-      { number: 2, text: "Technology revolution is good for the economy.", answer: "Man" },
+      { number: 2, text: "Technology revolution is good for the economy.", answer: "Woman" },
       { number: 3, text: "No computer is superior to the human brain.", answer: "Woman" },
       { number: 4, text: "More should be done to protect individual privacy.", answer: "Both" },
     ],
